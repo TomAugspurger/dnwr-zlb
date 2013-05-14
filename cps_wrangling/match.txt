@@ -1,0 +1,144 @@
+Variables used in Matching Current Population Survey Data
+Basic first, then March.
+
+year
+----
+HRYEAR4 HRYEAR   H-YEAR
+98-04   94-97    89-93
+18-21   67-68    40
+
+H-YEAR     H-YEAR (household record)
+99-04      88-98
+14-17      28
+
+month-in-sample
+---------------
+HRMIS    H-MIS
+94-04    89-93 
+63-64    70 
+
+H-MIS (household record)
+88-04
+29
+
+interview month
+---------------
+H-MONTH  H-MONTH  HRMONTH  HRMONTH
+79-88    89-93    94-97    98-04
+118-119  38-39    65-66    16-17
+
+H-MONTH (household record)
+89-04
+65-66
+
+state (or use gestfips)
+-----
+GESTCEN  HG-ST60
+94-04    89-93
+91-92    114-115
+
+HG-ST60 (household record)
+88-03
+40-41
+
+hhid
+----
+HRHHID    HRHHID     H-ID
+95Sep-04  94-95Aug   89-93 
+1-15      1-12       145-156
+
+H-IDNUM1   H-IDNUM    (household record)
+96-        88-95
+344-358    320-331
+
+
+hhid2
+----
+HRHHID2
+May04-  
+71-75
+
+H-IDNUM2 
+05- 
+320-324
+
+hhnum
+-----
+HUHHNUM   HUHHNUM   H-HHNUM
+04May     94-04Apr  89-93
+75        77-78     41 
+
+H-HHNUM (household record)
+88-04
+30
+
+famnum
+------
+PRFAMNUM   A-FAMNUM
+94-05      89-93
+151-152    422-423
+
+A-FAMNUM (person record)
+88-04
+29-30
+
+lineno
+------
+PULINENO 
+79-88 89-93   94-05
+94-95 264-265 147-148
+A-LINENO (person record)
+88-04
+9-10
+
+respnm ( line number of current respondent )
+------ 
+hurespli H-RESPNM I12 
+94-04    89-93    79-88
+22-23    48       31
+
+h-respnm (person record)
+88-93 94-04
+12    12-13
+
+sex
+---
+a-sex a-sex pesex
+79-88 89-93 94-05
+101   275   129-130 
+a-sex (person record)
+88-04
+20
+
+race (person record)
+----
+PRDTRACE PERACE  A-RACE
+03-05    94-02   89-93 79-88
+139-140  139-140 280   100
+
+PRDTRACE A-RACE
+03-04    88-02
+24-25    25
+
+age
+---
+peage    A-AGE
+94-05    89-93
+122-123  270-271
+
+a-age (person record)
+88-04
+15-16
+
+hispanic
+--------
+pehspnon prhspnon a_reorgn (ne 8 is hisp, 9 is dk)
+03-05    94-03    89-93
+157-158  157-158  344-345
+
+by Jean Roth, jroth@nber.org, 2004-01-13
+Age, sex, race variables added 2005-02-07 due to
+lack of unique person id in CPS March Supplement
+variables that are also available in CPS Basic Monthly Files.
+Interview month added for variables that change midyear 2005-02-10.
+Hispanic added for Hispanic sample 2006-05-31.

@@ -1,0 +1,7 @@
+* PROGRAM:  race.do
+* DATE:  November 11, 1998
+
+* This program recodes the variable race to make it consistent accross years
+
+replace race=3 if race>2
+

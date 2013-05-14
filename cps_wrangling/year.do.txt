@@ -1,0 +1,10 @@
+* PROGRAM:  year.do
+* DATE:  November 11, 1998
+
+* This program will create a variable with the year.
+
+gen byte year=${year}
+
+label variable year "Year of survey"
+
+

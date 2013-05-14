@@ -1,0 +1,20 @@
+* PROGRAM:  married.do
+* DATE:  November 16, 1998
+
+* This program generates an indicator variable for married, spouse present
+* Marital status is not coded consistently across the years.
+
+program define married2
+
+if ${year}<=86 {
+  gen byte married=marstat<=4
+}
+
+else if ${year}>=87 {
+  gen byte married=marstat<=3
+}
+
+label var married "Married, spouse present/absent"
+
+end
+
