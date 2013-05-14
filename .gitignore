@@ -66,8 +66,7 @@ nosetests.xml
 *.synctex.gz
 *.toc
 *.vrb
-*.xdy
-
+*.xd
 
 ###Misc###
 *.pdf
