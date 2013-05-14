@@ -71,3 +71,13 @@ nosetests.xml
 ###Misc###
 *.pdf
 *.png
+cps_wrangling/educate.do.txt
+cps_wrangling/educate2.do.txt
+cps_wrangling/married.do.txt
+cps_wrangling/married2.do.txt
+cps_wrangling/match.txt
+cps_wrangling/matchcps.do
+cps_wrangling/multobs.do.txt
+cps_wrangling/race.do.txt
+cps_wrangling/readme.txt
+cps_wrangling/year.do.txt
