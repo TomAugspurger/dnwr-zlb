@@ -55,12 +55,6 @@ def get_data(f, index, return_cols=None):
         return_cols = df.columns
     return df[return_cols]
 
-# def run():
-#     global f
-#     f = open('nipa_consumption_1947_2013.csv')
-#     strip_header(f)
-#     get_index(f)
-
 
 def main(f):
     meta = strip_header(f)
@@ -71,5 +65,11 @@ def main(f):
 
 if __name__ == '__main__':
     import sys
-    f = sys.argv[1]
-    main(f)
+    dir_ = sys.argv[1]
+
+    for fname in ['nipa_deflator_1947-2013.csv',
+                  'nipa_gdp_1947-2013.csv',
+                  'nipa_consumption_1947_2013.csv']:
+        with open(dir_ + fname) as f:
+            df = main(f)
+            df.to_csv(dir_ + 'cleaned_' + fname)
