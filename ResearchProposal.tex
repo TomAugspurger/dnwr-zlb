@@ -1,0 +1,177 @@
+%----------------------------------------------------------------------------------------
+%    PAGE ADJUSTMENTS
+%----------------------------------------------------------------------------------------
+
+\documentclass[12pt,a4paper]{article}            % Article 12pt font for a4 paper while hiding links
+\usepackage[margin=1in]{geometry}                          % Required to adjust margins
+
+%----------------------------------------------------------------------------------------
+%    TYPE SETTING PACKAGES
+%----------------------------------------------------------------------------------------
+
+\usepackage[english]{babel}                                % English language/hyphenation 
+\usepackage[utf8x]{inputenc}                               % Accept different input encodings
+\usepackage{amsmath,amsfonts,amsthm,amssymb}               % Math packages to use equations
+\usepackage{siunitx}                                       % Scientific units and numbering
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}    % Set color of text/background
+\linespread{1.2}                                           % Default line spacing size
+\usepackage{microtype}                                     % Improves spacing in the document
+\usepackage{setspace}                                      % Set line spacing dynamically
+\usepackage{tocloft}                                       % List adjustments including ToC
+\DeclareMathOperator*{\argmin}{arg\!\min}
+%----------------------------------------------------------------------------------------
+%    FIGURES
+%----------------------------------------------------------------------------------------
+
+\usepackage{graphicx}                                      % Required for the inclusion of images
+\graphicspath{{./Pictures/}}                               % Specifies picture directory
+\usepackage{float}                                         % Allows putting an [H] in \begin{figure}
+\usepackage{wrapfig}                                       % Allows in-line images
+
+\usepackage[colorlinks=true, citecolor=blue]{hyperref}     % References
+\usepackage{cleveref}                                      % Better References
+%\crefname{lstlisting}{listing}{listings}
+%\Crefname{lstlisting}{Listing}{Listings}
+\crefname{figure}{figure}{figures}
+\Crefname{figure}{Figure}{Figures}
+
+%----------------------------------------------------------------------------------------
+%    INCLUDE CODE
+%----------------------------------------------------------------------------------------
+
+\usepackage{listings}                                      % Package so code looks pretty
+\lstset{
+language=Python,                                           % Choose the language
+basicstyle=\footnotesize,                                  % The size of the fonts used
+numbers=left,                                              % Where to put the line-numbers
+numberstyle=\footnotesize,                                 % The size of the line-numbers
+stepnumber=1,                                              % The step line-numbers
+numbersep=5pt,                                             % How far the line-numbers are from the code
+backgroundcolor=\color{white},                             % Choose the background color
+showspaces=false,                                          % Show spaces adding partiular underscores
+showstringspaces=false,                                    % Underline spaces within strings
+showtabs=false,                                            % Show tabs within strings adding particular underscores
+frame=single,                                              % Adds a frame around the code
+tabsize=2,                                                 % Sets default tabsize to 2 spaces
+captionpos=b,                                              % Sets the caption-position to bottom
+breaklines=true,                                           % Sets automatic line breaking
+breakatwhitespace=false,                                   % Sets if automatic breaks should only happen at whitespace
+escapeinside={\%*}{*)}                                     % If you want to add a comment within your code
+}
+
+\usepackage[T1]{fontenc}
+\usepackage{inconsolata}
+
+
+%----------------------------------------------------------------------------------------
+%    EXTRAS
+%----------------------------------------------------------------------------------------
+
+\usepackage{attachfile}                                    % Attach files to your document
+\usepackage{fancyhdr}                                      % Fancy Header
+\usepackage{natbib}
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%    COMMANDS
+%----------------------------------------------------------------------------------------
+
+\renewcommand*\thesection{\arabic{section}}                % Renew section numbers
+\renewcommand{\labelenumi}{\alph{enumi}.}                  % Section ordered numbering
+\let\oldvec\vec                                            % Save the old vector style
+\renewcommand{\vec}[1]{\oldvec{\mathbf{#1}}}               % Set vectors to look like vectors
+
+\renewcommand{\contentsname}{Table of Contents}            % Make ToC actually say ToC
+\addtocontents{toc}{~\hfill\textbf{Page}\par}              % Add 'page' to top of ToC
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}      % Makes dots leading up to page number
+\setcounter{tocdepth}{3}                                   % Depth of ToC
+\setcounter{lofdepth}{3}                                   % Depth of LoF
+
+\pagestyle{fancy}                                          % Fancy page style for headers
+\setlength{\headheight}{15pt}                              % Change header hieght
+\fancyhead[L,LO]{\fontsize{8}{10} \selectfont \firstmark}  % Adds header to left with section name
+\fancyhead[R,RO]{\fontsize{8}{10} \selectfont Right}       % Adds header to right
+\definecolor{grey}{HTML}{cccccc}                           % The next 4 lines modifies the header (color)
+\renewcommand{\headrulewidth}{1px}
+\renewcommand{\headrule}{{\color{grey}%
+\hrule width\headwidth height\headrulewidth%
+\vskip-\headrulewidth}}
+
+\numberwithin{equation}{section}                           % Number equations within sections
+\numberwithin{figure}{section}                             % Number figures within sections
+\numberwithin{table}{section}                              % Number tables within sections
+\numberwithin{lstlisting}{section}                         % Number listings within sections
+
+\renewcommand{\sfdefault}{phv}                             % Change default font
+\renewcommand{\familydefault}{\sfdefault}                  % Use default font everywhere
+\newcommand{\tvect}[2]{%
+  \ensuremath{\Bigl(\negthinspace\begin{smallmatrix}#1\\#2\end{smallmatrix}\Bigr)}}
+
+%----------------------------------------------------------------------------------------
+%    TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\begin{titlepage}
+
+\title{Research Proposal}
+\author{Tom Augspurger}                               % via Seth Miers
+
+\vspace*{\fill}                                            % Center title page vertically
+
+\newcommand{\HRule}{\rule{\linewidth}{0.3mm}}              % Defines horizontal lines
+
+\center                                                    % Center everything on the page
+
+% \textsc{\LARGE Research Proposal}\[1.5cm]                % First heading
+
+% \HRule \[0.4cm]
+% { \huge \bfseries Title}\[0.4cm]                     % Title of document
+% \HRule \[1.5cm]
+
+%\begin{minipage}{0.4\textwidth}
+%\begin{flushleft} \large
+%\emph{Author:}\
+%Tom \textsc{Augspurger}                                    % Name
+%\end{flushleft}
+%\end{minipage}
+%~
+%\begin{minipage}{0.4\textwidth}
+%\begin{flushright} \large
+%\emph{Professor:} \
+%Dr. James \textsc{Smith}                                   % Professor's Name
+%\end{flushright}
+%\end{minipage}\[4cm]
+
+{\today}                                                  % Date, change the \today to be precise
+
+%\includegraphics{Logo}\[1cm]                             % Include a departmentw/university logo
+
+\vspace*{\fill}                                            % Fill the rest of the page with whitespace
+
+\end{titlepage}
+
+\phantomsection
+
+
+%----------------------------------------------------------------------------------------
+%    CONTENT
+%----------------------------------------------------------------------------------------
+
+For my second-year paper, I plan to investigate the interaction of downward nominal wage rigidities and the zero-lower bound.
+The zero-lower bound on nominal interest rates bound has seen renewed attention since central banks in advanced countries cut their policy rates nearly to zero with the recent recession.
+
+A world where the zero lower bound binds is likely to be a world where inflation is low.  This is also a world where downward wage rigidities will likely bind as well.
+
+I intentionally used interaction, in the sense of each having an effect on the other.  The central bank might be interested in adjusted it's policy (target rate of inflation, say) if it must worry about DNWR and its effects on the economy.  Also, the welfare loss (or gain) of DNWR will depend on the central banks behavior, which my be constrained by the ZLB.
+
+Prior research ---e.g. \cite{coibon_gorodnichenko_wieland_2012}--- has looked at optimal monetary policy in light of the ZLB with a simple version of DNWR added as an extension.  
+They found that DNWR actually were welfare-improving by lower the variance of inflation and output.
+However, recent research on DNWR ---e.g. by \cite{benigno_ricci_2011}--- has emphasized the importance of idiosyncratic shocks (rather than homogeneous as in \cite{coibon_gorodnichenko_wieland_2012}) in generating effects at the aggregate level.
+
+
+\newpage
+\bibliographystyle{apa}
+\bibliography{citations}
+
+\end{document}

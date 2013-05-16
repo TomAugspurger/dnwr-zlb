@@ -67,6 +67,8 @@ nosetests.xml
 *.toc
 *.vrb
 *.xd
+*.bib
+*.fls
 
 ###SublimeText###
  
