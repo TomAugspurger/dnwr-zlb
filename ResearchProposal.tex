@@ -19,6 +19,9 @@
 \usepackage{setspace}                                      % Set line spacing dynamically
 \usepackage{tocloft}                                       % List adjustments including ToC
 \DeclareMathOperator*{\argmin}{arg\!\min}
+\definecolor{purple}{HTML}{7A68A6}
+\definecolor{blue}{HTML}{6C91FF}
+\definecolor{red}{HTML}{A60628}
 %----------------------------------------------------------------------------------------
 %    FIGURES
 %----------------------------------------------------------------------------------------
@@ -90,8 +93,8 @@ escapeinside={\%*}{*)}                                     % If you want to add 
 
 \pagestyle{fancy}                                          % Fancy page style for headers
 \setlength{\headheight}{15pt}                              % Change header hieght
-\fancyhead[L,LO]{\fontsize{8}{10} \selectfont \firstmark}  % Adds header to left with section name
-\fancyhead[R,RO]{\fontsize{8}{10} \selectfont Right}       % Adds header to right
+% \fancyhead[L,LO]{\fontsize{8}{10} \selectfont \firstmark}  % Adds header to left with section name
+% \fancyhead[R,RO]{\fontsize{8}{10} \selectfont Right}       % Adds header to right
 \definecolor{grey}{HTML}{cccccc}                           % The next 4 lines modifies the header (color)
 \renewcommand{\headrulewidth}{1px}
 \renewcommand{\headrule}{{\color{grey}%
@@ -112,16 +115,16 @@ escapeinside={\%*}{*)}                                     % If you want to add 
 %    TITLE PAGE
 %----------------------------------------------------------------------------------------
 
-\begin{titlepage}
+% \begin{titlepage}
 
-\title{Research Proposal}
+\title{Research Proposal for Second-Year Paper}
 \author{Tom Augspurger}                               % via Seth Miers
 
-\vspace*{\fill}                                            % Center title page vertically
+% \vspace*{\fill}                                            % Center title page vertically
 
-\newcommand{\HRule}{\rule{\linewidth}{0.3mm}}              % Defines horizontal lines
+% \newcommand{\HRule}{\rule{\linewidth}{0.3mm}}              % Defines horizontal lines
 
-\center                                                    % Center everything on the page
+% \center                                                    % Center everything on the page
 
 % \textsc{\LARGE Research Proposal}\[1.5cm]                % First heading
 
@@ -142,32 +145,79 @@ escapeinside={\%*}{*)}                                     % If you want to add 
 %Dr. James \textsc{Smith}                                   % Professor's Name
 %\end{flushright}
 %\end{minipage}\[4cm]
-
-{\today}                                                  % Date, change the \today to be precise
-
+\maketitle
+% \center{{\today}}                                                  % Date, change the \today to be precise
+\newpage
 %\includegraphics{Logo}\[1cm]                             % Include a departmentw/university logo
 
-\vspace*{\fill}                                            % Fill the rest of the page with whitespace
+% \vspace*{\fill}                                            % Fill the rest of the page with whitespace
 
-\end{titlepage}
+% \end{titlepage}
 
-\phantomsection
+% \phantomsection
 
 
 %----------------------------------------------------------------------------------------
 %    CONTENT
 %----------------------------------------------------------------------------------------
 
-For my second-year paper, I plan to investigate the interaction of downward nominal wage rigidities and the zero-lower bound.
-The zero-lower bound on nominal interest rates bound has seen renewed attention since central banks in advanced countries cut their policy rates nearly to zero with the recent recession.
+For my second-year paper I plan to investigate the interaction of downward nominal wage rigidities and the zero-lower-bound on nominal interest rates.
+The downward-nominal-wage rigidity literature has emphasized the importance of idiosyncratic shocks to labor preferences or productivity as in \cite{benigno_ricci_2011}.
+To date, work on the zero-lower bound with downward-nominal-wage rigidity has not incorporated this point.
+My main contribution will be to combine the finding that idiosyncratic labor shocks matter with the research on optimal monetary policy in a world with the zero-lower bound on nominal interest rates.
 
-A world where the zero lower bound binds is likely to be a world where inflation is low.  This is also a world where downward wage rigidities will likely bind as well.
+The zero-lower-bound on nominal interest rates has seen renewed attention since central banks in advanced countries cut their policy rates nearly to zero with the recent recession.
+The zero-lower bound matters because it slows recovery from deep recessions (\cite{williams_2009}).
+% The zero-lower bound may affect many of our predictions, policy recommendations, and modeling choices;\footnote{\cite{wieland_2013} and \cite{curdia_woodford_2010} on predictions and policy recommendations and \cite{fv_gordon_gq_rr_2012} on modeling at the zero-lower bound.}
+There are many issues to be considered with the zero-lower bound, but I will focus mainly on how monetary policy should act when the zero-lower bound may bind;
+specifically, should central banks raise their inflation targets due to the zero-lower bound?
+We might expect that if the zero-lower bound is costly, we could benefit by targeting higher inflation and hitting the zero-lower bound less frequently.
+However, this benefit of fewer episodes at the zero-lower bound has to be measured against the costs of higher inflation (mainly price dispersion and inefficient allocation of resources).
+% A world where the zero lower bound binds is likely also to be a world where inflation is low (cite Great Depression, Japan; to a smaller extent today).  The downward wage rigidity is likely to bind when inflation is unexpectedly low.
 
-I intentionally used interaction, in the sense of each having an effect on the other.  The central bank might be interested in adjusted it's policy (target rate of inflation, say) if it must worry about DNWR and its effects on the economy.  Also, the welfare loss (or gain) of DNWR will depend on the central banks behavior, which my be constrained by the ZLB.
+% There is much evidence for wage rigidities\footnote{For example, \cite{dickens_et_al_2006}}.
+% % The effects are perhaps harder to pin down than the existence.
+The wage rigidity literature has two principal components: an empirical side concerned with the evidence for wage rigidities and another side concerned with the economic implications of wage rigidities.\footnote{See \cite{dickens_et_al_2006} for the first and \cite{erceg_henderson_levin_1999} for an example of the second.}
+I will mostly ignore the reasons why wages appear to be rigid and instead focus on how downward-nominal-wage rigidity affects optimal monetary policy.
+I reiterate that idiosyncratic shocks are important for downward nominal wage rigidities to generate effects at the aggregate level.
 
-Prior research ---e.g. \cite{coibon_gorodnichenko_wieland_2012}--- has looked at optimal monetary policy in light of the ZLB with a simple version of DNWR added as an extension.  
-They found that DNWR actually were welfare-improving by lower the variance of inflation and output.
-However, recent research on DNWR ---e.g. by \cite{benigno_ricci_2011}--- has emphasized the importance of idiosyncratic shocks (rather than homogeneous as in \cite{coibon_gorodnichenko_wieland_2012}) in generating effects at the aggregate level.
+Some attempts have been made to combine downward-nominal-wage rigidity with the zero-lower bound.
+Most notably \cite{coibon_gorodnichenko_wieland_2012} included downward-nominal-wage rigidity as they investigated optimal monetary policy with the zero-lower bound.
+My approach will be similar to theirs, though with the (perhaps) crucial difference that I will use idiosyncratic shocks to labor.
+If the research on downward-nominal-wage rigidity is to be believed, this difference will prove to be important.
+Interestingly, \cite{coibon_gorodnichenko_wieland_2012} found that downward-nominal-wage rigidities were actually welfare improving.  Wage rigidities reduced the volatility of marginal costs and output, and so reduced the variance of inflation.  The wage rigidities were also a bulwark against deflation, so the central bank could to target a lower inflation level while maintaining the same probability of the zero-lower bound binding.
+
+I am interested in modeling both the zero-lower bound and downward-nominal-wage rigidity together since we might expect them to become binding in the same environment.
+The zero-lower bound is usually characterized by low or even negative inflation.
+And a world with unexpectedly low inflation is a world where downward-nominal-wage rigidities should be most likely to bind as well.
+Of course, a model will be needed to discuss the exact nature of the interaction and all of the effects.
+
+More concretely, I'll use a fairly standard New Keynesian model where the representative household supplies differentiated labor and consumes the final product.
+The different labor types will be subject to idiosyncratic shocks each period; \cite{daly_hobijn_2013} use preference shocks to the disutility from labor and I will likely do the same, though I am also considering productivity shocks as in \cite{fagan_messina_2009}.  With preference shocks, the household's utility function will be something along the lines of
+\begin{equation*}
+    \max E_{t_0} \sum_{t=t_0}^{\infty} \beta^t \big\{\ln{C_t} + \frac{\eta}{\eta + 1} \int_{0}^{1} Z_t(i) N_t(i)^{\frac{\eta + 1}{\eta}} di \big\}
+\end{equation*}
+where $C_t$ is the household's consumption, $N_t(i)$ is the individual $i$'s labor contribution, $\eta$ is the Frisch labor supply elasticity, and $Z_t(i)$ is a stochastic preference shock to labor.  Importantly, $Z_t(i)$ is specific to individual $i$.
+
+The production side of the economy will be characterized by monopolistically competitive  intermediate goods producers and a perfectly competitive final good producer.
+The intermediate goods producers will likely face some sort of pricing friction as in \cite{calvo_1983}.
+Together with the consumers, intermediate goods producers will determine the wages for each type of consumer.
+I haven't settled on a specific form for the downward nominal wage rigidities yet.
+\cite{daly_hobijn_2013} use a Calvo-type friction where only some fraction of workers are allowed to change their wages downward.
+\cite{coibon_gorodnichenko_wieland_2012} mandate that the wage today is the maximum of the wage yesterday and the desired wage today.
+Alternatively, \cite{benigno_ricci_2011} restrict the workers' path of wages to the space of (weakly) increasing sequences.
+Regardless of the specific form I chose, this may be a good area for sensitivity analysis.
+
+The central bank will follow a Taylor rule that is constrained by the zero-lower bound.
+I should then be able log-linearize around the steady-state, which will facilitate calibration and solution for the optimal inflation rate.
+Welfare will be measured by the household's utility function and the loss will be relative to the benchmark case of no zero-lower bound and no downward-nominal-wage rigidity.
+
+I will use the standard National Income and Product Accounts for most of the aggregate data.
+Using the data from the Current Population Survey, I will construct a panel dataset to measure the distribution of wage changes at the monthly or quarterly frequency.
+It may be interesting to track the distribution of wage changes over time in my calibration.
+I suspect that this aspect will provide some technical difficulties, but hopefully nothing too intractable.
+
+To solve the model, I will perhaps use the shooting algorithm employed in \cite{bodenstein_erceg_and_guerrieri_2009}, though I haven't explored this area much yet.
 
 
 \newpage
