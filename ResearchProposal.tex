@@ -176,7 +176,7 @@ My main contribution will be to combine the finding that idiosyncratic labor sho
 \section{Introduction}
 \label{sec:introduction}
 
-The zero-lower-bound on nominal interest rates has a long history in economics. It has seen renewed attention since central banks in advanced countries cut their policy rates nearly to zero with the recent recession.
+The zero-lower-bound on nominal interest rates has a long history in economics. It has seen renewed attention since Japan ran up against in starting the the 1990s and even more so since central banks in advanced countries cut their policy rates nearly to zero with the recent recession.
 Hitting the zero-lower bound matters mainly because it deepens recessions and slows recovery (\cite{williams_2009} gives an estimate of the cost).
 % The zero-lower bound may affect many of our predictions, policy recommendations, and modeling choices;\footnote{\cite{wieland_2013} and \cite{curdia_woodford_2010} on predictions and policy recommendations and \cite{fv_gordon_gq_rr_2012} on modeling at the zero-lower bound.}
 There are many issues to be considered with the zero-lower bound, but I will focus mainly on how monetary policy should act when the zero-lower bound may bind;
@@ -249,10 +249,25 @@ This will be maximized subject to the period budget constraint:
 Here, $S_t$ is the stock of one-period bonds carried over to tomorrow, $R_t$ is the gross nominal interest rate, $P_t$ is the price of the final good, $W_t(i)$ is the nominal wage paid to individual $i$, and $T_t$ is a real transfer of profits from the firms to the household.
 
 Like in \cite{erceg_henderson_levin_1999} individuals of the household can share consumption risk but make wage decisions individually.
-Given this wage, each individual supplies labor as demanded.
+Given this wage, each individual supplies labor as demanded.  Additionally, we will construct a labor aggregator who chooses the labor types in the same proportion as the individual firms described below.
+
+\begin{equation}
+    N_t = \left[ \int_{0}^{1} N_t(h)^{ \frac{\eta - 1}{\eta} } dh \right]^{ \frac{\eta}{\eta - 1} }
+\end{equation}
+where the integration is over the labor types in $[0, 1]$. The aggregator's total demand for each type of labor equals the sum of the intermediate firms' demand for that type. In the usual manner, this aggregator minimizes the input costs required to produce a given level of output by choosing input $N_t(h)$ given wages $W_t(h)$.  This leads to the aggregate wage index $W_t$:
+
+\begin{equation}
+    W_t = \left[ \int_{0}^{1} W_t(h)^{ 1 - \eta }  \right]^{ \frac{1}{1 - \eta} }
+\end{equation}
+Finally, this implies that the total demand for labor services from individual $h$ is:
+
+\begin{equation}
+    N_t(h) = \left[ \frac{W_t}{W_t(h)}  \right]^{\eta}N_t
+\end{equation}
+
 
 The production side of the economy will be characterized by a continuum of monopolistically competitive  intermediate goods producers and a perfectly competitive final good producer.
-The final good producer aggregates intermediate goods as:
+As before when, we'll construct an aggregator who combines the intermediate products into an aggregate index.  The aggregator's choices reflect those of the household:
 \begin{equation*}
     Y_t = \left[\int_{0}^{1} Y_t(f)^{ \frac{\eta - 1}{\eta}} df \right]^{ \frac{\eta}{\eta - 1} }
 \end{equation*}
@@ -261,17 +276,19 @@ which yields the aggregate price index:
 \begin{equation*}
     P_t = \left[\int_{0}^{1} P_t(f)^{1 - \eta} df \right]^{\frac{1}{1 - \eta}}
 \end{equation*}
+and also the total demand for that firm's product:
+
+\begin{equation}
+    Y_t(f) = \left[ \frac{P_t}{P_t(f)}  \right]^{\eta} Y_t
+\end{equation}
+
 Meanwhile each intermediate good $j$ is produced according to:
 
 \begin{equation*}
     Y_t(f) = A_t N_t(f)
 \end{equation*}
-where $A_t$ is the (stochastic) aggregate technology level and $N_t(f)$ is also a aggregation, this time over worker types:
+where $A_t$ is the (stochastic) aggregate technology level and $N_t(f)$ is the quantity of the aggregate labor index $N_t$ chosen by that firm.
 
-\begin{equation*}
-    N_t(f) = \left[\int_{0}^{1} N_t(i)^{\frac{\eta - 1}{\eta} } di \right]^{ \frac{\eta}{1 - \eta} }
-\end{equation*}
-where $N_t(i)$ is the labor services supply by individual $h$.
 % Next sort out int. prods function. Aggregate now or later.
 The intermediate goods producers will likely face some sort of pricing friction as in \cite{calvo_1983}.
 Together with the consumers, intermediate goods producers will determine the wages for each type of consumer.
