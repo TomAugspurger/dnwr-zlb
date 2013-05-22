@@ -14,7 +14,7 @@
 \usepackage{amsmath,amsfonts,amsthm,amssymb}               % Math packages to use equations
 \usepackage{siunitx}                                       % Scientific units and numbering
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}    % Set color of text/background
-\linespread{2}                                           % Default line spacing size
+\linespread{1}                                           % Default line spacing size
 \usepackage{microtype}                                     % Improves spacing in the document
 \usepackage{setspace}                                      % Set line spacing dynamically
 \usepackage{tocloft}                                       % List adjustments including ToC
@@ -91,8 +91,8 @@ escapeinside={\%*}{*)}                                     % If you want to add 
 \setcounter{tocdepth}{3}                                   % Depth of ToC
 \setcounter{lofdepth}{3}                                   % Depth of LoF
 
-\pagestyle{fancy}                                          % Fancy page style for headers
-\setlength{\headheight}{15pt}                              % Change header hieght
+\pagestyle{plain}                                          % Fancy page style for headers
+% \setlength{\headheight}{15pt}                              % Change header hieght
 % \fancyhead[L,LO]{\fontsize{8}{10} \selectfont \firstmark}  % Adds header to left with section name
 % \fancyhead[R,RO]{\fontsize{8}{10} \selectfont Right}       % Adds header to right
 \definecolor{grey}{HTML}{cccccc}                           % The next 4 lines modifies the header (color)
@@ -165,7 +165,7 @@ escapeinside={\%*}{*)}                                     % If you want to add 
 % Intro
 \begin{abstract}
 For my second-year paper I plan to investigate the effect downward nominal wage rigidities and the zero-lower-bound on nominal interest rates have on the optimal inflation rate.
-The downward-nominal-wage rigidity literature has emphasized the importance of idiosyncratic shocks in generating aggregate effects on output.
+The downward-nominal-wage rigidity literature has emphasized the importance of idiosyncratic shocks in generating effects on aggregate output.
 To date, work on the zero-lower bound with downward-nominal-wage rigidity has not incorporated this point.
 Furthermore, endogenous wage rigidities in the upward direction will slow wage growth and inflation when exiting the zero-lower bound, which may mitigate expansionary actions taken by the central bank.
 My main contribution will be to combine the finding that idiosyncratic labor shocks matter with the research on optimal monetary policy in a world with the zero-lower bound on nominal interest rates.
@@ -176,7 +176,7 @@ My main contribution will be to combine the finding that idiosyncratic labor sho
 \section{Introduction}
 \label{sec:introduction}
 
-The zero-lower-bound on nominal interest rates has a long history in economics. It has seen renewed attention since Japan ran up against in starting the the 1990s and even more so since central banks in advanced countries cut their policy rates nearly to zero with the recent recession.
+The zero-lower-bound on nominal interest rates has a long history in economics. It has seen renewed attention since Japan ran up against it in the 1990s and even more so since central banks in advanced countries cut their policy rates nearly to zero with the recent recession.
 Hitting the zero-lower bound matters mainly because it deepens recessions and slows recovery (\cite{williams_2009} gives an estimate of the cost).
 % The zero-lower bound may affect many of our predictions, policy recommendations, and modeling choices;\footnote{\cite{wieland_2013} and \cite{curdia_woodford_2010} on predictions and policy recommendations and \cite{fv_gordon_gq_rr_2012} on modeling at the zero-lower bound.}
 There are many issues to be considered with the zero-lower bound, but I will focus mainly on how monetary policy should act when the zero-lower bound may bind;
@@ -196,7 +196,7 @@ I will mostly ignore the reasons why wages appear to be rigid and instead focus 
 
 One interesting result from prior research on wage rigidities is that idiosyncratic shocks to labor are important for generating aggregate effects on output or employment.\footnote{This is stressed in \cite{elsby_2009}, \cite{benigno_ricci_2011}, and \cite{daly_hobijn_2013}.}
 \cite{daly_hobijn_2013} \emph{assert} that ``[Idiosyncratic] shocks are necessary to make nominal wage cuts desirable when the economy is in steady state.''
-As this is something of a linchpin to my story, I will need to investigate this issue further.
+As the importance of idiosyncratic shocks is something of a linchpin to my story, I will need to investigate this issue further.
 At this time I do not have a compelling explanation for how much these shock matter or what their worldly counterpart is.
 Interestingly, \cite{golosov_lucas_2007} introduced similar idiosyncratic shocks in a model with menu costs.
 Their motivation was to reconcile an aggregate inflation with individual price changes.
@@ -235,7 +235,7 @@ Of course, a model will be needed to discuss the exact nature of the interaction
 
 
 More concretely, I'll use a fairly standard New Keynesian model where the representative household supplies differentiated labor and consumes the final product.
-The different labor types will be subject to idiosyncratic shocks each period; \cite{daly_hobijn_2013} use preference shocks to the disutility from labor and I will likely do the same, though I am also considering productivity shocks as in \cite{fagan_messina_2009}. 
+The different labor types (indexed on $[0, 1]$) will be subject to idiosyncratic shocks each period; \cite{daly_hobijn_2013} use preference shocks to the disutility from labor and I will likely do the same, though I am also considering productivity shocks as in \cite{fagan_messina_2009}. 
 With preference shocks, the household's utility function will be something along the lines of
 \begin{equation*}
     E_{t_0} \sum_{t=t_0}^{\infty} \beta^t \left\{\ln{C_t} + \frac{\eta}{\eta + 1} \int_{0}^{1} Z_t(i) N_t(i)^{\frac{\eta + 1}{\eta}} di \right\}
@@ -243,55 +243,54 @@ With preference shocks, the household's utility function will be something along
 where $C_t$ is the household's consumption, $N_t(i)$ is the individual $i$'s labor contribution, $\eta > 1$ is the Frisch labor supply elasticity, and $Z_t(i)$ is a stochastic preference shock to labor of type $i$.
 This will be maximized subject to the period budget constraint:
 
-\begin{equation}
+\begin{equation*}
     C_t + \frac{S_t}{P_t} \leq \int_{0}^{1} \left( N_t(i) \frac{W_t(i)}{P_t}\right) di + S_{t-1}\frac{R_{t-1}}{P_t} + T_t
-\end{equation}
+\end{equation*}
 Here, $S_t$ is the stock of one-period bonds carried over to tomorrow, $R_t$ is the gross nominal interest rate, $P_t$ is the price of the final good, $W_t(i)$ is the nominal wage paid to individual $i$, and $T_t$ is a real transfer of profits from the firms to the household.
 
 Like in \cite{erceg_henderson_levin_1999} individuals of the household can share consumption risk but make wage decisions individually.
 Given this wage, each individual supplies labor as demanded.  Additionally, we will construct a labor aggregator who chooses the labor types in the same proportion as the individual firms described below.
 
-\begin{equation}
+\begin{equation*}
     N_t = \left[ \int_{0}^{1} N_t(h)^{ \frac{\eta - 1}{\eta} } dh \right]^{ \frac{\eta}{\eta - 1} }
-\end{equation}
-where the integration is over the labor types in $[0, 1]$. The aggregator's total demand for each type of labor equals the sum of the intermediate firms' demand for that type. In the usual manner, this aggregator minimizes the input costs required to produce a given level of output by choosing input $N_t(h)$ given wages $W_t(h)$.  This leads to the aggregate wage index $W_t$:
+\end{equation*}
+where the integration is over the labor types in. The aggregator's total demand for each type of labor equals the sum of the intermediate firms' demand for that type. In the usual manner, this aggregator minimizes the input costs required to produce a given level of output by choosing input $N_t(h)$ given wages $W_t(h)$.  This leads to the aggregate wage index $W_t$:
 
-\begin{equation}
+\begin{equation*}
     W_t = \left[ \int_{0}^{1} W_t(h)^{ 1 - \eta }  \right]^{ \frac{1}{1 - \eta} }
-\end{equation}
+\end{equation*}
 Finally, this implies that the total demand for labor services from individual $h$ is:
 
-\begin{equation}
+\begin{equation*}
     N_t(h) = \left[ \frac{W_t}{W_t(h)}  \right]^{\eta}N_t
-\end{equation}
+\end{equation*}
 
 
 The production side of the economy will be characterized by a continuum of monopolistically competitive  intermediate goods producers and a perfectly competitive final good producer.
-As before when, we'll construct an aggregator who combines the intermediate products into an aggregate index.  The aggregator's choices reflect those of the household:
+The intermediate producers are also indexed on $[0, 1]$.
+As before, we'll construct an aggregator who combines the intermediate products into an aggregate index.  The aggregator's choices reflect those of the household:
 \begin{equation*}
-    Y_t = \left[\int_{0}^{1} Y_t(f)^{ \frac{\eta - 1}{\eta}} df \right]^{ \frac{\eta}{\eta - 1} }
+    Y_t = \left[\int_{0}^{1} Y_t(f)^{ \frac{\theta - 1}{\theta}} df \right]^{ \frac{\theta}{\theta - 1} }
 \end{equation*}
 which yields the aggregate price index:
 
 \begin{equation*}
-    P_t = \left[\int_{0}^{1} P_t(f)^{1 - \eta} df \right]^{\frac{1}{1 - \eta}}
+    P_t = \left[\int_{0}^{1} P_t(f)^{1 - \theta} df \right]^{\frac{1}{1 - \theta}}
 \end{equation*}
 and also the total demand for that firm's product:
 
-\begin{equation}
-    Y_t(f) = \left[ \frac{P_t}{P_t(f)}  \right]^{\eta} Y_t
-\end{equation}
+\begin{equation*}
+    Y_t(f) = \left[ \frac{P_t}{P_t(f)}  \right]^{\theta} Y_t
+\end{equation*}
 
-Meanwhile each intermediate good $j$ is produced according to:
+Meanwhile each intermediate good $f$ is produced according to:
 
 \begin{equation*}
     Y_t(f) = A_t N_t(f)
 \end{equation*}
 where $A_t$ is the (stochastic) aggregate technology level and $N_t(f)$ is the quantity of the aggregate labor index $N_t$ chosen by that firm.
-
-% Next sort out int. prods function. Aggregate now or later.
 The intermediate goods producers will likely face some sort of pricing friction as in \cite{calvo_1983}.
-Together with the consumers, intermediate goods producers will determine the wages for each type of consumer.
+
 I haven't settled on a specific form for the downward nominal wage rigidities yet.
 \cite{daly_hobijn_2013} use a Calvo-type friction where only some fraction of workers are allowed to change their wages downward.
 \cite{coibon_gorodnichenko_wieland_2012} mandate that the wage today is the maximum of the wage yesterday and the desired wage today.
