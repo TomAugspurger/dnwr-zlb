@@ -2,7 +2,7 @@
 %    PAGE ADJUSTMENTS
 %----------------------------------------------------------------------------------------
 
-\documentclass[12pt,a4paper]{article}            % Article 12pt font for a4 paper while hiding links
+\documentclass[12pt,a4paper]{scrartcl}            % Article 12pt font for a4 paper while hiding links
 \usepackage[margin=1.25in]{geometry}                          % Required to adjust margins
 
 %----------------------------------------------------------------------------------------
@@ -106,18 +106,23 @@ escapeinside={\%*}{*)}                                     % If you want to add 
 \numberwithin{table}{section}                              % Number tables within sections
 \numberwithin{lstlisting}{section}                         % Number listings within sections
 
-\renewcommand{\sfdefault}{phv}                             % Change default font
-\renewcommand{\familydefault}{\sfdefault}                  % Use default font everywhere
+% \renewcommand{\sfdefault}{phv}                             % Change default font
+% \renewcommand{\familydefault}{\sfdefault}                  % Use default font everywhere
 \newcommand{\tvect}[2]{%
   \ensuremath{\Bigl(\negthinspace\begin{smallmatrix}#1\\#2\end{smallmatrix}\Bigr)}}
+
+\makeatletter
+\def\blfootnote{\xdef\@thefnmark{}\@footnotetext}
+\makeatother
+
 
 %----------------------------------------------------------------------------------------
 %    TITLE PAGE
 %----------------------------------------------------------------------------------------
 
 % \begin{titlepage}
-
-\title{Research Proposal for Second-Year Paper}
+\title{Monetary Policy with the Zero-Lower Bound and Wage Rigidities}
+\subtitle{Research Proposal for Second-Year Paper}
 \author{Tom Augspurger}                               % via Seth Miers
 
 % \vspace*{\fill}                                            % Center title page vertically
@@ -162,13 +167,15 @@ escapeinside={\%*}{*)}                                     % If you want to add 
 %----------------------------------------------------------------------------------------
 
 \begin{abstract}
-For my second-year paper I plan to investigate the effect downward nominal wage rigidities and the zero-lower-bound on nominal interest rates have on optimal monetary policy.
+For my second-year paper I plan to investigate the effects downward nominal wage rigidities and the zero-lower-bound on nominal interest rates have on optimal monetary policy.
 The downward-nominal-wage rigidity literature has emphasized the importance of idiosyncratic shocks in generating effects on aggregate output.
 To date, work on the zero-lower bound has not incorporated this point.
-My main contribution will be to combine the finding that idiosyncratic labor shocks matter with the research on optimal monetary policy in a world with the zero-lower bound on nominal interest rates.
+My main contribution will be to combine the finding that idiosyncratic labor shocks matter with the research on optimal monetary policy in a world with the zero-lower bound.
 It is possible that downward-nominal-wage rigidities will raise the optimal inflation target set by the central bank.
 Furthermore, endogenous wage rigidities in the upward direction may slow wage growth and inflation when exiting the zero-lower bound, which may mitigate expansionary actions taken by the central bank.
 \end{abstract}
+
+\blfootnote{Thanks to Martin Gervais, Alice Schoonbroodt, and Nicolas Ziebarth for agreeing to advise me on this project.  All remaining errors are mine, etc.}
 \newpage
 %----------------------------------------------------------------------------------------
 \section{Introduction}
@@ -190,16 +197,17 @@ However, this benefit has to be measured against the costs of higher inflation (
 % % The effects are perhaps harder to pin down than the existence.
 A separate literature has investigated the phenomenon of downward wage rigidities.
 The wage rigidity literature has two principal components: an empirical side concerned with the evidence and possible reasons for wage rigidities at the micro level and another side concerned with the economic implications of wage rigidities in aggregate.\footnote{For the micro level evidence you can start with \cite{dickens_et_al_2006}, \cite{akerlof_dickens_perry_1996}, or \cite{card_hyslop_1997}. \cite{erceg_henderson_levin_1999} is an example of the the macroeconomic effects.  \cite{elsby_2009} finds weaker macroeconomic effects. \cite{chari_kehoe_macgratten_2009} would disagree with the whole endeavor.}
-I will mostly ignore the reasons why wages appear to be rigid and instead focus on how downward-nominal-wage rigidity affects optimal monetary policy.
+I will mostly ignore the micro side---the reasons why wages appear to be rigid---and instead focus on how downward-nominal-wage rigidity affects monetary policy.
 
 One interesting result from prior research on wage rigidities is that idiosyncratic shocks to labor are important for generating aggregate effects on output or employment.\footnote{This is stressed in \cite{elsby_2009}, \cite{benigno_ricci_2011}, and \cite{daly_hobijn_2013}.}
-\cite{daly_hobijn_2013} \emph{assert} that ``[Idiosyncratic] shocks are necessary to make nominal wage cuts desirable when the economy is in steady state.''
-As the importance of idiosyncratic shocks is something of a linchpin to my story, I will need to investigate this issue further.
-At this time I do not have a compelling explanation for how much these shock matter or what their worldly counterpart is.
+\cite{daly_hobijn_2013} \emph{assert} that ``models need to include heterogeneous shocks to the labor supply or productivity of workers. Such shocks are necessary to make nominal wage cuts desirable when the economy is in steady state.''
+I will describe my setup more fully later, but for now bear in mind that these idiosyncratic shocks are something of a linchpin to my story.
+While we can see how idiosyncratic shocks will distort relative prices, at this time I do not have a compelling explanation for how much these shock matter or what their worldly counterpart is.\footnote{
 Interestingly, \cite{golosov_lucas_2007} introduced similar idiosyncratic shocks in a model with menu costs.
-Their motivation was to reconcile an aggregate inflation with individual price changes;
+Their motivation was to reconcile the level of aggregate inflation with individual price changes;
 aggregate shocks alone could not produce the observed dynamics.
-I will at least be able to benchmark my model with idiosyncratic shocks against a model with only aggregate shocks to quantify the difference.
+}
+At the very least I will be able to benchmark my model with idiosyncratic shocks against a model with only aggregate shocks to quantify the difference.
 
 % I reiterate that idiosyncratic shocks are important for downward nominal wage rigidities to generate effects at the aggregate level.
 
@@ -209,36 +217,45 @@ Some attempts have been made to combine downward-nominal-wage rigidity with the 
 Most notably \cite{coibon_gorodnichenko_wieland_2012} included downward-nominal-wage rigidity as they investigated optimal monetary policy with the zero-lower bound.
 My approach will be similar to theirs, though with the (perhaps) crucial difference that I will use idiosyncratic shocks to labor.
 If the research on downward-nominal-wage rigidity is to be believed, this difference will prove to be important.
-\cite{coibon_gorodnichenko_wieland_2012} found that downward-nominal-wage rigidities were actually welfare improving.
+Contrary to their expectations, \cite{coibon_gorodnichenko_wieland_2012} found that downward-nominal-wage rigidities were actually welfare improving.
 In their model wage rigidities reduced the volatility of marginal costs and output, and so reduced the variance of inflation.
-The wage rigidities were also a bulwark against deflation, so the central bank could to target a lower inflation level while maintaining the same probability of the zero-lower bound binding.
+The wage rigidities were also a bulwark against deflation, so the central bank could target a lower inflation level while maintaining the same probability of the zero-lower bound binding.
+It is not immediately clear if these beneficial effects of downward-nominal-wage rigidity will still be present when idiosyncratic shocks are considered.
 %----------------------------------------------------------------------------------------
 \section{My Motivation}
 \label{sec:my_motivation}
-
 
 I am interested in modeling both the zero-lower bound and downward-nominal-wage rigidity together since we might expect them to become binding in the same environment.
 The zero-lower bound is usually characterized by low or even negative inflation.
 And a world with unexpectedly low inflation is a world where downward-nominal-wage rigidities should be most likely to bind as well.
 
+Another reason to investigate the zero-lower bound and downward-nominal-wage rigidity simultaneously is that their costs may both be reduced by a higher rate of inflation.
+New Keynesian models typically recommend an inflation rate of zero or even deflation equal to the real rate of interest.\footnote{\cite{schmitt-grohe_uribe_2010} gives a good summary.  Famously, Oliver Blanchard suggested the possibility of higher inflation targets in \cite{blanchard_dellariccia_and_mauro}.}
+Correcting for nominal wage rigidities has been offered as a benefit of inflation in the past, perhaps first by \cite{tobin_1972};
+and, as mentioned in the introduction, positive inflation implies a lower probability of hitting the zero lower bound.
+We should then expect a higher optimal rate of inflation when the zero-lower bound and downward-nominal-wage rigidities are included.
+
 % This needs some work: given inflation level, DNWR implies lower w' which implies a lower level of inflation?
-Furthermore, it's possible that downward-nominal-wage rigidities could dampen wage growth in the recovery.
-Households anticipating future dates where they would like to lower their wages but are unable to, will today choose lower wages than if wages were flexible.
+Furthermore, it's possible that downward-nominal-wage rigidities could dampen growth in the recovery from a zero-lower-bound event.
+Households will choose lower wages today (relative to the flexible-wage case) because they anticipate future dates where they would like to lower wages but cannot (fear of slipping back into the zero-lower bound, say).
 Marginal costs and inflation will rise by less, tempering the fall in the real interest rate.
-Of course, a model will be needed to discuss the exact nature of the interaction and quantify all of the effects.
+This is the endogenous \emph{upward}-wage rigidity process described in \cite{elsby_2009}.
+Placed inside a model with the zero-lower bound, this upward rigidity takes on new importance:
+outside of the zero-lower bound the central bank can achieve its target by lowering the nominal interest rate;
+at the zero-lower bound the central bank does not have that option.
+Of course, a model is needed to discuss the exact nature of the interaction and to quantify the various effects.
 
 %----------------------------------------------------------------------------------------
 \section{The Model}
 \label{sec:the_model}
 
-
-More concretely, I'll use a fairly standard New Keynesian model where the representative household supplies differentiated labor and consumes the final product.
-The different labor types (indexed on $[0, 1]$) will be subject to idiosyncratic shocks each period; \cite{daly_hobijn_2013} use preference shocks to the disutility from labor and I will likely do the same, though I am also considering productivity shocks as in \cite{fagan_messina_2009}. 
+More concretely, I will use a fairly standard New Keynesian model where the representative household supplies differentiated labor and consumes the final product.
+Individuals in the household (the different labor types, indexed on $[0, 1]$) will be subject to idiosyncratic shocks each period; \cite{daly_hobijn_2013} use preference shocks to the disutility from labor and I will likely do the same, though I am also considering productivity shocks as in \cite{fagan_messina_2009}. 
 With preference shocks, the household's utility function will be something along the lines of
 \begin{equation*}
-    E_{t_0} \sum_{t=t_0}^{\infty} \beta^t \left\{\ln{C_t} + \frac{\eta}{\eta + 1} \int_{0}^{1} Z_t(i) N_t(i)^{\frac{\eta + 1}{\eta}} di \right\}
+    E_{t_0} \sum_{t=t_0}^{\infty} \beta^t \left\{\ln{C_t} - \frac{\eta}{\eta + 1} \int_{0}^{1} Z_t(i) N_t(i)^{\frac{\eta + 1}{\eta}} di \right\}
 \end{equation*}
-where $C_t$ is the household's consumption, $N_t(i)$ is the individual $i$'s labor contribution, $\eta > 1$ is the Frisch labor supply elasticity, and $Z_t(i)$ is a stochastic preference shock to labor of type $i$.
+where $C_t$ is the household's consumption, $N_t(i)$ is individual $i$'s labor contribution, $\eta > 1$ is the Frisch labor supply elasticity, and $Z_t(i)$ is a stochastic preference shock to labor of type $i$.\footnote{I don't want to commit to a specification too early---tractability will likely put huge importance on the exact forms I choose---but the shock Z will probably be log-normally distributed with independence across time.}
 This will be maximized subject to the period budget constraint:
 
 \begin{equation*}
@@ -247,15 +264,16 @@ This will be maximized subject to the period budget constraint:
 Here, $S_t$ is the stock of one-period bonds carried over to tomorrow, $R_t$ is the gross nominal interest rate, $P_t$ is the price of the final good, $W_t(i)$ is the nominal wage paid to individual $i$, and $T_t$ is a real transfer of profits from the firms to the household.
 
 Like in \cite{erceg_henderson_levin_1999} individuals of the household can share consumption risk but make wage decisions individually.
-Given this wage, each individual supplies labor as demanded.  Additionally, we will construct a labor aggregator who chooses the labor types in the same proportion as the individual firms described below.
+Given this wage, each individual supplies labor as demanded.  Additionally, we will construct a labor aggregator who chooses the labor types in the same proportion as the individual firms described below.  It demands a labor index $N_t$ defined as:
 
 \begin{equation*}
     N_t = \left[ \int_{0}^{1} N_t(h)^{ \frac{\eta - 1}{\eta} } dh \right]^{ \frac{\eta}{\eta - 1} }
 \end{equation*}
-where the integration is over the labor types in. The aggregator's total demand for each type of labor equals the sum of the intermediate firms' demand for that type. In the usual manner, this aggregator minimizes the input costs required to produce a given level of output by choosing input $N_t(h)$ given wages $W_t(h)$.  This leads to the aggregate wage index $W_t$:
+where the integration is over the labor types. The aggregator's total demand for each type of labor equals the sum of the intermediate firms' demand for that type.
+In the usual manner, this aggregator minimizes the input costs required to produce a given level of output by choosing inputs $N_t(h)$ given wages $W_t(h)$.  This leads to the aggregate wage index $W_t$:
 
 \begin{equation*}
-    W_t = \left[ \int_{0}^{1} W_t(h)^{ 1 - \eta }  \right]^{ \frac{1}{1 - \eta} }
+    W_t \equiv \left[ \int_{0}^{1} W_t(h)^{ 1 - \eta }  \right]^{ \frac{1}{1 - \eta} }
 \end{equation*}
 Finally, this implies that the total demand for labor services from individual $h$ is:
 
@@ -266,16 +284,19 @@ Finally, this implies that the total demand for labor services from individual $
 
 The production side of the economy will be characterized by a continuum of monopolistically competitive  intermediate goods producers and a perfectly competitive final good producer.
 The intermediate producers are also indexed on $[0, 1]$.
-As before, we'll construct an aggregator who combines the intermediate products into an aggregate index.  The aggregator's choices reflect those of the household:
+As before, we'll construct an aggregator who combines the intermediate products $Y_t(f)$ into an aggregate index $Y_t$.
+The aggregator's choices reflect those of the household:
 \begin{equation*}
     Y_t = \left[\int_{0}^{1} Y_t(f)^{ \frac{\theta - 1}{\theta}} df \right]^{ \frac{\theta}{\theta - 1} }
 \end{equation*}
-which yields the aggregate price index:
+where $\theta > 1$ is the elasticity of substitution among types of intermediate goods.
+This yields the aggregate price index:
 
 \begin{equation*}
-    P_t = \left[\int_{0}^{1} P_t(f)^{1 - \theta} df \right]^{\frac{1}{1 - \theta}}
+    P_t \equiv \left[\int_{0}^{1} P_t(f)^{1 - \theta} df \right]^{\frac{1}{1 - \theta}}
 \end{equation*}
-and also the total demand for that firm's product:
+where $P_t(f)$ is the price for intermediate product $f$.
+We can also get the total demand for that firm's product:
 
 \begin{equation*}
     Y_t(f) = \left[ \frac{P_t}{P_t(f)}  \right]^{\theta} Y_t
@@ -301,7 +322,7 @@ Some extra care will be needed for potential nonlinearities at the zero-lower bo
 Welfare will be measured by the household's utility function and the loss will be relative to the benchmark case of no zero-lower bound and no downward-nominal-wage rigidity.
 
 I will use the standard National Income and Product Accounts for most of the aggregate data.
-Using the data from the Current Population Survey, I will construct a panel dataset to measure the distribution of wage changes at the monthly or quarterly frequency.
+Using data from the Current Population Survey, I am constructing a panel dataset to measure the distribution of wage changes at the monthly or quarterly frequency.
 It may be interesting to track the distribution of wage changes over time in my calibration.
 I suspect that this aspect will provide some technical difficulties, but hopefully nothing too intractable.
 

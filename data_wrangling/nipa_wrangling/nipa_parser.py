@@ -62,6 +62,10 @@ def main(f):
     df = get_data(f, idx)
     return df
 
+def run():
+    f = open('/Volumes/HDD/Users/tom/DataStorage/nipa/nipa_gdp_1947-2013.csv')
+    strip_header(f)
+    f.close()
 
 if __name__ == '__main__':
     import sys
