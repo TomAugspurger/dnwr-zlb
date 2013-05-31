@@ -178,7 +178,7 @@ def make_padder(breaker):
 
 class Parser(object):
 
-    def __init__(self, infile, outfile, regex=None):
+    def __init__(self, infile, outfile, style=None, regex=None):
         self.infile = infile
         self.outfile = outfile  # Full path for store.
         self.dataframes = []
@@ -186,7 +186,7 @@ class Parser(object):
         self.next_line = None
         self.holder = []
         if regex is None:
-            self.regex = self.make_regex()
+            self.regex = self.make_regex(style=style)
         self.pos_id = 0
         self.pos_len = 1
         self.pos_start = 2
@@ -202,12 +202,15 @@ class Parser(object):
                     self.starts = []
                     self.ends = []
                 self.analyze(line, f)
-            # Finally
 
+            # Finally
             to_be_df = self.holder
             df = pd.DataFrame(to_be_df, columns=['id', 'length', 'start',
                                                  'end'])
-            df = pd.concat([self.common, df])
+            # Some years need to grab the very last one
+            # If there's only one, it's been picked up.
+            if len(self.dataframes) > 0:
+                df = pd.concat([self.common, df])
             self.dataframes.append(df)
 
     def analyze(self, line, f):
@@ -308,19 +311,26 @@ class Parser(object):
 
         self.holder = [formatted]  # next line
 
-    def make_regex(self):
-        return re.compile(r'(\w{1,2}[\$\-%]\w*|PADDING)\s*CHARACTER\*(\d{3})\s*\.{0,1}\s*\((\d*):(\d*)\).*')
+    def make_regex(self, style=None):
+        if style is None:
+            return re.compile(r'(\w{1,2}[\$\-%]\w*|PADDING)\s*CHARACTER\*(\d{3})\s*\.{0,1}\s*\((\d*):(\d*)\).*')
+        elif style is 'aug2005':
+            return re.compile(r'(\w+) \s* (\d{1,2}) \s*(.*)\s*\((\d+)\s*-\s*(\d+)\)')
 
     def formatter(self, match):
         """
         Conditional on a match, format them into a nice tuple of
             id, length, start, end
+
+        match is a regex object.
         """
-        id_, length, start, end = match.groups()
+        try:
+            id_, length, start, end = match.groups()
+        except ValueError:
+            id_, length, description, start, end = match.groups()
         length = int(length)
         start = int(start)
         end = int(end)
-        print(id_)
         return (id_, length, start, end)
 
     def len_checker(self):
@@ -371,4 +381,5 @@ if __name__ == '__main__':
     else:
         kls = Parser(infile)
         kls.run()
+        kls.writer()
         print('Added {}'.format(infile))
