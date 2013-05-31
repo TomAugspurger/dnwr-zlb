@@ -75,7 +75,7 @@ class TestDDParser(unittest.TestCase):
 class TestParserClass(unittest.TestCase):
 
     def setUp(self):
-        self.parser = Parser('fakefile', 'fakefile2')
+        self.parser = Parser('/cpsbjan03.ddf', 'fakefile2')
 
     def test_formatter(self):
         s = 'H-MONTH     CHARACTER*002 .     (0038:0039)'
@@ -92,3 +92,7 @@ class TestParserClass(unittest.TestCase):
         s = 'PADDING  CHARACTER*039          (0472:0600)'
         expected = ('PADDING', '039', '0472', '0600')
         self.assertEqual(expected, self.parser.regex.match(s).groups())
+
+    def test_store_name_basic(self):
+        expected = 'jan2003'
+        self.assertEqual(expected, self.parser.get_store_name())
