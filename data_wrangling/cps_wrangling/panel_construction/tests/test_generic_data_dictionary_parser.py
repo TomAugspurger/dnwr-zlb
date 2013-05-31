@@ -4,7 +4,8 @@ import pandas as pd
 
 from ..generic_data_dictionary_parser import (item_identifier, item_parser,
                                               dict_constructor, checker,
-                                              writer, month_item)
+                                              writer, month_item,
+                                              Parser)
 
 from pandas.util.testing import (assert_panel_equal, assert_frame_equal,
                                  assert_series_equal, assert_almost_equal)
@@ -37,6 +38,10 @@ class TestDDParser(unittest.TestCase):
         expected = ('H-MONTH', '002', '0038', '0039')
         self.assertEqual(expected, month_item(s).groups())
 
+    def test_regex_no_trailing(self):
+        s = 'H-HHTYPE    CHARACTER*001 .     (0069:0069)'
+
+
     @unittest.skip('Skipping')
     def test_dict_constructor(self):
         pass
@@ -65,3 +70,25 @@ class TestDDParser(unittest.TestCase):
         result = checker(df)
         assert_frame_equal(expected[0], result[0])
         assert_frame_equal(expected[1], result[1], check_names=False)
+
+
+class TestParserClass(unittest.TestCase):
+
+    def setUp(self):
+        self.parser = Parser('fakefile', 'fakefile2')
+
+    def test_formatter(self):
+        s = 'H-MONTH     CHARACTER*002 .     (0038:0039)'
+        m = self.parser.regex.match(s)
+        expected = ('H-MONTH', 2, 38, 39)
+        self.assertEqual(expected, self.parser.formatter(m))
+
+    def test_regex_paddding_trailing_space(self):
+        s = 'PADDING  CHARACTER*039          (0472:0600) '
+        expected = ('PADDING', '039', '0472', '0600')
+        self.assertEqual(expected, self.parser.regex.match(s).groups())
+
+    def test_regex_paddding(self):
+        s = 'PADDING  CHARACTER*039          (0472:0600)'
+        expected = ('PADDING', '039', '0472', '0600')
+        self.assertEqual(expected, self.parser.regex.match(s).groups())

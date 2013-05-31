@@ -29,6 +29,7 @@ so either [H,HG,L,A,C,M][$-%]|PADDING
 
 """
 import re
+import itertools as it
 
 import ipdb
 import pandas as pd
@@ -92,7 +93,7 @@ def main(file_, store_path='/Volumes/HDD/Users/tom/DataStorage/CPS/',
         year = file_[6:8]
         with open(file_, 'r') as f:
             for line in f:
-                # ipdb.set_trace()
+
                 if item_identifier(line, march=True):
                     dict_constructor(line, ids, lengths, starts)
         df = pd.DataFrame({'length': lengths,
@@ -168,13 +169,116 @@ def padder(df):
     padded_df = pd.concat([df, add_on]).sort([])
     
 
-
 def make_padder(breaker):
     start = df.ix[breaker - 1].end
     length = abs(diffed.ix[breaker])
     id_ = 'PADDER'
     end = start + length
 
+
+class Parser(object):
+
+    def __init__(self, infile, outfile, regex=None):
+        self.infile = infile
+        self.outfile = outfile
+        self.dataframes = []
+        self.previous_line = None
+        self.next_line = None
+        self.holder = []
+        if regex is None:
+            self.regex = self.make_regex()
+        self.pos_id = 0
+        self.pos_len = 1
+        self.pos_start = 2
+        self.pos_end = 3
+
+    def run(self):
+        with open(self.infile, 'r') as f:
+            for line in f:
+                if self.previous_line is None:
+                    self.ids = []
+                    self.lenghts = []
+                    self.starts = []
+                    self.ends = []
+                self.analyze(line, f)
+            # Finally
+
+            to_be_df = self.holder
+            df = pd.DataFrame(to_be_df, columns=['id', 'length', 'start',
+                                                 'end'])
+            df = pd.concat([self.common, df])
+            self.dataframes.append(df)
+
+    def analyze(self, line, f):
+        maybe_groups = self.regex.match(line)
+        if maybe_groups:
+            formatted = self.formatter(maybe_groups)
+
+            if len(self.holder) == 0:
+                self.holder.append(formatted)
+            # Fake break
+            elif formatted[self.pos_start] > self.holder[-1][self.pos_end] + 1:
+                self.handle_padding(formatted, f)
+            # Real break
+            elif formatted[self.pos_start] < self.holder[-1][self.pos_end]:
+                self.handle_real_break(formatted)
+            else:
+                self.holder.append(formatted)
+
+    def handle_padding(self, formatted, f):
+        """
+        CPS left out some padding characters.
+
+        Unpure.  Need to know next line to determine pad len.
+        """
+        # Can't use f.readline() cause final line would be infinite loop.
+
+        # dr = it.dropwhile(lambda x: not self.regex.match(x), f)
+        # next_line = next(dr)
+        # maybe_groups = self.regex.match(next_line)
+
+        # next_formatted = self.formatter(maybe_groups)
+        last_formatted = self.holder[-1]
+        pad_len = formatted[self.pos_start] - last_formatted[self.pos_end]
+        pad_str = last_formatted[self.pos_end] + 1
+        pad_end = pad_len + pad_str - 1
+        pad = ('PADDING', pad_len, pad_str, pad_end)
+
+        self.holder.append(pad)
+        self.holder.append(formatted)  # goto next line
+
+    def handle_real_break(self, formatted):
+        """
+        CPS reuses some codes and then starts over.
+        """
+        to_be_df = self.holder
+        df = pd.DataFrame(to_be_df, columns=['id', 'length', 'start',
+                                             'end'])
+
+        if len(self.dataframes) == 0:
+            self.dataframes.append(df)
+            common_index_pt = df[df['start'] == formatted[self.pos_end]].index[0]
+            self.common = df.ix[:common_index_pt]
+        else:
+            df = pd.concat([self.common, df])
+            self.dataframes.append(df)
+
+        self.holder = [formatted]  # next line
+
+    def make_regex(self):
+        return re.compile(r'(\w{1,2}[\$\-%]\w*|PADDING)\s*CHARACTER\*(\d{3})\s*\.{0,1}\s*\((\d*):(\d*)\).*')
+
+    def formatter(self, match):
+        """
+        Conditional on a match, format them into a nice tuple of
+            id, length, start, end
+        """
+        id_, length, start, end = match.groups()
+        length = int(length)
+        start = int(start)
+        end = int(end)
+        print(id_)
+        return (id_, length, start, end)
 
 if __name__ == '__main__':
     """
