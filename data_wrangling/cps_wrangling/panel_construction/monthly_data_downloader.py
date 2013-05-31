@@ -60,5 +60,5 @@ if __name__ == '__main__':
     if dd == 'dd':  # download the data dictionaries
         regex = re.compile(r'\w*\.ddf')
     else:
-        regex = re.compile(r'cpsb\d{4}.Z|\w{3}\d{2}pub.zip|\.ddf$')
+        regex = re.compile(r'cpsb\d{4}.Z|\w{3}\d{2}pub.zip|\.[ddf,asc]$')
     main(out_dir, regex)
