@@ -2,10 +2,11 @@ import unittest
 
 import pandas as pd
 
-from ..generic_data_dictionary_parser import (item_identifier, item_parser,
+from ..march_supp_dd_parser import (item_identifier, item_parser,
                                               dict_constructor, checker,
-                                              writer, month_item,
-                                              Parser)
+                                              writer, month_item)
+
+from ..generic_data_dictionary_parser import Parser
 
 from pandas.util.testing import (assert_panel_equal, assert_frame_equal,
                                  assert_series_equal, assert_almost_equal)
@@ -96,3 +97,45 @@ class TestParserClass(unittest.TestCase):
     def test_store_name_basic(self):
         expected = 'jan2003'
         self.assertEqual(expected, self.parser.get_store_name())
+
+    def test_aug05_regex_basic(self):
+        ring = 'HRHHID          15     HOUSEHOLD IDENTIFIER   (Part 1)             (1 - 15)'
+        self.parser.regex = self.parser.make_regex(style='aug2005')
+        expected = ('HRHHID', '15', 'HOUSEHOLD IDENTIFIER   (Part 1)', '1', '15')
+        self.assertEqual(expected, self.parser.regex.match(ring).groups())
+
+    def test_aug05_style_with_parens_id(self):
+        ring = 'HRHHID       15    HOUSEHOLD IDENTIFIER   (Part 1)            1 - 15'
+        self.parser.regex = self.parser.make_regex(style='aug2005')
+        expected = ('HRHHID', '15', 'HOUSEHOLD IDENTIFIER   (Part 1)', '1', '15')
+        self.assertEqual(expected, self.parser.regex.match(ring).groups())
+
+    def test_aug05_style_dont_pickup_first_number(self):
+        ring = 'HRMONTH      2     MONTH OF INTERVIEW                      16-17'
+        self.parser.regex = self.parser.make_regex(style='aug2005')
+        expected = ('HRMONTH', '2', 'MONTH OF INTERVIEW', '16', '17')
+        self.assertEqual(expected, self.parser.regex.match(ring).groups())
+
+    def test_aug05_style_with_nums_in_description(self):
+        ring = 'PRPTHRS      2     AT WORK 1-34 BY HOURS AT WORK           403 - 404'
+        self.parser.regex = self.parser.make_regex(style='aug2005')
+        expected = ('PRPTHRS', '2', 'AT WORK 1-34 BY HOURS AT WORK', '403', '404')
+        self.assertEqual(expected, self.parser.regex.match(ring).groups())
+
+    def tets_jan98_style_miss_first(self):
+        ring = 'DATA        SIZE  BEGIN'
+        self.parser.regex = self.parser.make_regex(style='jan1998')
+        expected = None
+        self.assertEqual(expected, self.parser.regex.match(ring))
+
+    def test_jan98_basic(self):
+        ring = 'D HRHHID     15      1'
+        self.parser.regex = self.parser.make_regex(style='jan1998')
+        expected = ('HRHHID', '15', '1')
+        self.assertEqual(expected, self.parser.regex.match(ring).groups())
+
+    def test_aug05_style_tabs(self):
+        ring = 'HRHHID\t\t15\t\tHOUSEHOLD IDENTIFIER (Part 1)\t\t\t\t\t 1- 15'
+        self.parser.regex = self.parser.make_regex(style='aug2005')
+        expected = ('HRHHID', '15', 'HOUSEHOLD IDENTIFIER (Part 1)', '1', '15')
+        self.assertEqual(expected, self.parser.regex.match(ring).groups())

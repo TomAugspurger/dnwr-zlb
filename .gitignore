@@ -93,3 +93,5 @@ data_wrangling/cps_wrangling/year.do.txt
 data_wrangling/cps_wrangling/stata_readme.txt
 
 data_wrangling/cps_wrangling/panel_construction/Madrian\ and\ Lefgren/
+fail_log.txt
+processed.txt
