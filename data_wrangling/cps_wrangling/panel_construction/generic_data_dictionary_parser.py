@@ -4,7 +4,18 @@ import itertools as it
 import pandas as pd
 import ipdb
 
+
 class Parser(object):
+    """
+    Handles most years.
+
+    Parameters
+    ----------
+    infile: A path to the data dictionary
+    outfile: path to HDFStore holding output.
+    style: Optional mmmYYYY for regex.
+    regex: Not used I think.
+    """
 
     def __init__(self, infile, outfile, style=None, regex=None):
         self.infile = infile
@@ -30,7 +41,7 @@ class Parser(object):
                     # self.lenghts = []
                     # self.starts = []
                     # self.ends = []
-                self.analyze(line, f)
+                self.analyze(line.rstrip(), f)
 
             # Finally
             to_be_df = self.holder
@@ -44,11 +55,10 @@ class Parser(object):
 
     def analyze(self, line, f):
         maybe_groups = self.regex.match(line)
+
         if maybe_groups:
-            ipdb.set_trace()
             formatted = self.formatter(maybe_groups)
             # Return to main for loop under run
-            # ipdb.set_trace()
             if len(self.holder) == 0:
                 self.holder.append(formatted)
             # Fake break
