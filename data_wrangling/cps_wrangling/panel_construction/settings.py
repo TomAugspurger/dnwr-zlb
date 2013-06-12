@@ -25,7 +25,10 @@ def run_parse_dictionaries(month_path, overwrite=False):
         if file_.parts[-1] in ['cpsbaug05.ddf', 'cpsbjan07.ddf',
                                'cpsbjan09.ddf', 'cpsbjan10.ddf',
                                'cpsbmay04.ddf', 'cpsbmay12.ddf',
-                               'cpsbjan03.ddf', 'cpsbsep95.ddf']:
+                               'cpsbjan03.ddf', 'cpsbsep95.ddf',
+                               'cpsb_apr94_may95.ddf',
+                               'cpsb_jan94_mar94.ddf',
+                               'cpsb_jun95_aug95.ddf']:
             style = 'aug2005'
         elif file_.parts[-1] in ['cpsbjan98.ddf']:
             style = 'jan1998'
