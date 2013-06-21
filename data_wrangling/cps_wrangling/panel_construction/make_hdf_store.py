@@ -87,7 +87,7 @@ def pre_process(df, ids):
     # May want to be careful with index here.
     # forcing numeric chops of leading zeros.
     df = df.convert_objects(convert_numeric=True)
-    df = df.set_index([ids])
+    df = df.set_index(ids)
     return df
 
 
@@ -115,6 +115,7 @@ class FileHandler(object):
             raise IOError("The File does not exist.")
 
     def __enter__(self):
+
         if self.fname.endswith('.Z'):
             subprocess.call(["uncompress", "-v", self.fname])
         elif self.fname.endswith('.gzip'):
@@ -127,15 +128,17 @@ class FileHandler(object):
             # Unzipping gives new name; can't control.  Get diff
             current = {x for x in pathlib.Path(dir_name)}
             subprocess.call(["unzip", self.fname, "-d", dir_name])
-            new = {x for x in pathlib.Path(dir_name)} - current
+            new = ({x for x in pathlib.Path(dir_name)} - current).pop()
             self.new_path = str(new)
         self.compname = self.fname.split('.')[0]
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         subprocess.call(["gzip", self.compname])
         if self.fname.endswith('.gz') and self.force:
             os.remove(self.fname.replace('.gz', '.txt'))
-
+        if self.fname.endswith('.zip'):
+            os.remove(self.new_path)
 
 def get_id(target, store):
     """
@@ -149,7 +152,6 @@ def get_id(target, store):
 
 if __name__ == '__main__':
     import sys
-    import pathlib
 
     try:
         settings = json.load(open(sys.argv[1]))
@@ -164,18 +166,24 @@ if __name__ == '__main__':
     for month in raw_path:
         try:
             s_month = str(month)
-            no_ext = s_month.split('.')[:-1]
+            name = s_month.split('.')[:-1]
             just_name = month.parts[-1].split('.')[0]
             dd_name = settings["month_to_dd_by_filename"][just_name]
             ids = settings["dd_to_ids"][dd_name]
             dd = dds.select('/monthly/dd/' + dd_name)
             widths = dd.length.tolist()
-            if str(month).endswith('.gz'):
-                df = pd.read_fwf(no_ext, widths=widths, names=dd.id.values, compression='gzip')
+            if s_month.endswith('.gz'):
+                df = pd.read_fwf(name + '.gz', widths=widths,
+                                 names=dd.id.values, compression='gzip')
             else:
-                with FileHandler(s_month) as f:
-                    unzip_name = f.new_path
-                    df = pd.read_fwf(no_ext, widths=widths, names=dd.id.values, n=10)
-            df = pre_process(df)
+                with FileHandler(s_month) as handler:
+                    import ipdb; ipdb.set_trace()
+                    try:
+                        name = handler.new_path
+                    except AttributeError:
+                        pass
+                    df = pd.read_fwf(name, widths=widths, names=dd.id.values,
+                                     nrows=10)
+            df = pre_process(df, ids=ids)
         except KeyError:
             print(month)
