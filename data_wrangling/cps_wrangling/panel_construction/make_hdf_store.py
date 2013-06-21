@@ -36,6 +36,7 @@ import os
 import json
 import subprocess
 
+import pathlib
 import pandas as pd
 
 
@@ -45,9 +46,9 @@ def tst_setup(n=10):
     base_path = settings['base_path']
     repo_path = settings['repo_path']
     dd = dds.select('/monthly/dd/jan1998')
-    pth = '/Volumes/HDD/Users/tom/DataStorage/CPS/monthly/cpsb9810'
+    pth = '/Volumes/HDD/Users/tom/DataStorage/CPS/monthly/cpsb9810.gz'
     widths = dd.length.tolist()
-    df = pd.read_fwf(pth, widths=widths, nrows=n, names=dd.id.values)
+    df = pd.read_fwf(pth, widths=widths, nrows=n, names=dd.id.values, compression='gzip')
     return df, dd, dds
 
 
@@ -81,16 +82,16 @@ def dedup_cols(df):
     return df.T.drop(dupes).T
 
 
-def pre_process(df):
+def pre_process(df, ids):
     df = dedup_cols(df)
     # May want to be careful with index here.
     # forcing numeric chops of leading zeros.
     df = df.convert_objects(convert_numeric=True)
-    df = df.set_index(['HRHHID', 'HUHHNUM', 'PULINENO'])
+    df = df.set_index([ids])
     return df
 
 
-class file_handler(object):
+class FileHandler(object):
     """
     Just useful the first time since I'm rezipping as gzip, which can be parsed
     on the fly.
@@ -122,10 +123,59 @@ class file_handler(object):
             else:
                 print('Skipping decompression.')
         elif self.fname.endswith('.zip'):
-            subprocess.call(["7z", "x", self.fname])
-        self.compname = self.fname.rstrip('.Z')
+            dir_name = '/'.join(self.fname.split('/')[:-1])
+            # Unzipping gives new name; can't control.  Get diff
+            current = {x for x in pathlib.Path(dir_name)}
+            subprocess.call(["unzip", self.fname, "-d", dir_name])
+            new = {x for x in pathlib.Path(dir_name)} - current
+            self.new_path = str(new)
+        self.compname = self.fname.split('.')[0]
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         subprocess.call(["gzip", self.compname])
         if self.fname.endswith('.gz') and self.force:
             os.remove(self.fname.replace('.gz', '.txt'))
+
+
+def get_id(target, store):
+    """
+    Target is a str, e.g. HHID; This finds all this little
+    idiosyncracies.
+    """
+    for key in store.keys():
+        dd = store.select(key)
+        yield key, dd.id[dd.id.str.contains(target)]
+
+
+if __name__ == '__main__':
+    import sys
+    import pathlib
+
+    try:
+        settings = json.load(open(sys.argv[1]))
+    except IndexError:
+        settings = json.load(open('info.txt'))
+
+    raw_path  = pathlib.Path(str(settings['raw_monthly_path']))
+    base_path = settings['base_path']
+    repo_path = settings['repo_path']
+    dds       = pd.HDFStore(settings['store_path'])
+
+    for month in raw_path:
+        try:
+            s_month = str(month)
+            no_ext = s_month.split('.')[:-1]
+            just_name = month.parts[-1].split('.')[0]
+            dd_name = settings["month_to_dd_by_filename"][just_name]
+            ids = settings["dd_to_ids"][dd_name]
+            dd = dds.select('/monthly/dd/' + dd_name)
+            widths = dd.length.tolist()
+            if str(month).endswith('.gz'):
+                df = pd.read_fwf(no_ext, widths=widths, names=dd.id.values, compression='gzip')
+            else:
+                with FileHandler(s_month) as f:
+                    unzip_name = f.new_path
+                    df = pd.read_fwf(no_ext, widths=widths, names=dd.id.values, n=10)
+            df = pre_process(df)
+        except KeyError:
+            print(month)
