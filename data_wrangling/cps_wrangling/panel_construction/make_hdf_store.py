@@ -10,8 +10,8 @@ cps_store/
     monthly/
         dd/
         data/
-            jan1989
-            feb1989
+            mYYYY_MM
+            mYYYY_MM
 
 Want to keep pythonic names so I can't go 2013-01.
 
@@ -39,41 +39,43 @@ import subprocess
 import pathlib
 import pandas as pd
 
-
-def tst_setup(n=10):
-    settings = json.load(open('info.txt'))
-    dds = pd.HDFStore(settings['store_path'])
-    base_path = settings['base_path']
-    repo_path = settings['repo_path']
-    dd = dds.select('/monthly/dd/jan1998')
-    pth = '/Volumes/HDD/Users/tom/DataStorage/CPS/monthly/cpsb9810.gz'
-    widths = dd.length.tolist()
-    df = pd.read_fwf(pth, widths=widths, nrows=n, names=dd.id.values, compression='gzip')
-    return df, dd, dds
+#-----------------------------------------------------------------------------
+# Helper Functions
 
 
-def runner(fname, n=10, settings=json.load(open('info.txt'))):
-    dds = pd.HDFStore(settings['store_path'])
-    no_ext = ''.join(fname.split('.')[:-1])
-    dd_month = settings['month_to_dd_by_filename'][no_ext.split('/')[-1] + '.Z']
-    dd = dds.select('/monthly/dd/' + dd_month)
-    widths = dd.length.tolist()
-    if fname.endswith('.Z'): 
-        pth = ''.join(fname.split('.')[:-1])
-        df = pd.read_fwf(pth, widths=widths, nrows=n, names=dd.id.values)
-    elif fname.endswith('.gz'):
-        df = pd.read_fwf(fname, widths=widths, nrows=n, names=dd.id.values,
-                         compression='gzip')
-    else:
-        raise IOError('Was the thing even zipped?')
-    return df, dd
+def writer(df, name, repo_path):
+    """
+    Write the dataframe to the HDFStore. Non-pure.
+
+    Parameters
+    ----------
+    df: DataFrame to be writter
+    name: name in the table; will be prepended with '/monhtly/data/m'
+    repo_path: path to the store.  Get from settings.
+
+    Returns
+    -------
+    None - IO
+    """
+    with pd.get_store(repo_path) as store:
+        try:
+            store.remove('/monthly/data/' + name)
+        except KeyError:
+            pass
+        store.append('/monthly/data/' + name)
 
 
 def dedup_cols(df):
     """
-    Will append a suffix to the index keys which are duplicated.
+    Drops columns that are duplicated.  Have to transpose for unknown reason.
+    I'm hitting multiple PADDING's, that should be it.
+    
+    Parameters
+    ----------
+    df : DataFrame
 
-    I'm hitting multiple PADDING's.
+    Returns
+    df : Same DataFrame, less the dupes.
     """
     idx = df.columns
     dupes = idx.get_duplicates()
@@ -83,6 +85,20 @@ def dedup_cols(df):
 
 
 def pre_process(df, ids):
+    """
+    Get DataFrame ready for writing to store.
+
+    Makes (hopefully) unique index and makes types numeric.
+
+    Parameters
+    ----------
+    df  : DataFrame
+    ids : Columns to be used as the index.
+
+    Returns
+    -------
+    df : DataFrame
+    """
     df = dedup_cols(df)
     # May want to be careful with index here.
     # forcing numeric chops of leading zeros.
@@ -93,12 +109,19 @@ def pre_process(df, ids):
 
 class FileHandler(object):
     """
-    Just useful the first time since I'm rezipping as gzip, which can be parsed
-    on the fly.
+    Takes care of file system details when working on the zipped files.
+    Handles .Z, .zip, .gzip.
+    
 
     Sorry windows; Replace subprocess.call with appropriate utility.
     Implements context manager that decompresses and cleans up once
     the df has been read in.
+
+    Parameters
+    ----------
+
+    fname : String, path to zipped file.
+    force : Bool, default False.  If True will unzip and rezip the gzip file.
 
     Example:
         fname = 'Volumes/HDD/Users/tom/DataStorage/CPS/monthly/cpsb0201.Z'
@@ -134,11 +157,12 @@ class FileHandler(object):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        subprocess.call(["gzip", self.compname])
+        subprocess.call(["gzip", self.compname])  # Gives warnings on zips.
         if self.fname.endswith('.gz') and self.force:
             os.remove(self.fname.replace('.gz', '.txt'))
         if self.fname.endswith('.zip'):
             os.remove(self.new_path)
+
 
 def get_id(target, store):
     """
@@ -149,7 +173,7 @@ def get_id(target, store):
         dd = store.select(key)
         yield key, dd.id[dd.id.str.contains(target)]
 
-
+#-----------------------------------------------------------------------------
 if __name__ == '__main__':
     import sys
 
@@ -166,24 +190,32 @@ if __name__ == '__main__':
     for month in raw_path:
         try:
             s_month = str(month)
-            name = s_month.split('.')[:-1]
+            name = s_month.split('.')[0]
             just_name = month.parts[-1].split('.')[0]
             dd_name = settings["month_to_dd_by_filename"][just_name]
             ids = settings["dd_to_ids"][dd_name]
             dd = dds.select('/monthly/dd/' + dd_name)
             widths = dd.length.tolist()
-            if s_month.endswith('.gz'):
-                df = pd.read_fwf(name + '.gz', widths=widths,
-                                 names=dd.id.values, compression='gzip')
-            else:
-                with FileHandler(s_month) as handler:
-                    import ipdb; ipdb.set_trace()
-                    try:
-                        name = handler.new_path
-                    except AttributeError:
-                        pass
-                    df = pd.read_fwf(name, widths=widths, names=dd.id.values,
-                                     nrows=10)
-            df = pre_process(df, ids=ids)
         except KeyError:
             print(month)
+            continue
+
+        if s_month.endswith('.gz'):
+            df = pd.read_fwf(name + '.gz', widths=widths,
+                             names=dd.id.values, compression='gzip', nrows=10)
+        else:
+            with FileHandler(s_month) as handler:
+                try:
+                    name = handler.new_path
+                except AttributeError:
+                    pass
+                df = pd.read_fwf(name, widths=widths, names=dd.id.values, nrows=10)
+        df = pre_process(df, ids=ids)
+        if df.index.is_unique:
+            out_name = settings['file_to_iso8601'][just_name]
+            writer(df, name=out_name, repo_path=repo_path)
+
+        else:
+            with open('non_unique.txt', 'a') as f:
+                f.write(s_month)
+
