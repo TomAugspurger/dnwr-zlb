@@ -32,6 +32,7 @@ Possiblye interested in
 **  PTWK-T Earnings-weekly-top code flag  **
 
 """
+import re
 import os
 import json
 import subprocess
@@ -164,6 +165,26 @@ class FileHandler(object):
             os.remove(self.new_path)
 
 
+def get_dd(fname, settings=None):
+    """
+    Helper to get the data dictionary associated with a given month's filename.
+
+    Parameters
+    ----------
+    fname: str, either full or shortened should work.
+    settings: str or None.  Path to the settings file
+
+    Returns
+    -------
+    dd: str, name of data dictionary. 
+
+    """
+    if settings is None:
+        settings = json.load(open('info.txt'))
+    just_name = fname.split('/')[-1].split('.')[0]
+    return settings['month_to_dd_by_filename'][just_name]
+
+
 def get_id(target, store):
     """
     Target is a str, e.g. HHID; This finds all this little
@@ -172,6 +193,27 @@ def get_id(target, store):
     for key in store.keys():
         dd = store.select(key)
         yield key, dd.id[dd.id.str.contains(target)]
+
+
+def find_attr(attr, fields):
+    """
+    Dictionary may lie.  Check here.
+
+    Parameters
+    ----------
+    attr: str; e.g. "AGE", "RACE", "SEX"
+    df: Index; probably columns of the dataframe.
+
+    Returns
+    -------
+
+    List of strs possible matches.
+    """
+
+    match_with = re.compile(r'\w*' + attr + r'\w*')
+    maybe_matches = (match_with.match(x) for x in fields)
+    return [x.string for x in filter(None, maybe_matches)]
+
 
 #-----------------------------------------------------------------------------
 if __name__ == '__main__':
@@ -209,7 +251,7 @@ if __name__ == '__main__':
                     name = handler.new_path
                 except AttributeError:
                     pass
-                df = pd.read_fwf(name, widths=widths, names=dd.id.values, nrows=10)
+                df = pd.read_fwf(name, widths=widths, names=dd.id.values, nrows=None)
         df = pre_process(df, ids=ids)
         if df.index.is_unique:
             out_name = settings['file_to_iso8601'][just_name]
