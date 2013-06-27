@@ -215,6 +215,22 @@ def find_attr(attr, fields):
     return [x.string for x in filter(None, maybe_matches)]
 
 
+def drop_invalid_indicies(df, dd_name=None):
+    """
+    df: Full dataframe
+    dd_name: name to lookup
+    """
+    # Generalize to getting the -1 (invlaid) from settings.
+    valids = df[~(df.apply(lambda x: x.name[2] == -1, axis=1))]
+    return valids
+
+
+def drop_duplicates_index(df, dupes=None):
+    """Isn't a method on the dataframe oddly"""
+    if dupes is None:
+        dupes = df.index.get_duplicates()
+    return df.ix[~(df.index.isin(dupes))]
+
 #-----------------------------------------------------------------------------
 if __name__ == '__main__':
     import sys
@@ -252,12 +268,16 @@ if __name__ == '__main__':
                 except AttributeError:
                     pass
                 df = pd.read_fwf(name, widths=widths, names=dd.id.values, nrows=None)
-        df = pre_process(df, ids=ids)
+        df = pre_process(df, ids=ids).sort_index()
+        cols = settings['dd_to_vars'][dd_name].values()
         if df.index.is_unique:
             out_name = settings['file_to_iso8601'][just_name]
             writer(df, name=out_name, repo_path=repo_path)
 
         else:
+            dupes = df.index.get_duplicates()
+            gen = (df[cols].xs(x) for x in dupes)
+
             with open('non_unique.txt', 'a') as f:
                 f.write(s_month)
 
