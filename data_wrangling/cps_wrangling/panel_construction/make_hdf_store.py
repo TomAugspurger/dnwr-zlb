@@ -112,7 +112,7 @@ class FileHandler(object):
     """
     Takes care of file system details when working on the zipped files.
     Handles .Z, .zip, .gzip.
-    
+
 
     Sorry windows; Replace subprocess.call with appropriate utility.
     Implements context manager that decompresses and cleans up once
@@ -230,6 +230,49 @@ def drop_duplicates_index(df, dupes=None):
     if dupes is None:
         dupes = df.index.get_duplicates()
     return df.ix[~(df.index.isin(dupes))]
+
+
+def make_regex(style=None):
+    if style is None:
+        return re.compile(r'(\w{1,2}[\$\-%]\w*|PADDING)\s*CHARACTER\*(\d{3})\s*\.{0,1}\s*\((\d*):(\d*)\).*')
+    elif style is 'aug2005':
+        return re.compile(r'(\w+)[\s\t]*(\d{1,2})[\s\t]*(.*?)[\s\t]*\(*(\d+)\s*-\s*(\d+)\)*$')
+    elif style is 'jan1998':
+        return re.compile(r'D (\w+) \s* (\d{1,2}) \s* (\d*)')
+
+
+def get_definition(code, dd_path=None, style=None):
+    """
+    Get the definition for a code.
+
+    Maybe add option to pass dd_name with a lookup from settings as convinence.
+    """
+
+    regex = make_regex(style)
+
+    def dropper(line):
+        maybe_match = regex.match(line)
+        try:
+            line_code = maybe_match.groups()[0]
+            return line_code
+        except AttributeError:
+            return None
+
+    def get_def(dd):
+        """
+        Next of dd is the line you start with.  Now consume up to next match.
+        """
+        top_line = [''.join(list(next(dd)))]
+        rest = it.takewhile(lambda x: regex.match(x) is None, dd)
+        rest = [''.join(x) for x in rest]
+        top_line.append(rest)
+        return top_line
+
+    with open(dd_path) as dd:
+        gen = it.dropwhile(lambda x: dropper(x) != code, dd)
+        definition = get_def(gen)
+        return definition
+
 
 #-----------------------------------------------------------------------------
 if __name__ == '__main__':
