@@ -77,6 +77,9 @@ nosetests.xml
 *.sublime-workspace
 sftp-config*.json
 
+# Temp Files
+*~
+
 ###Misc###
 *.pdf
 *.png

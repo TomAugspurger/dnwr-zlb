@@ -44,9 +44,9 @@
 
 "dd_to_vars":
     {
-        "jan1989": {"age": ["A$AGEDG1", "A$AGEDG2"], "sex": "A$SEX", "race": "A$RACE"},
-        "jan1992": {"age": ["A$AGEDG1", "A$AGEDG2"], "sex": "PESEX", "race": "PERACE"},
-        "jan1994": {"age": "PEAGE", "sex": "PESEX", "race": "PERACE"},
+        "jan1989": {"age": ["A$AGEDG1", "A$AGEDG2"], "sex": "A$SEX", "race": "A$RACE", "earnings": ["A-WERNTP", "A-WERNTF"]},
+        "jan1992": {"age": ["A$AGEDG1", "A$AGEDG2"], "sex": "A$SEX", "race": "PERACE", "earnings": ["A-WERNTP", "A-WERNTF"]},
+        "jan1994": {"age": "PEAGE", "sex": "PESEX", "race": "PERACE", "earnings": ["PRERNWA", "PEERNHRO", "PEERNVR1"]},
         "apr1994": {"age": "PEAGE", "sex": "PESEX", "race": "PERACE"},
         "jun1995": {"age": "PEAGE", "sex": "PESEX", "race": "PERACE"},
         "sep1995": {"age": "PEAGE", "sex": "PESEX", "race": "PERACE"},

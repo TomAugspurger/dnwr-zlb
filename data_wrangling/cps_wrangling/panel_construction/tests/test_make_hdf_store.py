@@ -21,5 +21,4 @@ class TestLoadSettings(unittest.TestCase):
         dd = self.settings["month_to_dd"]["198901"]
         expected = "jan1989"
         self.assertEqual(expected, dd)
-
-    
+ 
