@@ -274,21 +274,14 @@ def get_definition(code, dd_path=None, style=None):
         return definition
 
 
-#-----------------------------------------------------------------------------
-if __name__ == '__main__':
-    import sys
+def test_run():
+    files = ["cpsb9601.gz", "cpsb8701.Z", "cpsb1001.zip", "cpsb0801.gz",
+             "cpsb0201.gz", "cpsb0001.zip"]
+    settings = json.load(open('info.txt'))
+    dds = pd.HDFStore(settings['store_path'])
 
-    try:
-        settings = json.load(open(sys.argv[1]))
-    except IndexError:
-        settings = json.load(open('info.txt'))
-
-    raw_path  = pathlib.Path(str(settings['raw_monthly_path']))
-    base_path = settings['base_path']
-    repo_path = settings['repo_path']
-    dds       = pd.HDFStore(settings['store_path'])
-
-    for month in raw_path:
+    for month in files:
+        month = pathlib.Path('/Volumes/HDD/Users/tom/DataStorage/CPS/monthly/' + month)
         try:
             s_month = str(month)
             name = s_month.split('.')[0]
@@ -303,7 +296,7 @@ if __name__ == '__main__':
 
         if s_month.endswith('.gz'):
             df = pd.read_fwf(name + '.gz', widths=widths,
-                             names=dd.id.values, compression='gzip', nrows=10)
+                             names=dd.id.values, compression='gzip', nrows=None)
         else:
             with FileHandler(s_month) as handler:
                 try:
@@ -313,14 +306,117 @@ if __name__ == '__main__':
                 df = pd.read_fwf(name, widths=widths, names=dd.id.values, nrows=None)
         df = pre_process(df, ids=ids).sort_index()
         cols = settings['dd_to_vars'][dd_name].values()
-        if df.index.is_unique:
-            out_name = settings['file_to_iso8601'][just_name]
-            writer(df, name=out_name, repo_path=repo_path)
+        df.index.name = 'm' + settings['file_to_iso8601'][just_name]
+        yield df
 
+
+def log_and_store(df):
+    with open('ready_to_store.txt', 'w') as f:
+        if df.index.is_unique:
+            f.write('Ready: {}\n'.format(df.index.name))
         else:
             dupes = df.index.get_duplicates()
-            gen = (df[cols].xs(x) for x in dupes)
+            f.write('Dupes: {}\n'.format(df.index.name))        
+            f.write("\t\t {}".format(dupes))
 
-            with open('non_unique.txt', 'a') as f:
-                f.write(s_month)
 
+def get_skips(file_):
+    with open(file_, 'r') as f:
+        skips = [line.split(' ')[-1].rstrip()
+                 for line in f if line.startswith(('F', 'P'))]
+    return skips
+
+
+def handle_dupes(df, settings):
+    """
+    Get subset of df that doesn't have duplicated index.
+
+    Parameters
+    ----------
+
+    df : DataFrame.  Index should have name
+    settings: dict.
+
+    Returns
+    -------
+
+    deduped: DataFrame with duplicate indicies removed.
+    """
+    dupes = df.index.get_duplicates()
+    parts = (df.xs(x) for x in dupes)
+    deduped = drop_duplicates_index(df, dupes=dupes)
+
+    dupe_file = settings['dupe_path'] + df.index.name + '.csv'
+
+    with open(dupe_file, 'w') as f:
+        header = ','.join(map(str, df.index.names) + df.columns.tolist()) + '\n'
+        f.write(header)
+
+    for part in parts:
+        part.to_csv(dupe_file, mode='a', header=False)
+
+    print("Deduplicated {}".format(df.index.name))
+    return deduped
+
+
+def main():
+    import sys
+    try:
+        settings = json.load(open(sys.argv[1]))
+    except IndexError:
+        settings = json.load(open('info.txt'))
+    #-------------------------------------------------------------------------
+    # setup
+    raw_path  = pathlib.Path(str(settings['raw_monthly_path']))
+    base_path = settings['base_path']
+    repo_path = settings['repo_path']
+    dds       = pd.HDFStore(settings['store_path'])
+
+    skips = get_skips(settings['store_log'])
+
+    for month in raw_path:
+        just_name = month.parts[-1].split('.')[0]
+
+        if just_name == '' or month.is_dir():  # . files
+            continue
+
+        out_name = 'm' + settings['file_to_iso8601'][just_name]
+        s_month = str(month)
+        name = s_month.split('.')[0]
+        dd_name = settings["month_to_dd_by_filename"][just_name]
+        ids = settings["dd_to_ids"][dd_name]
+
+        try:
+            dd = dds.select('/monthly/dd/' + dd_name)
+            widths = dd.length.tolist()
+        except KeyError:
+            print(month)
+            continue
+
+        if s_month.endswith('.gz'):
+            df = pd.read_fwf(name + '.gz', widths=widths,
+                             names=dd.id.values, compression='gzip', nrows=None)
+        else:
+            with FileHandler(s_month) as handler:
+                try:
+                    name = handler.new_path
+                except AttributeError:
+                    pass
+                df = pd.read_fwf(name, widths=widths, names=dd.id.values, nrows=None)
+        df = pre_process(df, ids=ids).sort_index()
+        cols = settings['dd_to_vars'][dd_name].values()
+        df.index.name = out_name
+
+        #---------------------------------------------------------------------
+        # Ensure uniqueness
+        if not df.index.is_unique:
+            df = handle_dupes(df, settings=settings)
+            assert df.index.is_unique
+        #---------------------------------------------------------------------
+        # Writing
+        store_path = settings['store_path']
+        writer(df, name=out_name, store_path=store_path, settings=settings)
+        print('Added {}'.format(out_name))
+#-----------------------------------------------------------------------------
+if __name__ == '__main__':
+    main()
