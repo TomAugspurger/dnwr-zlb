@@ -44,7 +44,7 @@ import pandas as pd
 # Helper Functions
 
 
-def writer(df, name, repo_path):
+def writer(df, name, store_path, settings):
     """
     Write the dataframe to the HDFStore. Non-pure.
 
@@ -52,18 +52,21 @@ def writer(df, name, repo_path):
     ----------
     df: DataFrame to be writter
     name: name in the table; will be prepended with '/monhtly/data/m'
-    repo_path: path to the store.  Get from settings.
+    store_path: path to the store.  Get from settings.
 
     Returns
     -------
     None - IO
     """
-    with pd.get_store(repo_path) as store:
+    with pd.get_store(store_path) as store:
         try:
             store.remove('/monthly/data/' + name)
         except KeyError:
             pass
-        store.append('/monthly/data/' + name)
+        store.append('/monthly/data/' + name, df)
+
+    with open(settings["store_log"], 'a') as f:
+        f.write('PASSED {}\n'.format(name))
 
 
 def dedup_cols(df):
@@ -81,7 +84,6 @@ def dedup_cols(df):
     idx = df.columns
     dupes = idx.get_duplicates()
     print("Duplicates: {}".format(dupes))
-
     return df.T.drop(dupes).T
 
 
@@ -176,8 +178,7 @@ def get_dd(fname, settings=None):
 
     Returns
     -------
-    dd: str, name of data dictionary. 
-
+    dd: str, name of data dictionary.
     """
     if settings is None:
         settings = json.load(open('info.txt'))
@@ -272,42 +273,6 @@ def get_definition(code, dd_path=None, style=None):
         gen = it.dropwhile(lambda x: dropper(x) != code, dd)
         definition = get_def(gen)
         return definition
-
-
-def test_run():
-    files = ["cpsb9601.gz", "cpsb8701.Z", "cpsb1001.zip", "cpsb0801.gz",
-             "cpsb0201.gz", "cpsb0001.zip"]
-    settings = json.load(open('info.txt'))
-    dds = pd.HDFStore(settings['store_path'])
-
-    for month in files:
-        month = pathlib.Path('/Volumes/HDD/Users/tom/DataStorage/CPS/monthly/' + month)
-        try:
-            s_month = str(month)
-            name = s_month.split('.')[0]
-            just_name = month.parts[-1].split('.')[0]
-            dd_name = settings["month_to_dd_by_filename"][just_name]
-            ids = settings["dd_to_ids"][dd_name]
-            dd = dds.select('/monthly/dd/' + dd_name)
-            widths = dd.length.tolist()
-        except KeyError:
-            print(month)
-            continue
-
-        if s_month.endswith('.gz'):
-            df = pd.read_fwf(name + '.gz', widths=widths,
-                             names=dd.id.values, compression='gzip', nrows=None)
-        else:
-            with FileHandler(s_month) as handler:
-                try:
-                    name = handler.new_path
-                except AttributeError:
-                    pass
-                df = pd.read_fwf(name, widths=widths, names=dd.id.values, nrows=None)
-        df = pre_process(df, ids=ids).sort_index()
-        cols = settings['dd_to_vars'][dd_name].values()
-        df.index.name = 'm' + settings['file_to_iso8601'][just_name]
-        yield df
 
 
 def log_and_store(df):
