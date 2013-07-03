@@ -324,6 +324,18 @@ def handle_dupes(df, settings):
     return deduped
 
 
+def handle_89_pt1(df):
+    """Bad formatting this year"""
+    chars = {'$': '_', '%': '__', '&': '___', '-': '____'}
+    for key, val in chars.iteritems():
+        df.rename(columns=lambda x: x.replace(key, val), inplace=True)
+    return df
+
+def handle_89_pt2(df):
+    """After numeric.  Get only adult records."""
+    df = df[df['H____RECTYP'] == 1]
+    return df
+
 def main():
     import sys
     try:
@@ -340,48 +352,64 @@ def main():
     skips = get_skips(settings['store_log'])
 
     for month in raw_path:
-        just_name = month.parts[-1].split('.')[0]
-
-        if just_name == '' or month.is_dir():  # . files
-            continue
-
-        out_name = 'm' + settings['file_to_iso8601'][just_name]
-        s_month = str(month)
-        name = s_month.split('.')[0]
-        dd_name = settings["month_to_dd_by_filename"][just_name]
-        ids = settings["dd_to_ids"][dd_name]
-
         try:
-            dd = dds.select('/monthly/dd/' + dd_name)
-            widths = dd.length.tolist()
-        except KeyError:
-            print(month)
-            continue
+            just_name = month.parts[-1].split('.')[0]
 
-        if s_month.endswith('.gz'):
-            df = pd.read_fwf(name + '.gz', widths=widths,
-                             names=dd.id.values, compression='gzip', nrows=None)
-        else:
-            with FileHandler(s_month) as handler:
-                try:
-                    name = handler.new_path
-                except AttributeError:
-                    pass
-                df = pd.read_fwf(name, widths=widths, names=dd.id.values, nrows=None)
-        df = pre_process(df, ids=ids).sort_index()
-        cols = settings['dd_to_vars'][dd_name].values()
-        df.index.name = out_name
+            if just_name == '' or month.is_dir():  # . files
+                continue
 
-        #---------------------------------------------------------------------
-        # Ensure uniqueness
-        if not df.index.is_unique:
-            df = handle_dupes(df, settings=settings)
-            assert df.index.is_unique
-        #---------------------------------------------------------------------
-        # Writing
-        store_path = settings['store_path']
-        writer(df, name=out_name, store_path=store_path, settings=settings)
-        print('Added {}'.format(out_name))
+            out_name = 'm' + settings['file_to_iso8601'][just_name]
+            s_month = str(month)
+            name = s_month.split('.')[0]
+            dd_name = settings["month_to_dd_by_filename"][just_name]
+            ids = settings["dd_to_ids"][dd_name]
+
+            if out_name in skips:
+                continue
+
+            try:
+                dd = dds.select('/monthly/dd/' + dd_name)
+                widths = dd.length.tolist()
+            except KeyError:
+                print("No data dictionary for {}".format(out_name))
+                continue
+
+            if s_month.endswith('.gz'):
+                df = pd.read_fwf(name + '.gz', widths=widths,
+                                 names=dd.id.values, compression='gzip')
+            else:
+                with FileHandler(s_month) as handler:
+                    try:
+                        name = handler.new_path
+                    except AttributeError:
+                        pass
+                    df = pd.read_fwf(name, widths=widths, names=dd.id.values)
+            
+            if dd_name in ['jan1989', 'jan1992']:
+                df = handle_89_pt1(df)
+
+            df = pre_process(df, ids=ids).sort_index()
+            
+            if dd_name in ['jan1989', 'jan1992']:
+                df = handle_89_pt2(df)
+
+            cols = settings['dd_to_vars'][dd_name].values()
+            df.index.name = out_name
+
+            #---------------------------------------------------------------------
+            # Ensure uniqueness
+            if not df.index.is_unique:
+                df = handle_dupes(df, settings=settings)
+                assert df.index.is_unique
+            #---------------------------------------------------------------------
+            # Writing
+            store_path = settings['store_path']
+            writer(df, name=out_name, store_path=store_path, settings=settings)
+            print('Added {}'.format(out_name))
+        except:
+            with open(settings["store_log"], 'a') as f:
+                f.write('FAILED {}\n'.format(name))
+    pass
 #-----------------------------------------------------------------------------
 if __name__ == '__main__':
     main()

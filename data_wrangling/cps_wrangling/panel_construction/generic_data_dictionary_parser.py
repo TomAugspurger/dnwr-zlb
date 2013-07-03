@@ -211,10 +211,10 @@ class Parser(object):
         an HDFStore.
         """
         store = pd.HDFStore(self.outfile)
-        for df in self.dataframes:
-            try:
-                store.remove('monthly/dd/' + self.store_name)
-            except KeyError:
-                pass
-            store.append('monthly/dd/' + self.store_name, df)
+        df = self.dataframes[0]  # Only should happen in the old ones.
+        try:
+            store.remove('monthly/dd/' + self.store_name)
+        except KeyError:
+            pass
+        store.append('monthly/dd/' + self.store_name, df)
         store.close()

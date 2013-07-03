@@ -4,6 +4,8 @@
 "dd_path" : "/Volumes/HDD/Users/tom/DataStorage/CPS/dds/",
 "raw_monthly_path": "/Volumes/HDD/Users/tom/DataStorage/CPS/monthly/",
 "repo_path" : "/Users/tom/Dropbox/Economics/inflation_in_recession/dnwr-zlb/data_wrangling",
+"store_log": "/Users/tom/Dropbox/Economics/inflation_in_recession/dnwr-zlb/data_wrangling/cps_wrangling/panel_construction/store_log.txt",
+"dupe_path": "/Volumes/HDD/Users/tom/DataStorage/CPS/monthly/dupes/",
 "dd_to_year":
     {   
         "jan1989": ["1989-01","1991-12"],
@@ -25,8 +27,8 @@
 
 "dd_to_ids":
     {
-        "jan1989": ["None", "H$HHNUM", "A-LINENO"],
-        "jan1992": ["None", "H$HHNUM", "A-LINENO"],
+        "jan1989": ["H_HHNUM", "A____LINENO", "H____ID"],
+        "jan1992": ["H_HHNUM", "A____LINENO", "H____ID"],
         "jan1994": ["HRHHID", "HUHHNUM", "PULINENO"],
         "apr1994": ["HRHHID", "HUHHNUM", "PULINENO"],
         "jun1995": ["HRHHID", "HUHHNUM", "PULINENO"],
@@ -47,7 +49,7 @@
         "jan1989": {"age": ["A$AGEDG1", "A$AGEDG2"], "sex": "A$SEX", "race": "A$RACE", "earnings": ["A-WERNTP", "A-WERNTF"]},
         "jan1992": {"age": ["A$AGEDG1", "A$AGEDG2"], "sex": "A$SEX", "race": "PERACE", "earnings": ["A-WERNTP", "A-WERNTF"]},
         "jan1994": {"age": "PEAGE", "sex": "PESEX", "race": "PERACE", "earnings": ["PRERNWA", "PEERNHRO", "PEERNVR1"]},
-        "apr1994": {"age": "PEAGE", "sex": "PESEX", "race": "PERACE"},
+        "apr1994": {"age": "PEAGE", "sex": "PESEX", "race": "PERACE", "earnings": ["PEERNVR1", "PRERNWA", "PEERNHRO", "PTHR"]},
         "jun1995": {"age": "PEAGE", "sex": "PESEX", "race": "PERACE"},
         "sep1995": {"age": "PEAGE", "sex": "PESEX", "race": "PERACE"},
         "jan1998": {"age": "PRTAGE", "sex": "PESEX", "race": "PERACE"},
