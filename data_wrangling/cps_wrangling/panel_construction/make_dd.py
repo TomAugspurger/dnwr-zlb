@@ -4,7 +4,7 @@ from generic_data_dictionary_parser import Parser
 #-----------------------------------------------------------------------------
 
 
-def run_parse_dictionaries(month_path, overwrite=False):
+def run_parse_dictionaries(month_path, outfile, overwrite=False):
     data_dictionaries = (file_ for file_ in month_path if
                          file_.parts[-1].endswith('ddf') and
                          file_.parts[-1] != 'cpsrwdec07.ddf')
@@ -44,6 +44,7 @@ def run_parse_dictionaries(month_path, overwrite=False):
                 f.write(str_file)
 
         except Exception as e:
+            logfile = 'fail_log.txt'
             with open(logfile, 'a') as f:
                 f.write(str(file_) + '\n')
                 print('Failed on {}'.format(file_))
@@ -54,13 +55,13 @@ def main():
     import json
 
     settings = json.load(open('settings.txt'))
-    base_path = settings['base_path']
-    monthly_base = settings['raw_monthly_path']
-    month_path = pathlib.Path(monthly_base)
+    base_path = str(settings['base_path'])
+    dd_path = base_path + '/dds/'
+    dd_path = pathlib.Path(dd_path)
     outfile = base_path + 'cps_store.h5'
     logfile = 'fail_log.txt'
 
-    run_parse_dictionaries(month_path)
+    run_parse_dictionaries(dd_path, outfile=outfile)
 
 if __name__ == '__main__':
     main()

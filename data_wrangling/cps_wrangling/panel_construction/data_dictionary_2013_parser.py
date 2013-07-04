@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import re
 
-# import pandas as pd
+import pandas as pd
 
 # #-----------------------------------------------------------------------------
 # col_widths = [15, 2, 4, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 10, 2, 2, 2, 2,
@@ -43,7 +43,7 @@ r = re.compile(ur"(\w+) \s* (\d+) .* (\d+\s*-\s*\d+)\s*$")
 # anything, followed by digits - digits (col locations).
 # For whatever reason they'll occasionally use a unicode '-'
 # with byes '\xe2\x80\x93'.
-f = open('jan13dd.txt')
+f = open('/Volumes/HDD/Users/tom/DataStorage/CPS/jan13dd.txt')
 
 matches = []
 for line in f:
@@ -71,3 +71,16 @@ warns = pos_checker(matches)
 with open('jan13_dd_parsed.txt', 'wt') as f:
     for line in matches:
         f.write(','.join(x for x in line) + '\n')
+    print('Wrote the parsed file.')
+
+df = pd.read_csv('/Volumes/HDD/Users/tom/DataStorage/CPS/jan13_dd_parsed.txt',
+                 sep=r',|\s*-\s*', names=['id', 'len', 'start', 'stop'])
+store = pd.HDFStore('/Volumes/HDD/Users/tom/DataStorage/CPS/cps_store.h5')
+store_name = 'jan2013'
+try:
+    store.remove('monthly/dd/' + store_name)
+except KeyError:
+    pass
+store.append('monthly/dd/' + store_name, df)
+print('Wrote the dd.')
+store.close()

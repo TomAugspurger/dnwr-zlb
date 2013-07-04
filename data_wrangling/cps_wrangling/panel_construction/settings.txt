@@ -5,6 +5,7 @@
 "raw_monthly_path": "/Volumes/HDD/Users/tom/DataStorage/CPS/monthly/",
 "repo_path" : "/Users/tom/Dropbox/Economics/inflation_in_recession/dnwr-zlb/data_wrangling",
 "store_log": "/Users/tom/Dropbox/Economics/inflation_in_recession/dnwr-zlb/data_wrangling/cps_wrangling/panel_construction/store_log.txt",
+"dd_path" : "//Volumes/HDD/Users/tom/DataStorage/CPS/dds",
 "dupe_path": "/Volumes/HDD/Users/tom/DataStorage/CPS/monthly/dupes/",
 "dd_to_year":
     {   
