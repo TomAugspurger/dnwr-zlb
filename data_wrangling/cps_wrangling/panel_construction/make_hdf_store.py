@@ -181,7 +181,7 @@ def get_dd(fname, settings=None):
     dd: str, name of data dictionary.
     """
     if settings is None:
-        settings = json.load(open('info.txt'))
+        settings = json.load(open('settings.txt'))
     just_name = fname.split('/')[-1].split('.')[0]
     return settings['month_to_dd_by_filename'][just_name]
 
@@ -341,7 +341,7 @@ def main():
     try:
         settings = json.load(open(sys.argv[1]))
     except IndexError:
-        settings = json.load(open('info.txt'))
+        settings = json.load(open('settings.txt'))
     #-------------------------------------------------------------------------
     # setup
     raw_path  = pathlib.Path(str(settings['raw_monthly_path']))

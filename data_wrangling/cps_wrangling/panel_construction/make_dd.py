@@ -49,18 +49,18 @@ def run_parse_dictionaries(month_path, overwrite=False):
                 print('Failed on {}'.format(file_))
             raise e
 
-if __name__ == '__main__':
-    import sys
-    which = sys.argv[1]
 
-    base_path = '/Volumes/HDD/Users/tom/DataStorage/CPS/'
-    monthly_base = base_path + 'monthly/'
+def main():
+    import json
+
+    settings = json.load(open('settings.txt'))
+    base_path = settings['base_path']
+    monthly_base = settings['raw_monthly_path']
     month_path = pathlib.Path(monthly_base)
     outfile = base_path + 'cps_store.h5'
     logfile = 'fail_log.txt'
 
-    if which == 'dd':
-        run_parse_dictionaries(month_path)
+    run_parse_dictionaries(month_path)
 
-    else:
-        print('Acceptable entries are {}'.format('dd'))
+if __name__ == '__main__':
+    main()
