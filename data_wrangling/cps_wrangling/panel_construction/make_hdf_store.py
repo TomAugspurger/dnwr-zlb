@@ -346,6 +346,54 @@ def find_attr(attr, fields=None, dd_path=None, settings=None):
     maybe_matches = (match_with.match(x) for x in fields)
     return [x.string for x in filter(None, maybe_matches)]
 
+
+def run_one(path, settings, n=10):
+    """
+    Helper to get a single month's data and data dictonary.
+
+    Parameters
+    ----------
+
+    path : str. path to the raw data.
+    settings : dict. From the settings JSON file.
+    n : int.  Number of rows to read.  None if you want it all.
+
+    Returns
+    -------
+
+    df, dd : tuple with DataFrame and Data Dictonary.
+    """
+    dds = pd.HDFStore(settings['store_path'])
+    month = pathlib.Path(path)
+    just_name, out_name, s_month, name, dd_name = name_handling(month, settings)
+
+    ids = settings["dd_to_ids"][dd_name]
+    dd = dds.select('/monthly/dd/' + dd_name)
+    widths = dd.length.tolist()
+
+    if s_month.endswith('.gz'):
+        df = pd.read_fwf(name + '.gz', widths=widths,
+                         names=dd.id.values, compression='gzip', nrows=n)
+    else:
+        with FileHandler(s_month) as handler:
+            try:
+                name = handler.new_path
+            except AttributeError:
+                pass
+            df = pd.read_fwf(name, widths=widths, names=dd.id.values, nrows=n)
+
+    if dd_name in ['jan1989', 'jan1992']:
+        df = handle_89_pt1(df)
+
+    df = pre_process(df, ids=ids).sort_index()
+
+    if dd_name in ['jan1989', 'jan1992']:
+        df = handle_89_pt2(df)
+
+    # subset = get_subset(df, settings=settings)
+    df.index.name = out_name
+
+    return df, dd
 #-----------------------------------------------------------------------------
 # Logging
 #-----------------------------------------------------------------------------
@@ -394,6 +442,37 @@ def get_subset(df, settings, dd_name, quiet=True):
     return df[subset]
 
 
+def name_handling(month, settings, skip=True):
+    """
+    Handle all the name stuff for a function run.
+
+    Parameters
+    ----------
+
+    month: pathlib.Path object.  Path to the data.
+    settings : JSON dictionary.
+
+    Returns
+    -------
+
+    just_name : str; filename without any leading directories.
+    out_name : str; For use in store.  'm' + iso8601.
+    s_month : str; same as month but in str form.
+    name : str; month without the file extension.
+    dd_name : str; data dictionary name.
+    """
+    just_name = month.parts[-1].split('.')[0]
+    if just_name == '' or month.is_dir():
+        return just_name, _, _, _, _
+
+    out_name = 'm' + settings['file_to_iso8601'][just_name]
+    s_month = str(month)
+    name = s_month.split('.')[0]
+    dd_name = settings["month_to_dd_by_filename"][just_name]
+
+    return just_name, out_name, s_month, name, dd_name
+
+
 def main():
     import sys
     try:
@@ -411,18 +490,15 @@ def main():
 
     for month in raw_path:
         try:
-            just_name = month.parts[-1].split('.')[0]
+            just_name, out_name, s_month, name, dd_name = (
+                name_handling(month, settings))
 
-            if just_name == '' or month.is_dir():  # . files
+            if just_name == '' or month.is_dir():  # . files or subdirs
                 continue
 
-            out_name = 'm' + settings['file_to_iso8601'][just_name]
-            s_month = str(month)
-            name = s_month.split('.')[0]
-            dd_name = settings["month_to_dd_by_filename"][just_name]
             ids = settings["dd_to_ids"][dd_name]
 
-            if out_name in skips:
+            if out_name in skips and skip:
                 continue
 
             try:
