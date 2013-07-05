@@ -319,7 +319,7 @@ def find_attr(attr, fields=None, dd_path=None, settings=None):
     Parameters
     ----------
     attr: str; e.g. "AGE", "RACE", "SEX"
-    df: Index; probably columns of the dataframe.
+    fields: array-like; probably columns of the dataframe.
     dd_path : str; path inside the store.
     settings: dict with "store_path"
     Returns
