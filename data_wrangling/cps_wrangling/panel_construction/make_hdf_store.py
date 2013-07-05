@@ -312,7 +312,7 @@ def get_definition(code, dd_path=None, style=None):
         return definition
 
 
-def find_attr(attr, fields=None, dd_path=None, settings=None):
+def find_attr(attr, fields=None, dd=None, settings=None):
     """
     Dictionary may lie.  Check here.
 
@@ -320,7 +320,7 @@ def find_attr(attr, fields=None, dd_path=None, settings=None):
     ----------
     attr: str; e.g. "AGE", "RACE", "SEX"
     fields: array-like; probably columns of the dataframe.
-    dd_path : str; path inside the store.
+    dd : str or DataFrame; path inside the store or the DD itself.
     settings: dict with "store_path"
     Returns
     -------
@@ -332,12 +332,14 @@ def find_attr(attr, fields=None, dd_path=None, settings=None):
 
     store = pd.HDFStore(settings["store_path"])
 
-    if fields and dd_path:
-        raise ValueError('One of fields and dd_path must be specified.')
-    elif fields is None and dd_path is None:
-        raise ValueError('One of fields and dd_path must be specified.')
-    elif dd_path:
-        dd = store.select(dd_path)
+    if fields and dd:
+        raise ValueError('One of fields and dd must be specified.')
+    elif fields is None and dd is None:
+        raise ValueError('One of fields and dd must be specified.')
+    elif dd and isinstance(dd, str):
+        dd = store.select(dd)
+        fields = dd.id.tolist()
+    else dd and isinstance(dd, pd.DataFrame):
         fields = dd.id.tolist()
 
     store.close()
