@@ -39,7 +39,7 @@ import subprocess
 
 import pathlib
 import pandas as pd
-
+from matplotlib.cbook import flatten
 #-----------------------------------------------------------------------------
 # Helper Functions
 
@@ -73,7 +73,7 @@ def dedup_cols(df):
     """
     Drops columns that are duplicated.  Have to transpose for unknown reason.
     I'm hitting multiple PADDING's, that should be it.
-    
+
     Parameters
     ----------
     df : DataFrame
@@ -196,7 +196,7 @@ def get_id(target, store):
         yield key, dd.id[dd.id.str.contains(target)]
 
 
-def find_attr(attr, fields):
+def find_attr(attr, fields=None, dd_path=None, settings=None):
     """
     Dictionary may lie.  Check here.
 
@@ -204,14 +204,29 @@ def find_attr(attr, fields):
     ----------
     attr: str; e.g. "AGE", "RACE", "SEX"
     df: Index; probably columns of the dataframe.
-
+    dd_path : str; path inside the store.
+    settings: dict with "store_path"
     Returns
     -------
 
     List of strs possible matches.
     """
+    if settings is None:
+        settings = settings = json.load(open('settings.txt'))
 
-    match_with = re.compile(r'\w*' + attr + r'\w*')
+    store = pd.HDFStore(settings["store_path"])
+
+    if fields and dd_path:
+        raise ValueError('One of fields and dd_path must be specified.')
+    elif fields is None and dd_path is None:
+        raise ValueError('One of fields and dd_path must be specified.')
+    elif dd_path:
+        dd = store.select(dd_path)
+        fields = dd.id.tolist()
+
+    store.close()
+
+    match_with = re.compile(r'[\w|$%\-]*' + attr + r'[\w|$%\-]*')
     maybe_matches = (match_with.match(x) for x in fields)
     return [x.string for x in filter(None, maybe_matches)]
 
@@ -281,14 +296,14 @@ def log_and_store(df):
             f.write('Ready: {}\n'.format(df.index.name))
         else:
             dupes = df.index.get_duplicates()
-            f.write('Dupes: {}\n'.format(df.index.name))        
+            f.write('Dupes: {}\n'.format(df.index.name))
             f.write("\t\t {}".format(dupes))
 
 
 def get_skips(file_):
     with open(file_, 'r') as f:
         skips = [line.split(' ')[-1].rstrip()
-                 for line in f if line.startswith(('F', 'P'))]
+                 for line in f if line.startswith('PASSED')]
     return skips
 
 
@@ -331,10 +346,35 @@ def handle_89_pt1(df):
         df.rename(columns=lambda x: x.replace(key, val), inplace=True)
     return df
 
+
 def handle_89_pt2(df):
     """After numeric.  Get only adult records."""
     df = df[df['H____RECTYP'] == 1]
     return df
+
+
+def get_subset(df, settings, dd_name, quiet=True):
+    """
+    Select only those columns specified under settings.
+    Optionaly
+
+    Parameters
+    ----------
+
+    df : DataFrame
+    settings : dictionary with "dd_to_vars" column
+    quit: Bool.  If True will print, but not raise, on some columns
+    from settings not being in the df's columns.
+
+    Returns
+    -------
+
+    subset : DataFrame.
+    """
+    cols = {x for x in flatten(settings["dd_to_vars"][dd_name].values())}
+    subset = df.columns.intersection(cols)
+    return df[subset]
+
 
 def main():
     import sys
@@ -384,16 +424,18 @@ def main():
                     except AttributeError:
                         pass
                     df = pd.read_fwf(name, widths=widths, names=dd.id.values)
-            
+
             if dd_name in ['jan1989', 'jan1992']:
                 df = handle_89_pt1(df)
 
             df = pre_process(df, ids=ids).sort_index()
-            
+
             if dd_name in ['jan1989', 'jan1992']:
                 df = handle_89_pt2(df)
 
             cols = settings['dd_to_vars'][dd_name].values()
+
+            subset = get_subset(df, settings=settings)
             df.index.name = out_name
 
             #---------------------------------------------------------------------
