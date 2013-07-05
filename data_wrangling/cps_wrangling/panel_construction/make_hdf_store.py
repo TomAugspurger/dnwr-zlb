@@ -312,6 +312,30 @@ def get_definition(code, dd_path=None, style=None):
         return definition
 
 
+def check_fieldname(field, settings, dd=None, store_path=None):
+    """
+    Helper to see if a given field is in a data dictionary.
+
+    Parameters
+    ----------
+
+    field : str.  Column in df or row in dd.id.
+    settings : JSON settings file.
+    dd : DataFrame.  With col containing fields.
+    store_path : path within store to dd. Only used if dd is None.
+
+    Returns
+    -------
+
+    bool
+    """
+    if dd is None:
+        with pd.get_store(settings['store_path']) as store:
+            dd = store.select(store_path)
+
+    return field in dd.id.values
+
+
 def find_attr(attr, fields=None, dd=None, settings=None):
     """
     Dictionary may lie.  Check here.
@@ -328,18 +352,18 @@ def find_attr(attr, fields=None, dd=None, settings=None):
     List of strs possible matches.
     """
     if settings is None:
-        settings = settings = json.load(open('settings.txt'))
+        settings = json.load(open('settings.txt'))
 
     store = pd.HDFStore(settings["store_path"])
 
-    if fields is note None and dd is not None:
+    if fields is not None and dd is not None:
         raise ValueError('One of fields and dd must be specified.')
     elif fields is None and dd is None:
         raise ValueError('One of fields and dd must be specified.')
     elif dd and isinstance(dd, str):
         dd = store.select(dd)
         fields = dd.id.tolist()
-    else dd and isinstance(dd, pd.DataFrame):
+    elif dd and isinstance(dd, pd.DataFrame):
         fields = dd.id.tolist()
 
     store.close()
