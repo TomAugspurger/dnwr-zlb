@@ -332,7 +332,7 @@ def find_attr(attr, fields=None, dd=None, settings=None):
 
     store = pd.HDFStore(settings["store_path"])
 
-    if fields and dd:
+    if fields is note None and dd is not None:
         raise ValueError('One of fields and dd must be specified.')
     elif fields is None and dd is None:
         raise ValueError('One of fields and dd must be specified.')
