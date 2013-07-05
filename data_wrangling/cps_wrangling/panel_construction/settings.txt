@@ -5,15 +5,15 @@
 "raw_monthly_path": "/Volumes/HDD/Users/tom/DataStorage/CPS/monthly/",
 "repo_path" : "/Users/tom/Dropbox/Economics/inflation_in_recession/dnwr-zlb/data_wrangling",
 "store_log": "/Users/tom/Dropbox/Economics/inflation_in_recession/dnwr-zlb/data_wrangling/cps_wrangling/panel_construction/store_log.txt",
-"dd_path" : "//Volumes/HDD/Users/tom/DataStorage/CPS/dds",
+"dd_path" : "/Volumes/HDD/Users/tom/DataStorage/CPS/dds",
 "dupe_path": "/Volumes/HDD/Users/tom/DataStorage/CPS/monthly/dupes/",
 "dd_to_year":
-    {   
+    {
         "jan1989": ["1989-01","1991-12"],
         "jan1992": ["1992-01","1993-12"],
         "jan1994": ["1994-01","1994-03"],
         "apr1994": ["1994-04","1993-05"],
-        "jun1995": ["1995-06","1995-08"],        
+        "jun1995": ["1995-06","1995-08"],
         "sep1995": ["1995-09","1997-12"],
         "jan1998": ["1998-01","2002-12"],
         "jan2003": ["2003-01","2004-04"],
@@ -47,8 +47,8 @@
 
 "dd_to_vars":
     {
-        "jan1989": {"age": ["A$AGEDG1", "A$AGEDG2"], "sex": "A$SEX", "race": "A$RACE", "earnings": ["A-WERNTP", "A-WERNTF"]},
-        "jan1992": {"age": ["A$AGEDG1", "A$AGEDG2"], "sex": "A$SEX", "race": "PERACE", "earnings": ["A-WERNTP", "A-WERNTF"]},
+        "jan1989": {"age": ["A_AGEDG1", "A_AGEDG2"], "sex": "A_SEX", "race": "A_RACE", "earnings": ["A____WERNTP", "A____WERNTF"]},
+        "jan1992": {"age": ["A_AGEDG1", "A_AGEDG2"], "sex": "A_SEX", "race": "PERACE", "earnings": ["A____WERNTP", "A____WERNTF"]},
         "jan1994": {"age": "PEAGE", "sex": "PESEX", "race": "PERACE", "earnings": ["PRERNWA", "PEERNHRO", "PEERNVR1"]},
         "apr1994": {"age": "PEAGE", "sex": "PESEX", "race": "PERACE", "earnings": ["PEERNVR1", "PRERNWA", "PEERNHRO", "PTHR"]},
         "jun1995": {"age": "PEAGE", "sex": "PESEX", "race": "PERACE"},
@@ -221,7 +221,7 @@
         "200109": "jan1998",
         "200110": "jan1998",
         "200111": "jan1998",
-        "200112": "jan1998",                
+        "200112": "jan1998",
         "200201": "jan1998",
         "200202": "jan1998",
         "200203": "jan1998",
@@ -653,7 +653,7 @@
         "cpsb1302": "jan2013",
         "cpsb1303": "jan2013"
    },
-   "file_to_iso8601": 
+   "file_to_iso8601":
    {
     "cpsb8901": "1989_01",
     "cpsb8902": "1989_02",
