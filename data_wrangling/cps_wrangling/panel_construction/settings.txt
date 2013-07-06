@@ -42,26 +42,26 @@
         "jan2009": ["HRHHID", "HRHHID2", "PULINENO"],
         "jan2010": ["HRHHID", "HRHHID2", "PULINENO"],
         "may2012": ["HRHHID", "HRHHID2", "PULINENO"],
-        "jan2013": ["None", "None","None"]
+        "jan2013": [["None"], "None","None"]
     },
 
 "dd_to_vars":
     {
-        "jan1989": {"age": ["A_AGEDG1", "A_AGEDG2"], "sex": "A_SEX", "race": "A_RACE", "earnings": ["A____WERNTP", "A____WERNTF"]},
+        "jan1989": {"age": ["A_AGEDG1", "A_AGEDG2"], "sex": ["A_SEX"], "race": ["H_RACE", "A_RACE"], "earnings": ["H_FAMINC", "A____WERNTP", "A____HERNTP", "A____WERNTF", "A____HERNTF"], "misc": ["H_CPSCHK", "H____MONTH", "H____MONTH", "H____YEAR", "H____TYPEINT", "H____MIS", "H____HHWGT"]},
         "jan1992": {"age": ["A_AGEDG1", "A_AGEDG2"], "sex": "A_SEX", "race": "PERACE", "earnings": ["A____WERNTP", "A____WERNTF"]},
-        "jan1994": {"age": "PEAGE", "sex": "PESEX", "race": "PERACE", "earnings": ["PRERNWA", "PEERNHRO", "PEERNVR1"]},
-        "apr1994": {"age": "PEAGE", "sex": "PESEX", "race": "PERACE", "earnings": ["PEERNVR1", "PRERNWA", "PEERNHRO", "PTHR"]},
-        "jun1995": {"age": "PEAGE", "sex": "PESEX", "race": "PERACE"},
-        "sep1995": {"age": "PEAGE", "sex": "PESEX", "race": "PERACE"},
-        "jan1998": {"age": "PRTAGE", "sex": "PESEX", "race": "PERACE"},
-        "jan2003": {"age": "PEAGE", "sex": "PESEX", "race": "PRDTRACE"},
-        "may2004": {"age": "PEAGE", "sex": "PESEX", "race": "PRDTRACE"},
-        "aug2005": {"age": "PEAGE", "sex": "PESEX", "race": "PRDTRACE"},
-        "jan2007": {"age": "PEAGE", "sex": "PESEX", "race": "PRDTRACE"},
-        "jan2009": {"age": "PEAGE", "sex": "PESEX", "race": "PRDTRACE"},
-        "jan2010": {"age": "PEAGE", "sex": "PESEX", "race": "PRDTRACE"},
-        "may2012": {"age": "PRTAGE", "sex": "PESEX", "race": "PRDTRACE"},
-        "jan2013": {"age": "None", "sex": "None", "race": "None"}
+        "jan1994": {"age": ["PEAGE"], "sex": ["PESEX"], "race": ["PERACE"], "earnings": ["PRERNWA", "PEERNHRO", "PEERNVR1"]},
+        "apr1994": {"age": ["PEAGE"], "sex": ["PESEX"], "race": ["PERACE"], "earnings": ["PEERNVR1", "PRERNWA", "PEERNHRO", "PTHR"]},
+        "jun1995": {"age": ["PEAGE"], "sex": ["PESEX"], "race": ["PERACE"]},
+        "sep1995": {"age": ["PEAGE"], "sex": ["PESEX"], "race": ["PERACE"]},
+        "jan1998": {"age": ["PRTAGE"], "sex": ["PESEX"], "race": ["PERACE"]},
+        "jan2003": {"age": ["PEAGE"], "sex": ["PESEX"], "race": ["PRDTRACE"]},
+        "may2004": {"age": ["PEAGE"], "sex": ["PESEX"], "race": ["PRDTRACE"]},
+        "aug2005": {"age": ["PEAGE"], "sex": ["PESEX"], "race": ["PRDTRACE"]},
+        "jan2007": {"age": ["PEAGE"], "sex": ["PESEX"], "race": ["PRDTRACE"]},
+        "jan2009": {"age": ["PEAGE"], "sex": ["PESEX"], "race": ["PRDTRACE"]},
+        "jan2010": {"age": ["PEAGE"], "sex": ["PESEX"], "race": ["PRDTRACE"]},
+        "may2012": {"age": ["PRTAGE"], "sex": ["PESEX"], "race": ["PRDTRACE"], "misc": ["HUFINAL", "HEFAMINC", "HWHHWGT", "HRINTSTA", "HRMIS", "HRLONGLK", "HRHHID2", "PROLDRRP", "PUCHINHH", "PRFAMREL", "PRPERTYP", "PEMLR", "PUWK", "PURETOT", "PUDIS", "PERET1", "PUDIS1", "PUDIS2", "PUABSOT", "PULAY", "PEMJOT", "PEHRUSL1", "PEHRFTPT", "PEHRUSLT", "PEHRWANT", "PUHROFF1", "PUHROFF2", "PUHROT1", "PUHROT2", "PEHRACT1", "PEHRACTT", "PRCIVLF", "PRDISC", "PREMPNOT", "PRFTLF", "PRHRUSL", "PUIODP1", "PUIODP2", "PUIODP3", "PRDTIND1", "PEERNPER", "PEERNRT", "PEERNHRY", "PUERHN1C", "PEERNH10", "PRERNHLY", "PTHR", "PEERNHRO", "PRERNWA", "PTWK", "PEERN", "PUERN2", "PTOT", "PEERNLAB", "PENLFRET", "PRWERNAL", "PRHERNAL"], "weights": ["PWFMWGT", "PWLGWGT", "PWORWGT", "PWSSWGT", "pwcmpwgt"], "geo": ["GEREG", "GESTCEN", "GESTFIPS", "GTCBSA", "GTINDVPC"]},
+        "jan2013": {"age": ["None"], "sex": ["None"], "race": ["None"]}
     },
 
 "month_to_dd":
