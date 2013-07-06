@@ -319,7 +319,7 @@ def check_fieldname(field, settings, dd=None, store_path=None):
     Parameters
     ----------
 
-    field : str.  Column in df or row in dd.id.
+    field : str or list.  Column in df or row in dd.id.
     settings : JSON settings file.
     dd : DataFrame.  With col containing fields.
     store_path : path within store to dd. Only used if dd is None.
@@ -328,13 +328,24 @@ def check_fieldname(field, settings, dd=None, store_path=None):
     -------
 
     bool
+
+    Example
+    -------
+
+    >>> check_fieldname(flatten(settings['dd_to_vars']['may2012'].values()),
+                        settings, dd=dd)
+
     """
     if dd is None:
         with pd.get_store(settings['store_path']) as store:
             dd = store.select(store_path)
 
-    return field in dd.id.values
+    if isinstance(field, str):
+        fields = [field]
+    else:
+        fields = list(field)
 
+    return {x: x in dd.id.values for x in fields}
 
 def find_attr(attr, fields=None, dd=None, settings=None):
     """
