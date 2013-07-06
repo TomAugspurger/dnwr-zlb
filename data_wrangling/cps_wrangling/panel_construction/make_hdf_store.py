@@ -357,7 +357,7 @@ def check_fieldname(field, settings, dd=None, store_path=None):
     Returns
     -------
 
-    bool
+    grouped : dict of True : [], False: []
 
     Example
     -------
@@ -375,7 +375,10 @@ def check_fieldname(field, settings, dd=None, store_path=None):
     else:
         fields = list(field)
 
-    return {x: x in dd.id.values for x in fields}
+    ungrouped = {x: x in dd.id.values for x in fields}
+    grouped = grouper(ungrouped)
+    return grouped
+
 
 def find_attr(attr, fields=None, dd=None, settings=None):
     """
