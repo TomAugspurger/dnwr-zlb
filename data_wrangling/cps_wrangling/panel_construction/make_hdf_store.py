@@ -35,6 +35,7 @@ Possiblye interested in
 import re
 import os
 import json
+import itertools
 import subprocess
 
 import pathlib
@@ -310,6 +311,35 @@ def get_definition(code, dd_path=None, style=None):
         gen = it.dropwhile(lambda x: dropper(x) != code, dd)
         definition = get_def(gen)
         return definition
+
+
+def grouper(dict_, ):
+    """
+    Another helper for checking the fields.
+
+    Parameters
+    ----------
+
+    dict_: dictionary
+
+    Returns
+    -------
+    matched : list
+    remainder : list
+    """
+    # Convert dict to sorted list of items
+    list_ = sorted(dict_.items(), key=lambda x: x[1])
+
+    # Group by value of tuple
+    groups = itertools.groupby(list_, key=lambda x: x[1])
+
+    # Pull out matching groups of items, and combine items
+    # with no matches back into a single dictionary
+
+    dict_groups = {key: list(group) for key, group in groups}
+    trues = [x[0] for x in dict_groups[True]]
+    falses = [x[0] for x in dict_groups[False]]
+    return {True: trues, False: falses}
 
 
 def check_fieldname(field, settings, dd=None, store_path=None):
