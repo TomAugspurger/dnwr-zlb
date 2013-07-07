@@ -489,7 +489,7 @@ def get_skips(file_):
 #-----------------------------------------------------------------------------
 # MISC
 #-----------------------------------------------------------------------------
-def get_subset(df, settings, dd_name, quiet=True):
+def get_subset(df, settings, dd_name, quiet=False):
     """
     Select only those columns specified under settings.
     Optionaly
@@ -509,6 +509,10 @@ def get_subset(df, settings, dd_name, quiet=True):
     """
     cols = {x for x in flatten(settings["dd_to_vars"][dd_name].values())}
     subset = df.columns.intersection(cols)
+
+    if not quite:
+        print("Implicitly dropping {}".format(cols.symmetric_difference(subset)))
+
     return df[subset]
 
 
