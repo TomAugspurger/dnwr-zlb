@@ -37,6 +37,7 @@ import os
 import json
 import itertools
 import subprocess
+from difflib import get_close_matches
 
 import pathlib
 import pandas as pd
@@ -337,8 +338,14 @@ def grouper(dict_, ):
     # with no matches back into a single dictionary
 
     dict_groups = {key: list(group) for key, group in groups}
-    trues = [x[0] for x in dict_groups[True]]
-    falses = [x[0] for x in dict_groups[False]]
+    try:
+        trues = [x[0] for x in dict_groups[True]]
+    except KeyError:
+        trues = None
+    try:
+        falses = [x[0] for x in dict_groups[False]]
+    except KeyError:
+        falses = None
     return {True: trues, False: falses}
 
 
@@ -362,9 +369,10 @@ def check_fieldname(field, settings, dd=None, store_path=None):
     Example
     -------
 
-    >>> check_fieldname(flatten(settings['dd_to_vars']['may2012'].values()),
-                        settings, dd=dd)
+    >>> res = check_fieldname(flatten(
+                settings['dd_to_vars']['may2012'].values()), settings, dd=dd)
 
+    >>> {x: get_close_matches(x, dd.id) for x in res[False]}
     """
     if dd is None:
         with pd.get_store(settings['store_path']) as store:
@@ -376,8 +384,12 @@ def check_fieldname(field, settings, dd=None, store_path=None):
         fields = list(field)
 
     ungrouped = {x: x in dd.id.values for x in fields}
-    grouped = grouper(ungrouped)
-    return grouped
+    try:
+        grouped = grouper(ungrouped)
+        return grouped
+    except KeyError as e:
+        print(e)
+        return None
 
 
 def find_attr(attr, fields=None, dd=None, settings=None):
