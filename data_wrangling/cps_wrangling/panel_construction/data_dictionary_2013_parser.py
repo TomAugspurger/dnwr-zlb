@@ -74,7 +74,7 @@ with open('jan13_dd_parsed.txt', 'wt') as f:
     print('Wrote the parsed file.')
 
 df = pd.read_csv('/Volumes/HDD/Users/tom/DataStorage/CPS/jan13_dd_parsed.txt',
-                 sep=r',|\s*-\s*', names=['id', 'len', 'start', 'stop'])
+                 sep=r',|\s*-\s*', names=['id', 'length', 'start', 'stop'])
 store = pd.HDFStore('/Volumes/HDD/Users/tom/DataStorage/CPS/cps_store.h5')
 store_name = 'jan2013'
 try:
