@@ -511,7 +511,8 @@ def get_subset(df, settings, dd_name, quiet=False):
 
     df : DataFrame
     settings : dictionary with "dd_to_vars" column
-    quit: Bool.  If True will print, but not raise, on some columns
+    dd_name : str. for the lookup.
+    quiet: Bool.  If True will print, but not raise, on some columns
     from settings not being in the df's columns.
 
     Returns
@@ -522,7 +523,7 @@ def get_subset(df, settings, dd_name, quiet=False):
     cols = {x for x in flatten(settings["dd_to_vars"][dd_name].values())}
     subset = df.columns.intersection(cols)
 
-    if not quite:
+    if not quiet:
         print("Implicitly dropping {}".format(cols.symmetric_difference(subset)))
 
     return df[subset]
@@ -579,19 +580,26 @@ def main():
             just_name, out_name, s_month, name, dd_name = (
                 name_handling(month, settings))
 
+            # TEMPORARY EXCLUSION OF 89-92 SINCE I'M NOT READY YET
+            if dd_name in ['jan1989', 'jan1992']:
+                print("TEMPORY SKIP OF {}.".format(out_name))
+                continue
+
             if just_name == '' or month.is_dir():  # . files or subdirs
                 continue
 
             ids = settings["dd_to_ids"][dd_name]
 
             if out_name in skips and skip:
-                continue
+                print("Skipped {}".format(out_name))
 
             try:
                 dd = dds.select('/monthly/dd/' + dd_name)
                 widths = dd.length.tolist()
             except KeyError:
                 print("No data dictionary for {}".format(out_name))
+                with open(settings["store_log"], 'a') as f:
+                    f.write("FAILED {}. No data dictionary".format(out_name))
                 continue
 
             if s_month.endswith('.gz'):
@@ -615,7 +623,7 @@ def main():
 
             cols = settings['dd_to_vars'][dd_name].values()
 
-            subset = get_subset(df, settings=settings)
+            df = get_subset(df, settings=settings, dd_name=dd_name)
             df.index.name = out_name
 
             #---------------------------------------------------------------------
@@ -630,7 +638,7 @@ def main():
             print('Added {}'.format(out_name))
         except:
             with open(settings["store_log"], 'a') as f:
-                f.write('FAILED {}\n'.format(name))
+                f.write('FAILED {}\n'.format(str(month)))
     pass
 #-----------------------------------------------------------------------------
 if __name__ == '__main__':
