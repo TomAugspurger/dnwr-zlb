@@ -391,6 +391,29 @@ def check_fieldname(field, settings, dd=None, store_path=None):
         print(e)
         return None
 
+bp = '/Volumes/HDD/Users/tom/DataStorage/CPS/monthly/'
+
+for reference, part in [('apr1994', 'cpsb9404.gz'),
+                        ("jun1995", "cpsb9506.gz"),
+                        ("sep1995", "cpsb9509.gz"),
+                        ("jan1998", "cpsb9801.gz"),
+                        ("jan2003", "cpsb0301.gz"),
+                        ("may2004", "cpsb0404.gz"),
+                        ("aug2005", "cpsb0508.gz"),
+                        ("jan2007", "cpsb0701.gz"),
+                        ("jan2009", "cpsb0901.gz"),
+                        ("jan2010", "cpsb1001.zip"),
+                        ("may2012", "cpsb1205.zip"),
+                        ("jan2013", "cpsb1301.zip")]:
+    month = bp + part
+    df, dd = run_one(month, settings=settings, n=10)
+    res = check_fieldname(flatten(settings['dd_to_vars'][reference].values()),
+                          settings=settings, dd=dd)
+    try:
+        assert res[False] is None
+    except AssertionError:
+        print("Mismatch on {}, {}".format(part, res[False]))
+    print("OK on {}".format(reference))
 
 def find_attr(attr, fields=None, dd=None, settings=None):
     """
@@ -642,3 +665,4 @@ def main():
 #-----------------------------------------------------------------------------
 if __name__ == '__main__':
     main()
+t
