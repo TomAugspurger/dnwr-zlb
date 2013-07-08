@@ -43,7 +43,7 @@ r = re.compile(ur"(\w+) \s* (\d+) .* (\d+\s*-\s*\d+)\s*$")
 # anything, followed by digits - digits (col locations).
 # For whatever reason they'll occasionally use a unicode '-'
 # with byes '\xe2\x80\x93'.
-f = open('/Volumes/HDD/Users/tom/DataStorage/CPS/jan13dd.txt')
+f = open('/Volumes/HDD/Users/tom/DataStorage/CPS/dds/jan13dd.txt')
 
 matches = []
 for line in f:
