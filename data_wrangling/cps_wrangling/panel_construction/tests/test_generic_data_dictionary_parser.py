@@ -145,3 +145,9 @@ class TestParserClass(unittest.TestCase):
         self.parser.regex = self.parser.make_regex(style='aug2005')
         expected = ('HRHHID', '15', 'HOUSEHOLD IDENTIFIER (Part 1)', '1', '15')
         self.assertEqual(expected, self.parser.regex.match(ring).groups())
+
+    def test_formfeed(self):
+        ring = 'PRDTIND2     2     DETAILED INDUSTRY RECODE - JOB 2        (474 - 475)'
+        self.parser.regex = self.parser.make_regex(style='aug2005')
+        expected = ('PRDTIND2', '2', 'DETAILED INDUSTRY RECODE - JOB 2', '474', '475')
+        self.assertEqual(expected, self.parser.regex.match(ring).groups())

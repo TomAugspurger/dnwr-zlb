@@ -166,7 +166,7 @@ class Parser(object):
         if style is None:
             return re.compile(r'(\w{1,2}[\$\-%]\w*|PADDING)\s*CHARACTER\*(\d{3})\s*\.{0,1}\s*\((\d*):(\d*)\).*')
         elif style is 'aug2005':
-            return re.compile(r'(\w+)[\s\t]*(\d{1,2})[\s\t]*(.*?)[\s\t]*\(*(\d+)\s*-\s*(\d+)\)*$')
+            return re.compile(ur'[\x0c]{0,1}(\w+)[\s\t]*(\d{1,2})[\s\t]*(.*?)[\s\t]*\(*(\d+)\s*-\s*(\d+)\)*$')
         elif style is 'jan1998':
             return re.compile(r'D (\w+) \s* (\d{1,2}) \s* (\d*)')
 
