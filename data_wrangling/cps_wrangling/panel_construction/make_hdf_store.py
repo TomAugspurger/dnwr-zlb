@@ -410,19 +410,16 @@ def find_attr(attr, fields=None, dd=None, settings=None):
     if settings is None:
         settings = json.load(open('settings.txt'))
 
-    store = pd.HDFStore(settings["store_path"])
-
-    if fields is not None and dd is not None:
-        raise ValueError('One of fields and dd must be specified.')
-    elif fields is None and dd is None:
-        raise ValueError('One of fields and dd must be specified.')
-    elif dd and isinstance(dd, str):
-        dd = store.select(dd)
-        fields = dd.id.tolist()
-    elif dd and isinstance(dd, pd.DataFrame):
-        fields = dd.id.tolist()
-
-    store.close()
+    with pd.get_store(settings["store_path"]) as store:
+        if fields is not None and dd is not None:
+            raise ValueError('One of fields and dd must be specified.')
+        elif fields is None and dd is None:
+            raise ValueError('One of fields and dd must be specified.')
+        elif dd and isinstance(dd, str):
+            dd = store.select(dd)
+            fields = dd.id.tolist()
+        elif dd and isinstance(dd, pd.DataFrame):
+            fields = dd.id.tolist()
 
     match_with = re.compile(r'[\w|$%\-]*' + attr + r'[\w|$%\-]*')
     maybe_matches = (match_with.match(x) for x in fields)
@@ -445,12 +442,13 @@ def run_one(path, settings, n=10):
 
     df, dd : tuple with DataFrame and Data Dictonary.
     """
-    dds = pd.HDFStore(settings['store_path'])
+    with pd.get_store(settings['store_path']) as dds:
+        dd = dds.select('/monthly/dd/' + dd_name)
+
     month = pathlib.Path(path)
     just_name, out_name, s_month, name, dd_name = name_handling(month, settings)
 
     ids = settings["dd_to_ids"][dd_name]
-    dd = dds.select('/monthly/dd/' + dd_name)
     widths = dd.length.tolist()
 
     if s_month.endswith('.gz'):
@@ -639,7 +637,8 @@ def main():
         except:
             with open(settings["store_log"], 'a') as f:
                 f.write('FAILED {}\n'.format(str(month)))
-    pass
+    dds.close()
+
 #-----------------------------------------------------------------------------
 if __name__ == '__main__':
     main()
