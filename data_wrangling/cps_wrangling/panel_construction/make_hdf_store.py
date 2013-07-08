@@ -442,11 +442,11 @@ def run_one(path, settings, n=10):
 
     df, dd : tuple with DataFrame and Data Dictonary.
     """
-    with pd.get_store(settings['store_path']) as dds:
-        dd = dds.select('/monthly/dd/' + dd_name)
-
     month = pathlib.Path(path)
     just_name, out_name, s_month, name, dd_name = name_handling(month, settings)
+
+    with pd.get_store(settings['store_path']) as dds:
+        dd = dds.select('/monthly/dd/' + dd_name)
 
     ids = settings["dd_to_ids"][dd_name]
     widths = dd.length.tolist()
