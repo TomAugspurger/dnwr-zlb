@@ -4,13 +4,13 @@ import json
 
 import pandas as pd
 
-from ..make_hdf_store import runner, dedup_cols, pre_process
+from ..make_hdf_store import main, dedup_cols, pre_process
 
 
 class TestLoadSettings(unittest.TestCase):
 
     def setUp(self):
-        settings_path = 'info.txt'
+        settings_path = 'settings.txt'
         f = open(settings_path)
         self.settings = json.load(f)
 
