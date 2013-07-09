@@ -234,17 +234,9 @@ def handle_dupes(df, settings):
     return deduped
 
 
-def handle_89_pt1(df):
-    """Bad formatting this year"""
-    chars = {'$': '_', '%': '__', '&': '___', '-': '____'}
-    for key, val in chars.iteritems():
-        df.rename(columns=lambda x: x.replace(key, val), inplace=True)
-    return df
-
-
 def handle_89_pt2(df):
     """After numeric.  Get only adult records."""
-    df = df[df['H____RECTYP'] == 1]
+    df = df[df['HhRECTYP'] == 1]
     return df
 
 #-----------------------------------------------------------------------------
@@ -462,9 +454,6 @@ def run_one(path, settings, n=10):
                 pass
             df = pd.read_fwf(name, widths=widths, names=dd.id.values, nrows=n)
 
-    if dd_name in ['jan1989', 'jan1992']:
-        df = handle_89_pt1(df)
-
     df = pre_process(df, ids=ids).sort_index()
 
     if dd_name in ['jan1989', 'jan1992']:
@@ -578,11 +567,6 @@ def main():
             just_name, out_name, s_month, name, dd_name = (
                 name_handling(month, settings))
 
-            # TEMPORARY EXCLUSION OF 89-92 SINCE I'M NOT READY YET
-            if dd_name in ['jan1989', 'jan1992']:
-                print("TEMPORY SKIP OF {}.".format(out_name))
-                continue
-
             if just_name == '' or month.is_dir():  # . files or subdirs
                 continue
 
@@ -610,9 +594,6 @@ def main():
                     except AttributeError:
                         pass
                     df = pd.read_fwf(name, widths=widths, names=dd.id.values)
-
-            if dd_name in ['jan1989', 'jan1992']:
-                df = handle_89_pt1(df)
 
             df = pre_process(df, ids=ids).sort_index()
 
