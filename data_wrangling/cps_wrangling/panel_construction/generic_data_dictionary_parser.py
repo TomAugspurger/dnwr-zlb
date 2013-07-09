@@ -163,7 +163,7 @@ class Parser(object):
         self.holder = [formatted]  # next line
 
     def make_regex(self, style=None):
-        if style is None:
+        if style is None:  # 89 and 92
             return re.compile(r'(\w{1,2}[\$\-%]\w*|PADDING)\s*CHARACTER\*(\d{3})\s*\.{0,1}\s*\((\d*):(\d*)\).*')
         elif style is 'aug2005':
             return re.compile(ur'[\x0c]{0,1}(\w+)[\s\t]*(\d{1,2})[\s\t]*(.*?)[\s\t]*\(*(\d+)\s*-\s*(\d+)\)*$')
@@ -185,6 +185,8 @@ class Parser(object):
         else:
             try:
                 id_, length, start, end = match.groups()
+                if self.style is None:
+                   id_ = self.handle_replacers(id_)
             except ValueError:
                 id_, length, description, start, end = match.groups()
             length = int(length)
@@ -218,3 +220,9 @@ class Parser(object):
             pass
         store.append('monthly/dd/' + self.store_name, df)
         store.close()
+
+    def handle_replacers(self, id_):
+        replacers = {'$': 'd', '%': 'p', '-': 'h'}
+        for bad_char, good_char in replacers.iteritems():
+            id_ = id_.replace(bad_char, good_char)
+        return id_

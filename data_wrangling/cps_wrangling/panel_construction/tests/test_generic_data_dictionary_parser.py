@@ -81,7 +81,7 @@ class TestParserClass(unittest.TestCase):
     def test_formatter(self):
         s = 'H-MONTH     CHARACTER*002 .     (0038:0039)'.rstrip()
         m = self.parser.regex.match(s)
-        expected = ('H-MONTH', 2, 38, 39)
+        expected = ('HhMONTH', 2, 38, 39)
         self.assertEqual(expected, self.parser.formatter(m))
 
     def test_regex_paddding_trailing_space(self):
@@ -151,3 +151,10 @@ class TestParserClass(unittest.TestCase):
         self.parser.regex = self.parser.make_regex(style='aug2005')
         expected = ('PRDTIND2', '2', 'DETAILED INDUSTRY RECODE - JOB 2', '474', '475')
         self.assertEqual(expected, self.parser.regex.match(ring).groups())
+
+    def test_replacer(self):
+        st = "H$LIVQRT    CHARACTER*002 .     (0006:0007)"
+        self.parser.regex = self.parser.make_regex()
+        expected = ('HdLIVQRT', 2, 6, 7)
+        actual = self.parser.formatter(self.parser.regex.match(st))
+        self.assertEqual(expected, actual)
