@@ -65,6 +65,7 @@ def fetch_series(series, settings, cache=True):
 
         df = pd.concat([df, old], axis=1)
 
+    df = df.resample('QS-JAN')  # Start of quarter, begining in January
     return df
 
 
