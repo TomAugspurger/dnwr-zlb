@@ -2,5 +2,16 @@
     "store_path": "/Volumes/HDD/Users/tom/DataStorage/nipa/nipa_store.h5",
     "store_name": "fred_nipa",
     "start_date": "1947-01-01",
-    "end_date"  : "2013-07-07"
+    "end_date"  : "2013-07-07",
+    "fred_series": {"GDPC1": "real_gdp",
+                    "GDP": "gdp",
+                    "PCECC96": "real_pce",
+                    "GDPDEF": "gdp_deflator",
+                    "PCECTPI": "pce_chain",
+                    "PCNDGC96": "real_pce_nondurable",
+                    "GPDI": "gross_private_investment",
+                    "PCEDG": "pce_durable",
+                    "PCND": "pce_nondurable",
+                    "PCESV": "pce_services"
+                   } 
 }

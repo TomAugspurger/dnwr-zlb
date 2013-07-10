@@ -29,7 +29,7 @@ def get_names(settings_path='fred_nipa_settings.json'):
     return store_path, store_name, settings
 
 
-def fetch_series(settings):
+def fetch_series(series, settings, cache=True):
     """
     Get the data from FRED's servers.
 
@@ -47,17 +47,6 @@ def fetch_series(settings):
     df : DataFrame
     """
     try:
-        series = settings["fred_series"]
-    except KeyError:
-        series = {"GDPC1": "real_gdp",
-                  "GDP": "gdp",
-                  "PCECC96": "real_pce",
-                  "GDPDEF": "gdp_deflator",
-                  "PCECTPI": "pce_chain",
-                  "PCNDGC96": "real_pce_nondurable",
-                  "PCDG": "pce_durable",
-                  }
-    try:
         start, end = map(parse, [settings["start_date"],
                                  settings["end_date"]])
     except KeyError:
@@ -69,6 +58,13 @@ def fetch_series(settings):
 
     df = pd.concat(dfs, axis=1)
     df = df.rename(columns=series)
+
+    if cache:
+        with pd.get_store(settings["store_path"]) as store:
+            old = store.select(settings["store_name"])
+
+        df = pd.concat([df, old], axis=1)
+
     return df
 
 
@@ -96,11 +92,43 @@ def writer(df, settings, store_name=None, store_path=None):
         print("Added {0} to {1}".format(store_name, store_path))
 
 
-def main():
+def check_cache(settings):
+    """
+    See which series are already in the store.
+    """
+    store_path = settings['store_path']
+
+    with pd.get_store(store_path) as store:
+        try:
+            cols = store.select(settings['store_name']).columns
+        except KeyError:
+            cols = {}
+
+    series = settings['fred_series']
+    new = set(series.values()).difference(cols)
+    new = {k: v for k, v in series.iteritems() if v in new}
+    return new
+
+
+def main(cache=True):
     store_path, store_name, settings = get_names()
-    df = fetch_series(settings)
+    if cache:
+        series = check_cache(settings)
+    else:
+        series = settings["fred_series"]
+
+    df = fetch_series(series, settings, cache=cache)
     writer(df, settings, store_name=store_name, store_path=store_path)
 
 
 if __name__ == '__main__':
-    main()
+    from sys import argv
+    try:
+        cache = argv[1]
+        if cache == "False":
+            cache = False
+        else:
+            cache = True
+    except IndexError:
+        cache = True
+    main(cache=cache)
