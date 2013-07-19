@@ -1,4 +1,19 @@
-import pandas as pd
+import json
 
-path = '/Volumes/HDD/Users/tom/DataStorage/nipa/'
-dta = pd.read_csv(path + 'cleaned_nipa_gdp_1947-2013.csv', index_col=0).ix[:'2011-04']
+import pandas as pd
+import statsmodels.tsa.api as sm
+
+with open('settings.json') as f:
+    settings = json.load(f)
+
+store_path, store_name = settings['store_path'], settings['store_name']
+
+with pd.get_store(store_path) as store:
+    df = store.get(store_name)
+
+#-----------------------------------------------------------------------------
+df.fed_funds.update(df.tbill)
+cols = ['real_pce', 'gdp', 'gdp_deflator', 'fed_funds']
+
+res = (sm.filters.hpfilter(df[x]) for x in cols)
+stds = ((x.std(), y.std()) for x, y in res)
