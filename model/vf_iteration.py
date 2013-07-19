@@ -55,5 +55,44 @@ def truncate_normal(original, lower, upper):
     mu, sigma = original.mean(), original.std()
     return stats.norm(loc=mu, scale=sigma, a=a, b=b)
 
+
+def ut_c(cons):
+    return np.log(cons)
+
+def ut_l(wage, shock, agg_L, params):
+    """
+    Utillity from labor part of utility funciton.
+
+    Parameters
+    ----------
+
+    wage: float. real wage for i at time t
+    shock: float. idiosyncratic shock for i
+    agg_L: float. aggregate labor
+    params: dict. dict of params
+
+    Returns
+    -------
+
+    float: utility
+    """
+    eta = params['eta'][0]
+    gamma = params['gamma'][0]
+    return (wage ** (1 - eta) - (gamma / (gamma + 1)) * shock * (wage ** (-eta) * agg_L) ** (gamma / gamma + 1))
+
+def iter_vf(params):
+    VALUE, DESCRIPTION = 0, 1
+
+    wl = params['wl'][VALUE]     # wage lower bound
+    wu = params['wu'][VALUE]     # wage upper bound
+    wn = params['wn'][VALUE]     # wage grid point
+
+    w_grid = np.linspace(wl, wu, wn)
+    pi_grid = np.linspace(0, 2.5, 10)
+    pibar = params['pibar'][0]  # ss inflation
+    #-------------------------------------------------------------------------
+
+
+
 if __name__ == '__main__':
     pass
