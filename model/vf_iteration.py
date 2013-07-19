@@ -71,6 +71,7 @@ def truncate_normal(original, lower, upper):
 def ut_c(cons):
     return np.log(cons)
 
+
 def ut_l(wage, shock, agg_L, params):
     """
     Utillity from labor part of utility funciton.

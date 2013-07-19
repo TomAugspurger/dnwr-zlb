@@ -1,0 +1,10 @@
+{
+    "lambda_": [[0.2, 0.5, 0.8], "degree of rigidity"],
+    "pibar": [0.02, "target inflation"],
+    "eta":   [2.5, "elas. of subs among labor types"],
+    "gamma": [0.5, "frisch elas. of labor supply"],
+    "sigma": [0.2, "std. dev. of log(Z) (shocks)"],
+    "wl":    [1, "wage lower bound"],
+    "wu":    [10, "wage upper bound"],
+    "wn":    [100, "wage grid point"]
+}
