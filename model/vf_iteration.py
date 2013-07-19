@@ -98,7 +98,7 @@ def ut_l(wage, shock, agg_L, params):
     return utility
 
 
-def ss_output(params):
+def ss_output_flexible(params):
     eta = params['eta'][0]
     gamma = params['gamma'][0]
     sigma = params['sigma'][0]
@@ -106,6 +106,34 @@ def ss_output(params):
     zt = np.exp(-0.5 * (eta * (1 + gamma)) / (gamma + eta) * sigma ** 2)
     return (((eta - 1) / eta) ** (gamma / (1 + gamma)) *
             (1 / zt) ** (gamma / (1 + gamma)))
+
+
+def ss_wage_flexible(params, shock=None):
+    """
+    Given paraemters, get the ss wage.
+
+    Parameters
+    ----------
+
+    params: dict
+    shock: float; Draw from the distribution.  defaults to the mean.
+
+    Returns
+    -------
+
+    wage: float
+    """
+    eta = params['eta'][0]
+    gamma = params['gamma'][0]
+    sigma = params['sigma'][0]
+    agg_l = ss_output_flexible(params)
+
+    shock = shock or 1
+
+    wage = ((eta / (eta - 1)) ** (gamma / (gamma + eta)) *
+            shock ** (gamma / (gamma + eta)) *
+            agg_l ** ((1 + gamma) / (gamma + eta)))
+    return wage
 
 
 def iter_vf(params):
