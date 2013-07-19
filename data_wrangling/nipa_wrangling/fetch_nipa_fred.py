@@ -6,7 +6,7 @@ import pandas as pd
 from pandas.io.data import DataReader
 
 
-def get_names(settings_path='fred_nipa_settings.json'):
+def get_names(settings_path='settings.json'):
     """
     For reproducability, don't hardcode the settings
 
@@ -50,7 +50,7 @@ def fetch_series(series, settings, cache=True):
         start, end = map(parse, [settings["start_date"],
                                  settings["end_date"]])
     except KeyError:
-        start = datetime(1947, 1, 1)
+        start = datetime(1948, 1, 1)
         end = datetime(2013, 7, 7)
 
     dfs = [DataReader(ser, data_source="fred", start=start, end=end) for
