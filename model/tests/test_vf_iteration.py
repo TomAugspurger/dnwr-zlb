@@ -3,7 +3,8 @@ import json
 
 import nose
 
-from ..vf_iteration import truncate_normal, ut_c, ut_l, ss_output
+from ..vf_iteration import (truncate_normal, ut_c, ut_l, ss_output_flexible,
+                            ss_wage_flexible)
 
 import numpy as np
 from scipy.stats import norm
@@ -42,13 +43,26 @@ class testFunctions(unittest.TestCase):
         self.assertAlmostEqual(expected, result)
 
     def test_ss_out(self):
-        params = params = {'gamma': [0.5, '_'], 'eta': [1.5, '_'],
-                           'sigma': [.02, '_']}
+        params = {'gamma': [0.5, '_'], 'eta': [1.5, '_'],
+                  'sigma': [.02, '_']}
         expected = ((.5 / 1.5) ** (.5 / 1.5) *
                     (1 / (np.exp(-.5 * 1.5 * 1.5 / 2 * .02 ** 2))) ** (.5 / 1.5)
                     )
-        result = ss_output(params)
+        result = ss_output_flexible(params)
         self.assertAlmostEqual(expected, result)
+
+    def test_ss_wage(self):
+        params = {'gamma': [0.5, '_'], 'eta': [2.5, '_'], 'sigma': [0.2, '_']}
+        shock = 1
+        agg_l = ss_output_flexible(params)  # probably bad
+        expected = ((2.5 / 1.5) ** (.5 / 3) * shock ** ((0.5) / (3)) *
+                    agg_l ** (1.5 / 3))
+        self.assertAlmostEqual(expected, ss_wage_flexible(params))
+
+        expected_shock = ((2.5 / 1.5) ** (.5 / 3) * 2 ** (0.5 / 3) *
+                          agg_l ** (1.5 / 3))
+        self.assertAlmostEqual(expected_shock,
+                               ss_wage_flexible(params, shock=2))
 
 
 class TestDistribution(unittest.TestCase):
