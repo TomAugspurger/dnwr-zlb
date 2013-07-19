@@ -1,0 +1,24 @@
+{
+    "store_path": "/Volumes/HDD/Users/tom/DataStorage/nipa/nipa_store.h5",
+    "store_name": "fred_nipa",
+    "start_date": "1948-01-01",
+    "end_date"  : "2013-07-07",
+    "fred_series": {"GDPC1"          : "real_gdp",
+                    "GDP"            : "gdp",
+                    "PCECC96"        : "real_pce",
+                    "GDPDEF"         : "gdp_deflator",
+                    "PCECTPI"        : "pce_chain",
+                    "GPDI"           : "gross_private_investment",
+                    "PCEDG"          : "pce_durable",
+                    "PCND"           : "pce_nondurable",
+                    "PCESV"          : "pce_services",
+                    "DNDGRG3Q086SBEA": "price_index_nom_nondur_cons",
+                    "DDURRG3Q086SBEA": "price_index_nom_dur_cons",
+                    "GPDICTPI"       : "price_index_nom_invst",
+                    "CE16OV"         : "employment",
+                    "FEDFUNDS"       : "fed_funds",
+                    "TB3MS"          : "tbill",
+                    "CNP16OV"        : "popn",
+                    "IPMAN"          : "cap"
+                   } 
+}
