@@ -100,3 +100,4 @@ fail_log.txt
 processed.txt
 cover/
 data_wrangling/cps_wrangling/panel_construction/store_log.txt
+*.csv
