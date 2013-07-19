@@ -91,7 +91,21 @@ def ut_l(wage, shock, agg_L, params):
     """
     eta = params['eta'][0]
     gamma = params['gamma'][0]
-    return (wage ** (1 - eta) - (gamma / (gamma + 1)) * shock * (wage ** (-eta) * agg_L) ** (gamma / gamma + 1))
+
+    utility = (wage ** (1 - eta) -
+              (gamma / (gamma + 1)) * shock *
+              (wage ** (-eta) * agg_L) ** (gamma / (gamma + 1)))
+    return utility
+
+
+def ss_output(params):
+    eta = params['eta'][0]
+    gamma = params['gamma'][0]
+    sigma = params['sigma'][0]
+
+    zt = np.exp(-0.5 * (eta * (1 + gamma)) / (gamma + eta) * sigma ** 2)
+    return (((eta - 1) / eta) ** (gamma / (1 + gamma)) *
+            (1 / zt) ** (gamma / (1 + gamma)))
 
 
 def iter_vf(params):

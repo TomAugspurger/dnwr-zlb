@@ -3,7 +3,7 @@ import json
 
 import nose
 
-from ..vf_iteration import truncate_normal, ut_c, ut_l
+from ..vf_iteration import truncate_normal, ut_c, ut_l, ss_output
 
 import numpy as np
 from scipy.stats import norm
@@ -32,13 +32,24 @@ class testFunctions(unittest.TestCase):
         self.assertEquals(expected, ut_c(consumption))
 
     def test_labor(self):
-        hours = 2
         wage = 2
         shock = .25
         agg_L = 4
         params = {'gamma': [0.5, '_'], 'eta': [1.5, '_']}
-        expected = 2**(-.5) - (.5 / 1.5) * (.25) * ((2 ** (-1.5) * 4) ** (.5 / 1.5))
+        expected = (2**(-.5) - (.5 / 1.5) * (.25) *
+                   ((2 ** (-1.5) * 4) ** (.5 / 1.5)))
         result = ut_l(wage, shock, agg_L, params)
+        self.assertAlmostEqual(expected, result)
+
+    def test_ss_out(self):
+        params = params = {'gamma': [0.5, '_'], 'eta': [1.5, '_'],
+                           'sigma': [.02, '_']}
+        expected = ((.5 / 1.5) ** (.5 / 1.5) *
+                    (1 / (np.exp(-.5 * 1.5 * 1.5 / 2 * .02 ** 2))) ** (.5 / 1.5)
+                    )
+        result = ss_output(params)
+        self.assertAlmostEqual(expected, result)
+
 
 class TestDistribution(unittest.TestCase):
 
