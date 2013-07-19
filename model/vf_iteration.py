@@ -8,12 +8,14 @@ from scipy.stats import lognorm
 with open('parameters.json') as f:
     params = json.load(f)
 
-wl = params['wl']     # wage lower bound
-wu = params['wu']     # wage upper bound
-wn = params['wn']     # wage grid point
+VALUE, DESCRIPTION = 0, 1
+
+wl = params['wl'][VALUE]     # wage lower bound
+wu = params['wu'][VALUE]     # wage upper bound
+wn = params['wn'][VALUE]     # wage grid point
 
 w_grid = np.linspace(wl, wu, wn)
-pi_grid = np.linspace(0, 2.5, .1)
+pi_grid = np.linspace(0, 2.5, 10)
 pibar = 2.0  # ss inflation
 
 #-----------------------------------------------------------------------------
