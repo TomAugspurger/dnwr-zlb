@@ -93,8 +93,8 @@ def ut_l(wage, shock, agg_L, params):
     gamma = params['gamma'][0]
 
     utility = (wage ** (1 - eta) -
-              (gamma / (gamma + 1)) * shock *
-              (wage ** (-eta) * agg_L) ** (gamma / (gamma + 1)))
+              ((gamma / (gamma + 1)) * shock *
+              (wage ** (-eta) * agg_L) ** ((gamma + 1) / gamma)))
     return utility
 
 

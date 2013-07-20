@@ -37,8 +37,9 @@ class testFunctions(unittest.TestCase):
         shock = .25
         agg_L = 4
         params = {'gamma': [0.5, '_'], 'eta': [1.5, '_']}
-        expected = (2**(-.5) - (.5 / 1.5) * (.25) *
-                   ((2 ** (-1.5) * 4) ** (.5 / 1.5)))
+        expected = (2**(-.5) -
+                   ((.5 / 1.5) * (.25) *
+                   (2 ** (-1.5) * 4) ** (1.5 / 0.5)))
         result = ut_l(wage, shock, agg_L, params)
         self.assertAlmostEqual(expected, result)
 
