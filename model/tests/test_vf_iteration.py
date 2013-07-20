@@ -22,7 +22,7 @@ class TestJson(unittest.TestCase):
         self.assertTrue(isinstance(wl, int))
 
         wl_desc = self.params['wl'][1]
-        self.assertTrue(isinstance(wl_desc, unicode))
+        self.assertTrue(isinstance(wl_desc, (str, unicode)))
 
 
 class testFunctions(unittest.TestCase):

@@ -1,9 +1,9 @@
 from __future__ import division
 
+from functools import partial
 import json
 
 import numpy as np
-from scipy import stats
 from scipy.stats import norm, lognorm
 #-----------------------------------------------------------------------------
 
@@ -21,7 +21,7 @@ wl = params['wl'][VALUE]     # wage lower bound
 wu = params['wu'][VALUE]     # wage upper bound
 wn = params['wn'][VALUE]     # wage grid point
 
-w_grid = np.linspace(wl, wu, wn)
+w_v = np.linspace(wl, wu, wn)
 pi_grid = np.linspace(0, 2.5, 10)
 pibar = 2.0  # ss inflation
 
@@ -65,7 +65,7 @@ def truncate_normal(original, lower, upper):
     """
     a, b = original.ppf(lower), original.ppf(upper)
     mu, sigma = original.mean(), original.std()
-    return stats.norm(loc=mu, scale=sigma, a=a, b=b)
+    return norm(loc=mu, scale=sigma, a=a, b=b)
 
 
 def ut_c(cons):
