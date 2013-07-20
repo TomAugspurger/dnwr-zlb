@@ -1,3 +1,5 @@
+from __future__ import division
+
 import unittest
 import json
 
@@ -19,7 +21,7 @@ class TestJson(unittest.TestCase):
 
     def test_dtypes(self):
         wl = self.params['wl'][0]
-        self.assertTrue(isinstance(wl, int))
+        self.assertTrue(isinstance(wl, (float, int)))
 
         wl_desc = self.params['wl'][1]
         self.assertTrue(isinstance(wl_desc, (str, unicode)))
