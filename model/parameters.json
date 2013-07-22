@@ -5,8 +5,8 @@
     "gamma": [0.5, "frisch elas. of labor supply"],
     "sigma": [0.2, "std. dev. of log(Z) (shocks)"],
     "wl":    [0.3, "wage lower bound"],
-    "wu":    [1.0, "wage upper bound"],
-    "wn":    [100, "wage grid point"],
+    "wu":    [2.0, "wage upper bound"],
+    "wn":    [400, "wage grid point"],
     "beta": [0.97, "disount factor. check this"],
     "tol": [10e-6, "error tolerance for iteration"]
 }
