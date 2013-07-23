@@ -52,8 +52,8 @@ def u_(wage, shock=1, eta=2.5, gamma=0.5, aggL=0.85049063822172699):
 def bellman(w, u_fn, grid=grid, lambda_=0.8, shock=shocks, pi=2.0,
             argmax=False):
     """
-    Operate on the bellman equation. Returns the POLICY RULE (interpolated
-    linearly) at each point in grid.
+    Operate on the bellman equation. Returns the policy rule or
+    the value function (interpolated linearly) at each point in grid.
 
     Parameters
     ----------
