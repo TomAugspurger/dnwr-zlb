@@ -82,7 +82,8 @@ def bellman(w, u_fn, grid=grid, lambda_=0.8, shock=shocks, pi=2.0,
     return LinInterp(grid, np.array(vals))
 
 
-def get_iterates(w0, argmax=False, grid=grid, lambda_=0.8, pi=2.0, shock=1):
+def get_iterates(w0, maxiter=100, argmax=False, grid=grid, lambda_=0.8, pi=2.0,
+                 shock=1):
     """
     Generator for bellman()
 
@@ -103,13 +104,11 @@ def get_iterates(w0, argmax=False, grid=grid, lambda_=0.8, pi=2.0, shock=1):
     stream of Tv.
     """
     iters = [w0]
-    i = 0
-    while 1:
+    for i in range(maxiter):
         Tv = bellman(iters[i], u_, grid=grid, lambda_=lambda_, shock=shock,
                      pi=pi, argmax=argmax)
         iters.append(Tv)
         yield Tv
-        i += 1
 
 
 def get_iters_takewhile(w0, tol, maxiter=1000, grid=grid, lambda_=0.8,
