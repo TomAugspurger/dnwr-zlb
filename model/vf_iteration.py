@@ -134,7 +134,8 @@ def ss_wage_flexible(params, shock=None):
     sigma = params['sigma'][0]
     agg_l = ss_output_flexible(params)
 
-    shock = shock or 1
+    if shock is None:
+        shock = 1
 
     wage = ((eta / (eta - 1)) ** (gamma / (gamma + eta)) *
             shock ** (gamma / (gamma + eta)) *
