@@ -35,3 +35,6 @@ class LinInterp:
 
     def plot(self):
         return plt.plot(self.X, self.Y)
+
+    def inverse(self, z):
+        return interp(z, self.Y, self.X)
