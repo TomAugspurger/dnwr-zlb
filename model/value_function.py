@@ -93,10 +93,10 @@ def cycle(vs, max_cycles=100):
         raise('Too many value functions.  Only supports 7.')
     for i in range(max_cycles):
         out = []
-        for v, lambda_ in vs:
-            v = bellman(v, u_fn, lambda_=lambda_)
+        for v, kwargs in vs:
+            v = bellman(v, u_fn, **kwargs)
             v.plot(color=next(colors))
-            out.append((v, lambda_))
+            out.append((v, kwargs))
         vs = out
         yield out
 
