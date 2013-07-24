@@ -7,6 +7,8 @@ v(w) = (1 - lambda_) * (u(today | w' >= 0) + beta * v(w')) +
 """
 from __future__ import division
 
+import itertools as it
+
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import norm
@@ -80,6 +82,23 @@ def bellman(w, u_fn, grid=grid, lambda_=0.8, shock=shocks, pi=2.0,
             m2 = maximum(h_, y, w_max)
         vals.append((1 - lambda_) * m1 + lambda_ * m2)
     return LinInterp(grid, np.array(vals))
+
+
+def cycle(vs, max_cycles=100):
+    n_vfs = len(vs)
+    try:
+        colors = ['k', 'r', 'b', 'g', 'c', 'm', 'y'][:n_vfs]
+        colors = it.cycle(colors)
+    except IndexError:
+        raise('Too many value functions.  Only supports 7.')
+    for i in range(max_cycles):
+        out = []
+        for v, lambda_ in vs:
+            v = bellman(v, u_fn, lambda_=lambda_)
+            v.plot(color=next(colors))
+            out.append((v, lambda_))
+        vs = out
+        yield out
 
 
 def get_iterates(w0, maxiter=100, argmax=False, grid=grid, lambda_=0.8, pi=2.0,

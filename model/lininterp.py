@@ -33,8 +33,8 @@ class LinInterp:
         assert (self.X == other.X).all()
         return self.Y - other.Y
 
-    def plot(self):
-        return plt.plot(self.X, self.Y)
+    def plot(self, **kwargs):
+        return plt.plot(self.X, self.Y, **kwargs)
 
     def inverse(self, z):
         return interp(z, self.Y, self.X)
