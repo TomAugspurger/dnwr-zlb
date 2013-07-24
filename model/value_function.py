@@ -85,6 +85,20 @@ def bellman(w, u_fn, grid=grid, lambda_=0.8, shock=shocks, pi=2.0,
 
 
 def cycle(vs, max_cycles=100):
+    """
+    # Example
+    subshocks = shocks[[0, 250, 500, 750, -1]]
+
+    vs = [(w0, {'shock':subshocks[0]}),
+          (w0, {'shock':subshocks[1]}),
+          (w0, {'shock':subshocks[2]}),
+          (w0, {'shock':subshocks[3]}),
+          (w0, {'shock':subshocks[4]})]
+    gen = cycle(vs)
+    next(gen)
+    plt.legend()
+    next(gen)
+    """
     n_vfs = len(vs)
     try:
         colors = ['k', 'r', 'b', 'g', 'c', 'm', 'y'][:n_vfs]
@@ -95,10 +109,13 @@ def cycle(vs, max_cycles=100):
         out = []
         for v, kwargs in vs:
             v = bellman(v, u_fn, **kwargs)
-            v.plot(color=next(colors))
+            # import ipdb; ipdb.set_trace()
+            # very much hackish on the labeling.
+            ax = v.plot(c=next(colors),
+                        label='{0}:{1:.4f}'.format(*kwargs.iteritems().next()))
             out.append((v, kwargs))
         vs = out
-        yield out
+        yield out, ax
 
 
 def get_iterates(w0, maxiter=100, argmax=False, grid=grid, lambda_=0.8, pi=2.0,
