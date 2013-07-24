@@ -131,7 +131,7 @@ def get_iters_takewhile(w0, tol, maxiter=1000, grid=grid, lambda_=0.8,
     e = 1
     previous = w0
     gen = get_iterates(w0, grid=grid, lambda_=0.8, pi=2.0, shock=1,
-                       n_iters=maxiter, argmax=False)
+                       maxiter=maxiter, argmax=False)
 
     for i in range(maxiter):
         print('iteration: {}, error: {}.'.format(i, e))
