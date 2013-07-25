@@ -222,6 +222,7 @@ def get_diffs(w):
 
 
 def plot_hours_and_utility_over_shocks(shocks):
+    # This one is just utility.
     h_ = lambda x, shock: -1 * u_(x, shock=shock)
     ws = np.array([fminbound(h_, 0, 3, args=(x,)) for x in shocks])
     us = [u_(x, shock=y) for x, y in zip(ws, shocks)]
@@ -229,3 +230,20 @@ def plot_hours_and_utility_over_shocks(shocks):
     ax = plt.plot(shocks, us, label='utils')
     plt.legend()
     return ax
+
+
+def plot_wage_shock_schedule(w0, u_fn, shock=shocks, pi=pi, grid=grid):
+    w = get_iters_takewhile(w0, tol=.1, maxiter=15, shock=shocks)
+    h_ = lambda x, ashock: -1 * (np.mean(u_fn(x, shock=ashock)) +
+                                 beta * w((x / (1 + pi))))
+    w_max = grid[-1]
+    by_shock = []
+    for z in shock:
+        m1 = maximizer(h_, 0, w_max, args=(z,))  # can be pre-cached/z
+        by_shock.append(m1)
+    ax = plt.plot(shock, np.array(by_shock))
+    return ax
+
+
+if __name__ == '__main__':
+    pass
