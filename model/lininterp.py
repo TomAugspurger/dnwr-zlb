@@ -36,5 +36,5 @@ class LinInterp:
     def plot(self, **kwargs):
         return plt.plot(self.X, self.Y, **kwargs)
 
-    def inverse(self, z):
-        return interp(z, self.Y, self.X)
+    def inverse(self):
+        return LinInterp(self.Y, self.X)

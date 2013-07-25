@@ -52,8 +52,7 @@ def u_(wage, shock=1, eta=2.5, gamma=0.5, aggL=0.85049063822172699):
 # BREAKOFF to play with for i in shock.
 
 
-def bellman_shocks(w, u_fn, grid=None, lambda_=0.8, shock=None, pi=2.0,
-                   maxfun=maximum):
+def bellman_shocks(w, u_fn, grid=None, lambda_=0.8, shock=None, pi=2.0):
     """
     Differs from bellman by optimizing for *each* shock, rather than
     for the mean.  I think this is right since the agent observes Z_{it}
@@ -75,8 +74,8 @@ def bellman_shocks(w, u_fn, grid=None, lambda_=0.8, shock=None, pi=2.0,
     lambda : float. Degree of wage rigidity. 0 = flexible, 1 = fully rigid
     pi : steady-state (for now) inflation level.  Will be changed.
     maxfun : fucntion.  Wheter to get max or argmax
-        maximum : max; default
-        maximizer : argmax
+        maximum : max;
+        maximizer : argmax. default.
 
     Returns
     -------
@@ -97,22 +96,28 @@ def bellman_shocks(w, u_fn, grid=None, lambda_=0.8, shock=None, pi=2.0,
 
     h_ = lambda x, ashock: -1 * ((u_fn(x, shock=ashock)) +
                                  beta * w((x / (1 + pi))))
-    by_shock = []
+
     for y in grid:
         for z in shock:
-            m1 = maxfun(h_, 0, w_max, args=(z,))  # can be pre-cached/z
-            m2 = maxfun(h_, y, w_max, args=(z,))
+            m1 = maximizer(h_, 0, w_max, args=(z,))  # can be pre-cached/z
+            m2 = maximizer(h_, y, w_max, args=(z,))
             ## THE CONVEX COMBO SHOULD BE OF THE UTILITIES.
-            vals.append([y, z, (1 - lambda_) * m1 + lambda_ * m2])
+            value = -1 * ((1 - lambda_) * h_(m1, z) + lambda_ * h_(m2, z))
+            vals.append([y, z, value, m1, m2])
     vals = np.array(vals)
-    split = np.split(vals, len(grid))
-    return split
+    # split is grid x shocks x [w, z, w*, m1, m2]
+    split = np.array(np.split(vals, len(grid)))
+    SHOCKS = 1
+    FREE = 3
+    Tv = LinInterp(grid, split.mean(SHOCKS)[:, 2])  # operate on this
+    wage_schedule = split[0][:, FREE]  # Doesn't matter which row for free case
+    return Tv, vals
 
 
 
 # Deprecated
 def bellman(w, u_fn, grid=None, lambda_=0.8, shock=None, pi=2.0,
-            maxfun=maximum):
+            maxfun=maximizer):
     """
     Operate on the bellman equation. Returns the policy rule or
     the value function (interpolated linearly) at each point in grid.
