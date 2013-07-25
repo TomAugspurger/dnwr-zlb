@@ -29,17 +29,19 @@ sigma = 0.2
 mu = -(sigma ** 2) / 2
 
 trunc = truncate_normal(norm(loc=mu, scale=sigma), .05, .95)
-shocks = np.sort(np.exp(trunc.rvs(1000)))
+shocks = np.sort(np.exp(trunc.rvs(30)))
 
 grid = np.linspace(0.1, 4, 100)
 
-
-def maximizer(h_, a, b):
-    return float(fminbound(lambda x: -h_(x), a, b))
+pi = 2
 
 
-def maximum(h_, a, b):
-    return float(h_(fminbound(lambda x: -h_(x), a, b)))
+def maximizer(h_, a, b, args=()):
+    return float(fminbound(h_, a, b, args=args))
+
+
+def maximum(h_, a, b, args=()):
+    return -1 * float(h_(fminbound(h_, a, b, args=args), *args))
 
 
 def u_(wage, shock=1, eta=2.5, gamma=0.5, aggL=0.85049063822172699):
@@ -50,9 +52,60 @@ def u_(wage, shock=1, eta=2.5, gamma=0.5, aggL=0.85049063822172699):
 
 #-----------------------------------------------------------------------------
 
+# BREAKOFF to play with for i in shock.
 
+
+def bellman_shocks(w, u_fn, grid=grid, lambda_=0.8, shock=shocks, pi=2.0,
+                   maxfun=maximum):
+    """
+    Differs from bellman by optimizing for *each* shock, rather than
+    for the mean.  I think this is right since the agent observes Z_{it}
+    before choosing w_{it}.
+
+    Returns [(wage, shock, w*)]
+
+    where w* is the convex combo of optimal for constrained vs. unconstrained
+    case.  Currently that is 100 x 1000 x ?
+
+    Operate on the bellman equation. Returns the policy rule or
+    the value function (interpolated linearly) at each point in grid.
+
+    Parameters
+    ----------
+
+    w : callable value function (probably instance of LinInterp from last iter)
+    u_fn : The period utility function to be maximized. Omega in DH2013
+    lambda : float. Degree of wage rigidity. 0 = flexible, 1 = fully rigid
+    pi : steady-state (for now) inflation level.  Will be changed.
+    maxfun : fucntion.  Wheter to get max or argmax
+        maximum : max; default
+        maximizer : argmax
+
+    Returns
+    -------
+
+    Tv : The next iteration of the value function v. Instance of LinInterp.
+    """
+    vals = []
+    w_max = grid[-1]
+
+    h_ = lambda x, ashock: -1 * ((u_fn(x, shock=ashock)) +
+                                 beta * w((x / (1 + pi))))
+    by_shock = []
+    for y in grid:
+        for z in shock:
+            m1 = maxfun(h_, 0, w_max, args=(z,))  # can be pre-cached/z
+            m2 = maxfun(h_, y, w_max, args=(z,))
+            vals.append([y, z, (1 - lambda_) * m1 + lambda_ * m2])
+    vals = np.array(vals)
+    split = np.split(vals, len(grid))
+    return split
+
+
+
+# Deprecated
 def bellman(w, u_fn, grid=grid, lambda_=0.8, shock=shocks, pi=2.0,
-            argmax=False):
+            maxfun=maximum):
     """
     Operate on the bellman equation. Returns the policy rule or
     the value function (interpolated linearly) at each point in grid.
@@ -73,13 +126,9 @@ def bellman(w, u_fn, grid=grid, lambda_=0.8, shock=shocks, pi=2.0,
     vals = []
     w_max = grid[-1]
     for y in grid:
-        h_ = lambda x: np.mean(u_fn(x, shock)) + beta * w((x / (1 + pi)))
-        if argmax:
-            m1 = maximizer(h_, 0, w_max)
-            m2 = maximizer(h_, y, w_max)
-        else:
-            m1 = maximum(h_, 0, w_max)
-            m2 = maximum(h_, y, w_max)
+        h_ = lambda x: -1 * (np.mean(u_fn(x, shock)) + beta * w((x / (1 + pi))))
+        m1 = maxfun(h_, 0, w_max)
+        m2 = maxfun(h_, y, w_max)
         vals.append((1 - lambda_) * m1 + lambda_ * m2)
     return LinInterp(grid, np.array(vals))
 
@@ -118,7 +167,7 @@ def cycle(vs, max_cycles=100):
         yield out, ax
 
 
-def get_iterates(w0, maxiter=100, argmax=False, grid=grid, lambda_=0.8, pi=2.0,
+def get_iterates(w0, maxiter=100, maxfun=maximum, grid=grid, lambda_=0.8, pi=2.0,
                  shock=1):
     """
     Generator for bellman()
@@ -142,13 +191,13 @@ def get_iterates(w0, maxiter=100, argmax=False, grid=grid, lambda_=0.8, pi=2.0,
     iters = [w0]
     for i in range(maxiter):
         Tv = bellman(iters[i], u_, grid=grid, lambda_=lambda_, shock=shock,
-                     pi=pi, argmax=argmax)
+                     pi=pi, maxfun=maxfun)
         iters.append(Tv)
         yield Tv
 
 
 def get_iters_takewhile(w0, tol, maxiter=1000, grid=grid, lambda_=0.8,
-                        pi=2.0, shock=1, argmax=False):
+                        pi=2.0, shock=1, maxfun=maximum):
     """
     Wrapper for get_iterators.
 
@@ -167,7 +216,7 @@ def get_iters_takewhile(w0, tol, maxiter=1000, grid=grid, lambda_=0.8,
     e = 1
     previous = w0
     gen = get_iterates(w0, grid=grid, lambda_=0.8, pi=2.0, shock=1,
-                       maxiter=maxiter, argmax=False)
+                       maxiter=maxiter, maxfun=maximum)
 
     for i in range(maxiter):
         print('iteration: {}, error: {}.'.format(i, e))
@@ -176,7 +225,10 @@ def get_iters_takewhile(w0, tol, maxiter=1000, grid=grid, lambda_=0.8,
         if e < tol:
             return Tv
         previous = Tv
-
+    else:
+        print("Returning Tv before convergence!\n"
+              "Error is currently: {}".format(e))
+        return Tv
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -232,7 +284,7 @@ def plot_hours_and_utility_over_shocks(shocks):
     return ax
 
 
-def plot_wage_shock_schedule(w0, u_fn, shock=shocks, pi=pi, grid=grid):
+def unrestricted_wage_shock_schedule(w0, u_fn, shock=shocks, pi=pi, grid=grid):
     w = get_iters_takewhile(w0, tol=.1, maxiter=15, shock=shocks)
     h_ = lambda x, ashock: -1 * (np.mean(u_fn(x, shock=ashock)) +
                                  beta * w((x / (1 + pi))))
@@ -241,8 +293,27 @@ def plot_wage_shock_schedule(w0, u_fn, shock=shocks, pi=pi, grid=grid):
     for z in shock:
         m1 = maximizer(h_, 0, w_max, args=(z,))  # can be pre-cached/z
         by_shock.append(m1)
-    ax = plt.plot(shock, np.array(by_shock))
-    return ax
+    wage_schedule = LinInterp(shocks, np.array(by_shock))
+    wage_schedule.plot()
+    return wage_schedule
+
+
+def restricted_wage_shock_schedule(w0, u_fn, shock=shocks, lambda_=.8, pi=pi, grid=grid):
+    w = get_iters_takewhile(w0, tol=.1, maxiter=15, shock=shocks)
+    h_ = lambda x, ashock: -1 * (np.mean(u_fn(x, shock=ashock)) +
+                                 beta * w((x / (1 + pi))))
+    w_max = grid[-1]
+    by_shock = []
+    for y in grid:
+        for z in shock:
+            m2 = maximizer(h_, y, w_max, args=(z,))
+            by_shock.append((y, m2))
+
+    by_shock = np.array(by_shock)
+    split = np.split(by_shock, len(shock))
+    return split
+
+
 
 
 if __name__ == '__main__':

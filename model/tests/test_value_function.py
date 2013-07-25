@@ -8,7 +8,7 @@ from numpy.testing.decorators import slow
 from scipy.optimize import fminbound
 
 from ..lininterp import LinInterp
-from ..value_function import bellman, u_, get_iterates
+from ..value_function import bellman, u_, get_iterates, maximizer
 
 np.random.seed(42)
 
@@ -59,7 +59,7 @@ class TestValueFunction(unittest.TestCase):
     def test_pre_post_min_max_argmaxer(self):
         grid = np.linspace(0.1, 4, 100)
         w0 = LinInterp(grid, 1 / grid)
-        gen_argmaxes = get_iterates(w0, argmax=True, shock=1)
+        gen_argmaxes = get_iterates(w0, maxfun=maximizer, shock=1)
         argmaxer = [next(gen_argmaxes) for n in range(10)][-1].Y
 
         pre_argmax_after_10_runs = np.array([
