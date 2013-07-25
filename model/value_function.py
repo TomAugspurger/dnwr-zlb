@@ -24,16 +24,13 @@ np.random.seed(42)
 beta = .96
 lambda_ = .8  # Their high value
 eta = 2.5
-
-sigma = 0.2
-mu = -(sigma ** 2) / 2
-
-trunc = truncate_normal(norm(loc=mu, scale=sigma), .05, .95)
-shocks = np.sort(np.exp(trunc.rvs(30)))
+pi = 2
 
 grid = np.linspace(0.1, 4, 100)
-
-pi = 2
+sigma = 0.2
+mu = -(sigma ** 2) / 2
+trunc = truncate_normal(norm(loc=mu, scale=sigma), .05, .95)
+shock = np.sort(np.exp(trunc.rvs(30)))
 
 
 def maximizer(h_, a, b, args=()):
@@ -55,7 +52,7 @@ def u_(wage, shock=1, eta=2.5, gamma=0.5, aggL=0.85049063822172699):
 # BREAKOFF to play with for i in shock.
 
 
-def bellman_shocks(w, u_fn, grid=grid, lambda_=0.8, shock=shocks, pi=2.0,
+def bellman_shocks(w, u_fn, grid=None, lambda_=0.8, shock=None, pi=2.0,
                    maxfun=maximum):
     """
     Differs from bellman by optimizing for *each* shock, rather than
@@ -86,6 +83,15 @@ def bellman_shocks(w, u_fn, grid=grid, lambda_=0.8, shock=shocks, pi=2.0,
 
     Tv : The next iteration of the value function v. Instance of LinInterp.
     """
+    if grid is None:
+        grid = np.linspace(0.1, 4, 100)
+    if shock is None:
+        sigma = 0.2
+        mu = -(sigma ** 2) / 2
+        trunc = truncate_normal(norm(loc=mu, scale=sigma), .05, .95)
+        shock = np.sort(np.exp(trunc.rvs(30)))
+
+    #--------------------------------------------------------------------------
     vals = []
     w_max = grid[-1]
 
@@ -96,6 +102,7 @@ def bellman_shocks(w, u_fn, grid=grid, lambda_=0.8, shock=shocks, pi=2.0,
         for z in shock:
             m1 = maxfun(h_, 0, w_max, args=(z,))  # can be pre-cached/z
             m2 = maxfun(h_, y, w_max, args=(z,))
+            ## THE CONVEX COMBO SHOULD BE OF THE UTILITIES.
             vals.append([y, z, (1 - lambda_) * m1 + lambda_ * m2])
     vals = np.array(vals)
     split = np.split(vals, len(grid))
@@ -104,7 +111,7 @@ def bellman_shocks(w, u_fn, grid=grid, lambda_=0.8, shock=shocks, pi=2.0,
 
 
 # Deprecated
-def bellman(w, u_fn, grid=grid, lambda_=0.8, shock=shocks, pi=2.0,
+def bellman(w, u_fn, grid=None, lambda_=0.8, shock=None, pi=2.0,
             maxfun=maximum):
     """
     Operate on the bellman equation. Returns the policy rule or
@@ -123,6 +130,14 @@ def bellman(w, u_fn, grid=grid, lambda_=0.8, shock=shocks, pi=2.0,
 
     Tv : The next iteration of the value function v. Instance of LinInterp.
     """
+    if grid is None:
+        grid = np.linspace(0.1, 4, 100)
+    if shock is None:
+        sigma = 0.2
+        mu = -(sigma ** 2) / 2
+        trunc = truncate_normal(norm(loc=mu, scale=sigma), .05, .95)
+        shock = np.sort(np.exp(trunc.rvs(30)))
+
     vals = []
     w_max = grid[-1]
     for y in grid:
@@ -167,7 +182,7 @@ def cycle(vs, max_cycles=100):
         yield out, ax
 
 
-def get_iterates(w0, maxiter=100, maxfun=maximum, grid=grid, lambda_=0.8, pi=2.0,
+def get_iterates(w0, maxiter=100, maxfun=maximum, grid=None, lambda_=0.8, pi=2.0,
                  shock=1):
     """
     Generator for bellman()
@@ -188,6 +203,14 @@ def get_iterates(w0, maxiter=100, maxfun=maximum, grid=grid, lambda_=0.8, pi=2.0
 
     stream of Tv.
     """
+    if grid is None:
+        grid = np.linspace(0.1, 4, 100)
+    if shock is None:
+        sigma = 0.2
+        mu = -(sigma ** 2) / 2
+        trunc = truncate_normal(norm(loc=mu, scale=sigma), .05, .95)
+        shock = np.sort(np.exp(trunc.rvs(30)))
+
     iters = [w0]
     for i in range(maxiter):
         Tv = bellman(iters[i], u_, grid=grid, lambda_=lambda_, shock=shock,
@@ -196,7 +219,7 @@ def get_iterates(w0, maxiter=100, maxfun=maximum, grid=grid, lambda_=0.8, pi=2.0
         yield Tv
 
 
-def get_iters_takewhile(w0, tol, maxiter=1000, grid=grid, lambda_=0.8,
+def get_iters_takewhile(w0, tol, maxiter=1000, grid=None, lambda_=0.8,
                         pi=2.0, shock=1, maxfun=maximum):
     """
     Wrapper for get_iterators.
@@ -213,6 +236,14 @@ def get_iters_takewhile(w0, tol, maxiter=1000, grid=grid, lambda_=0.8,
 
     Tv: instance of LinInterp.
     """
+    if grid is None:
+        grid = np.linspace(0.1, 4, 100)
+    if shock is None:
+        sigma = 0.2
+        mu = -(sigma ** 2) / 2
+        trunc = truncate_normal(norm(loc=mu, scale=sigma), .05, .95)
+        shock = np.sort(np.exp(trunc.rvs(30)))
+
     e = 1
     previous = w0
     gen = get_iterates(w0, grid=grid, lambda_=0.8, pi=2.0, shock=1,
@@ -284,7 +315,15 @@ def plot_hours_and_utility_over_shocks(shocks):
     return ax
 
 
-def unrestricted_wage_shock_schedule(w0, u_fn, shock=shocks, pi=pi, grid=grid):
+def unrestricted_wage_shock_schedule(w0, u_fn, shock=None, pi=pi, grid=None):
+    if grid is None:
+        grid = np.linspace(0.1, 4, 100)
+    if shock is None:
+        sigma = 0.2
+        mu = -(sigma ** 2) / 2
+        trunc = truncate_normal(norm(loc=mu, scale=sigma), .05, .95)
+        shock = np.sort(np.exp(trunc.rvs(30)))
+
     w = get_iters_takewhile(w0, tol=.1, maxiter=15, shock=shocks)
     h_ = lambda x, ashock: -1 * (np.mean(u_fn(x, shock=ashock)) +
                                  beta * w((x / (1 + pi))))
@@ -298,7 +337,15 @@ def unrestricted_wage_shock_schedule(w0, u_fn, shock=shocks, pi=pi, grid=grid):
     return wage_schedule
 
 
-def restricted_wage_shock_schedule(w0, u_fn, shock=shocks, lambda_=.8, pi=pi, grid=grid):
+def restricted_wage_shock_schedule(w0, u_fn, shock=None, lambda_=.8, pi=pi, grid=None):
+    if grid is None:
+        grid = np.linspace(0.1, 4, 100)
+    if shock is None:
+        sigma = 0.2
+        mu = -(sigma ** 2) / 2
+        trunc = truncate_normal(norm(loc=mu, scale=sigma), .05, .95)
+        shock = np.sort(np.exp(trunc.rvs(30)))
+
     w = get_iters_takewhile(w0, tol=.1, maxiter=15, shock=shocks)
     h_ = lambda x, ashock: -1 * (np.mean(u_fn(x, shock=ashock)) +
                                  beta * w((x / (1 + pi))))
