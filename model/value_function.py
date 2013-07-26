@@ -150,7 +150,7 @@ def burn_in_vf(w, maxiter=15, lamda_=.8, pi=2, shock=1, argmax=False):
     grid = w.X
     w_max = grid[-1]
 
-    for i in range(1, maxiter):
+    for i in range(1, maxiter + 1):
         vals = []
         print("{} / {}".format(i, maxiter))
         h_ = lambda x: -1 * ((u_(x, shock=1)) + beta * w((x / (1 + pi))))
