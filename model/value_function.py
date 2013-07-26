@@ -49,8 +49,6 @@ def u_(wage, shock=1, eta=2.5, gamma=0.5, aggL=0.85049063822172699):
 
 #-----------------------------------------------------------------------------
 
-# BREAKOFF to play with for i in shock.
-
 
 def bellman(w, u_fn=u_, grid=None, lambda_=0.8, shock=None, pi=2.0):
     """
@@ -71,11 +69,10 @@ def bellman(w, u_fn=u_, grid=None, lambda_=0.8, shock=None, pi=2.0):
 
     w : callable value function (probably instance of LinInterp from last iter)
     u_fn : The period utility function to be maximized. Omega in DH2013
+    grid : Domain of w.  This is the real wage today at start of today.
     lambda : float. Degree of wage rigidity. 0 = flexible, 1 = fully rigid
+    shock : array. Draws from a lognormal distribution.
     pi : steady-state (for now) inflation level.  Will be changed.
-  .  Wheter to get max or argmax
-        maximum : max;
-        maximizer : argmax. default.
 
     Returns
     -------
