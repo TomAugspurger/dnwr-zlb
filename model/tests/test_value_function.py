@@ -9,7 +9,7 @@ from scipy.optimize import fminbound
 from scipy.stats import norm
 
 from ..lininterp import LinInterp
-from ..value_function import bellman, u_, get_iterates, maximizer
+from ..value_function import bellman, u_
 from test_vf_iteration import truncate_normal
 
 np.random.seed(42)
