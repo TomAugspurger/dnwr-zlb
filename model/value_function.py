@@ -52,7 +52,7 @@ def u_(wage, shock=1, eta=2.5, gamma=0.5, aggL=0.85049063822172699):
 # BREAKOFF to play with for i in shock.
 
 
-def bellman_shocks(w, u_fn, grid=None, lambda_=0.8, shock=None, pi=2.0):
+def bellman(w, u_fn=u_, grid=None, lambda_=0.8, shock=None, pi=2.0):
     """
     Differs from bellman by optimizing for *each* shock, rather than
     for the mean.  I think this is right since the agent observes Z_{it}
@@ -73,7 +73,7 @@ def bellman_shocks(w, u_fn, grid=None, lambda_=0.8, shock=None, pi=2.0):
     u_fn : The period utility function to be maximized. Omega in DH2013
     lambda : float. Degree of wage rigidity. 0 = flexible, 1 = fully rigid
     pi : steady-state (for now) inflation level.  Will be changed.
-    maxfun : fucntion.  Wheter to get max or argmax
+  .  Wheter to get max or argmax
         maximum : max;
         maximizer : argmax. default.
 
@@ -110,47 +110,9 @@ def bellman_shocks(w, u_fn, grid=None, lambda_=0.8, shock=None, pi=2.0):
     SHOCKS = 1
     FREE = 3
     Tv = LinInterp(grid, split.mean(SHOCKS)[:, 2])  # operate on this
-    wage_schedule = split[0][:, FREE]  # Doesn't matter which row for free case
-    return Tv, vals
-
-
-
-# Deprecated
-def bellman(w, u_fn, grid=None, lambda_=0.8, shock=None, pi=2.0,
-            maxfun=maximizer):
-    """
-    Operate on the bellman equation. Returns the policy rule or
-    the value function (interpolated linearly) at each point in grid.
-
-    Parameters
-    ----------
-
-    w : callable value function (probably instance of LinInterp from last iter)
-    u_fn : The period utility function to be maximized. Omega in DH2013
-    lambda : float. Degree of wage rigidity. 0 = flexible, 1 = fully rigid
-    pi : steady-state (for now) inflation level.  Will be changed.
-
-    Returns
-    -------
-
-    Tv : The next iteration of the value function v. Instance of LinInterp.
-    """
-    if grid is None:
-        grid = np.linspace(0.1, 4, 100)
-    if shock is None:
-        sigma = 0.2
-        mu = -(sigma ** 2) / 2
-        trunc = truncate_normal(norm(loc=mu, scale=sigma), .05, .95)
-        shock = np.sort(np.exp(trunc.rvs(30)))
-
-    vals = []
-    w_max = grid[-1]
-    for y in grid:
-        h_ = lambda x: -1 * (np.mean(u_fn(x, shock)) + beta * w((x / (1 + pi))))
-        m1 = maxfun(h_, 0, w_max)
-        m2 = maxfun(h_, y, w_max)
-        vals.append((1 - lambda_) * m1 + lambda_ * m2)
-    return LinInterp(grid, np.array(vals))
+    # Wage(shock).  Doesn't matter which row for free case.
+    wage_schedule = LinInterp(shock, split[0][:, FREE])
+    return Tv, wage_schedule, vals
 
 
 def cycle(vs, max_cycles=100):
@@ -161,7 +123,7 @@ def cycle(vs, max_cycles=100):
     vs = [(w0, {'shock':subshocks[0]}),
           (w0, {'shock':subshocks[1]}),
           (w0, {'shock':subshocks[2]}),
-          (w0, {'shock':subshocks[3]}),
+          (w0, {'shock':subshcks[3]}),
           (w0, {'shock':subshocks[4]})]
     gen = cycle(vs)
     next(gen)
@@ -187,84 +149,31 @@ def cycle(vs, max_cycles=100):
         yield out, ax
 
 
-def get_iterates(w0, maxiter=100, maxfun=maximum, grid=None, lambda_=0.8, pi=2.0,
-                 shock=1):
-    """
-    Generator for bellman()
+def burn_in_vf(w, maxiter=15, lamda_=.8, pi=2, shock=1, argmax=False):
+    grid = w.X
+    w_max = grid[-1]
 
-    Parameters
-    ----------
+    for i in range(1, maxiter):
+        vals = []
+        print("{} / {}".format(i, maxiter))
+        h_ = lambda x: -1 * ((u_(x, shock=1)) + beta * w((x / (1 + pi))))
 
-    init_v : Initial guess for value funtion / policy rule (argmax=True)
-    argmax : Bool
-        True :  policy rule
-        False : value function (default)
+        for y in grid:
+            m1 = maximizer(h_, 0, w_max)  # can be pre-cached/z
+            m2 = maximizer(h_, y, w_max)
+            value = -1 * ((1 - lambda_) * h_(m1) + lambda_ * h_(m2))
+            if argmax:
+                vals.append((m1, m2))
+            else:
+                vals.append(value)
 
+        vals = np.array(vals)
+        if argmax:
+            raise NotImplementedError
+        else:
+            w = LinInterp(grid, vals)
+    return w
 
-    see bellman doc for rest.
-
-    Returns
-    -------
-
-    stream of Tv.
-    """
-    if grid is None:
-        grid = np.linspace(0.1, 4, 100)
-    if shock is None:
-        sigma = 0.2
-        mu = -(sigma ** 2) / 2
-        trunc = truncate_normal(norm(loc=mu, scale=sigma), .05, .95)
-        shock = np.sort(np.exp(trunc.rvs(30)))
-
-    iters = [w0]
-    for i in range(maxiter):
-        Tv = bellman(iters[i], u_, grid=grid, lambda_=lambda_, shock=shock,
-                     pi=pi, maxfun=maxfun)
-        iters.append(Tv)
-        yield Tv
-
-
-def get_iters_takewhile(w0, tol, maxiter=1000, grid=None, lambda_=0.8,
-                        pi=2.0, shock=1, maxfun=maximum):
-    """
-    Wrapper for get_iterators.
-
-    Parameters
-    ----------
-
-    tol : Maximum distance between two succesive iterations.
-
-    for the rest see bellman.
-
-    Returns
-    -------
-
-    Tv: instance of LinInterp.
-    """
-    if grid is None:
-        grid = np.linspace(0.1, 4, 100)
-    if shock is None:
-        sigma = 0.2
-        mu = -(sigma ** 2) / 2
-        trunc = truncate_normal(norm(loc=mu, scale=sigma), .05, .95)
-        shock = np.sort(np.exp(trunc.rvs(30)))
-
-    e = 1
-    previous = w0
-    gen = get_iterates(w0, grid=grid, lambda_=0.8, pi=2.0, shock=1,
-                       maxiter=maxiter, maxfun=maximum)
-
-    for i in range(maxiter):
-        print('iteration: {}, error: {}.'.format(i, e))
-        Tv = next(gen)
-        e = np.max(np.abs(Tv - previous))
-        if e < tol:
-            return Tv
-        previous = Tv
-    else:
-        print("Returning Tv before convergence!\n"
-              "Error is currently: {}".format(e))
-        return Tv
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
