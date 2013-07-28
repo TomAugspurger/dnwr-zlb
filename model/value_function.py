@@ -54,15 +54,10 @@ def bellman(w, u_fn=u_, grid=None, lambda_=0.8, shock=None, pi=2.0):
     """
     Differs from bellman by optimizing for *each* shock, rather than
     for the mean.  I think this is right since the agent observes Z_{it}
-    before choosing w_{it}.
+    *before* choosing w_{it}.
 
-    Returns [(wage, shock, w*)]
-
-    where w* is the convex combo of optimal for constrained vs. unconstrained
-    case.  Currently that is 100 x 1000 x ?
-
-    Operate on the bellman equation. Returns the policy rule or
-    the value function (interpolated linearly) at each point in grid.
+    Operate on the bellman equation. Returns the value function
+    (interpolated linearly) at each point in grid.
 
     Parameters
     ----------
@@ -78,6 +73,9 @@ def bellman(w, u_fn=u_, grid=None, lambda_=0.8, shock=None, pi=2.0):
     -------
 
     Tv : The next iteration of the value function v. Instance of LinInterp.
+    wage_schedule : LinInterp. Wage as function of shock.
+    vals : everything else. temporary. [(wage, shock, free_w*, res_w*)]
+        This will be grid X shocks X 5
     """
     if grid is None:
         grid = np.linspace(0.1, 4, 100)
@@ -91,14 +89,17 @@ def bellman(w, u_fn=u_, grid=None, lambda_=0.8, shock=None, pi=2.0):
     vals = []
     w_max = grid[-1]
 
+    # See equatioon 13 in DH
     h_ = lambda x, ashock: -1 * ((u_fn(x, shock=ashock)) +
                                  beta * w((x / (1 + pi))))
 
     for y in grid:
         for z in shock:
-            m1 = maximizer(h_, 0, w_max, args=(z,))  # can be pre-cached/z
+            if y == grid[0]:
+                m1 = maximizer(h_, 0, w_max, args=(z,))  # can be pre-cached/z
+            else:
+                m1 = vals[np.where(z == shock)[0]][3]
             m2 = maximizer(h_, y, w_max, args=(z,))
-            ## THE CONVEX COMBO SHOULD BE OF THE UTILITIES.
             value = -1 * ((1 - lambda_) * h_(m1, z) + lambda_ * h_(m2, z))
             vals.append([y, z, value, m1, m2])
     vals = np.array(vals)
