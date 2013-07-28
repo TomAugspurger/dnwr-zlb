@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-class LinInterp:
+class LinInterp(object):
     "Provides linear interpolation in one dimension."
 
     def __init__(self, X, Y):
