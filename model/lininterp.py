@@ -12,31 +12,21 @@ import matplotlib.pyplot as plt
 class LinInterp(object):
     "Provides linear interpolation in one dimension."
 
-    def __init__(self, X, Y, kind='linear'):
+    def __init__(self, X, Y):
         """Parameters: X and Y are sequences or arrays
         containing the (x,y) interpolation points.
 
         kind : type of interpolation. one of {"linear", "pchip"}
         """
-        self.X = np.sort(X)
+        self.X = X
         self.Y = Y
-
-        if kind == 'linear':
-            self.interp = interp
-        elif kind == 'pchip':
-            self.interp = pchip_interpolate
-        else:
-            raise NotImplementedError
 
     def __call__(self, z):
         """Parameters: z is a number, sequence or array.
         This method makes an instance f of LinInterp callable,
         so f(z) returns the interpolation value(s) at z.
         """
-        try:
-            return self.interp(z, self.X, self.Y)
-        except ValueError:
-            return self.interp(self.X, self.Y, z)
+        return interp(z, self.X, self.Y)
 
     def __add__(self, other):
         assert (self.X == other.X).all()
@@ -54,4 +44,4 @@ class LinInterp(object):
 
     def __mul__(self, other):
         """Elementwise Multiplication"""
-        return LinInterp(X, Y * self.Y)
+        return LinInterp(self.X, Y * self.Y)
