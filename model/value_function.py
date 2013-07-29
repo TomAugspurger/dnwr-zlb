@@ -140,7 +140,27 @@ def g_p(g, f_dist, tol=1e-3):
     return gp
 
 
-def get_rigid_output():
+def get_rigid_output(grid, shock, eta, gammau), flex):
+    """
+    Eq 18 in DH. Not done yet.
+
+    Parameters
+    ----------
+
+
+
+    Returns
+    -------
+
+
+    """
+    get_sub_w = lambda x: grid[grid > z]
+    p1 = ((eta - 1) / eta) ** (gamma / (1 + gamma))
+    z1 = (1 - lambda_) * sum((1 / shock) ** (gamma * (eta - 1) / (gamma + eta)) * (flex / ws.Y) ** (eta - 1))
+    z2 = lambda_ * sum((1 / shock) ** (gamma * (eta - 1) / (eta + gamma)) * g * (ws.Y) * (1 + pi) * (flex / ws.Y) ** (eta - 1))
+    z3 = lambda_ * sum((1 / shock) ** (gamma * (eta - 1) / (eta + gamma)) * sum((1 + pi) * dg(sub_w * (1 + pi)) * (flex /  sub_w) ** (eta - 1)))
+    p2 = (1 / z_star) ** (gamma / (1 + gamma))
+    return p1 * p2
 
 
 def cycle(vs, max_cycles=100):
