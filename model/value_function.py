@@ -11,11 +11,13 @@ import itertools as it
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.stats import norm
-from scipy.optimize import fminbound
 from scipy import absolute as abs
+from scipy.interpolate import pchip, pchip_interpolate
+from scipy.optimize import fminbound
+from scipy.stats import norm
 
 from vf_iteration import truncate_normal
+
 from lininterp import LinInterp
 #-----------------------------------------------------------------------------
 np.random.seed(42)
@@ -24,7 +26,7 @@ np.random.seed(42)
 beta = .96
 lambda_ = .8  # Their high value
 eta = 2.5
-pi = 2
+pi = .02
 
 grid = np.linspace(0.1, 4, 100)
 sigma = 0.2
@@ -50,7 +52,8 @@ def u_(wage, shock=1, eta=2.5, gamma=0.5, aggL=0.85049063822172699):
 #-----------------------------------------------------------------------------
 
 
-def bellman(w, u_fn=u_, grid=None, lambda_=0.8, shock=None, pi=2.0):
+def bellman(w, u_fn=u_, grid=None, lambda_=0.8, shock=None, pi=.02,
+            cubic=False):
     """
     Differs from bellman by optimizing for *each* shock, rather than
     for the mean.  I think this is right since the agent observes Z_{it}
@@ -107,9 +110,13 @@ def bellman(w, u_fn=u_, grid=None, lambda_=0.8, shock=None, pi=2.0):
     split = np.array(np.split(vals, len(grid)))
     SHOCKS = 1
     FREE = 3
-    Tv = LinInterp(grid, split.mean(SHOCKS)[:, 2])  # operate on this
-    # Wage(shock).  Doesn't matter which row for free case.
-    wage_schedule = LinInterp(shock, split[0][:, FREE])
+    if cubic:
+        Tv = pchip(grid, split.mean(SHOCKS)[:, 2])
+        wage_schedule = pchip(shock, split[0][:, FREE])
+    else:
+        Tv = LinInterp(grid, split.mean(SHOCKS)[:, 2])  # operate on this
+        # Wage(shock).  Doesn't matter which row for free case.
+        wage_schedule = LinInterp(shock, split[0][:, FREE])
     return Tv, wage_schedule, vals
 
 
@@ -140,7 +147,7 @@ def g_p(g, f_dist, tol=1e-3):
     return gp
 
 
-def get_rigid_output(grid, shock, eta, gammau), flex):
+def get_rigid_output(grid, shock, eta, gammau, flex):
     """
     Eq 18 in DH. Not done yet.
 
@@ -197,8 +204,12 @@ def cycle(vs, max_cycles=100):
         yield out, ax
 
 
-def burn_in_vf(w, maxiter=15, lamda_=.8, pi=2, shock=1, argmax=False):
-    grid = w.X
+def burn_in_vf(w, maxiter=15, lamda_=.8, pi=2, shock=1, argmax=False, cubic=False):
+    try:
+        grid = w.X
+    except AttributeError:
+        grid = grid
+
     w_max = grid[-1]
 
     for i in range(1, maxiter + 1):
@@ -219,7 +230,10 @@ def burn_in_vf(w, maxiter=15, lamda_=.8, pi=2, shock=1, argmax=False):
         if argmax:
             raise NotImplementedError
         else:
-            w = LinInterp(grid, vals)
+            if cubic:
+                w = pchip(grid, vals)
+            else:
+                w = LinInterp(grid, vals)
     return w
 
 
