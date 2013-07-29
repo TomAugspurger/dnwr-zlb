@@ -113,6 +113,36 @@ def bellman(w, u_fn=u_, grid=None, lambda_=0.8, shock=None, pi=2.0):
     return Tv, wage_schedule, vals
 
 
+def g_p(g, f_dist, tol=1e-3):
+    """
+    Once you have the wage/shock schedule, use this to get the distribution
+    of wages.
+
+    Parameters
+    ----------
+
+    g : instance of LinInterp.  e.g. LinInterp(grid, grid/4) with Y
+        going from [0, 1].
+    f_dist : instance of lognormal with cdf callable.
+    tol : tolerance for convergence.
+
+    Returns
+    -------
+
+    gp : instance of LinInterp.  Approximation to wage distribution.
+    """
+    e = 1
+    while e > tol:
+        gp = LinInterp(grid, ((1 - lambda_) * f_dist.cdf(grid) +
+                              lambda_ * f_dist.cdf(grid) * g.Y))
+        e = np.max(np.abs(gp - g))
+        g = gp
+    return gp
+
+
+def get_rigid_output():
+
+
 def cycle(vs, max_cycles=100):
     """
     # Example
@@ -249,7 +279,8 @@ def unrestricted_wage_shock_schedule(w0, u_fn, shock=None, pi=pi, grid=None):
     return wage_schedule
 
 
-def restricted_wage_shock_schedule(w0, u_fn, shock=None, lambda_=.8, pi=pi, grid=None):
+def restricted_wage_shock_schedule(w0, u_fn, shock=None, lambda_=.8, pi=pi,
+                                   grid=None):
     if grid is None:
         grid = np.linspace(0.1, 4, 100)
     if shock is None:
