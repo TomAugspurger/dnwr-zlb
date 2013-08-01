@@ -193,7 +193,7 @@ def get_rigid_output(params, ws, flex_ws, gp):
             inner_vals += (1 + pi) * dg(w * (1 + pi)) * (flex_ws(z) / w)**(eta - 1)
 
         p3 += (1 / z)**(gamma * (eta - 1) / (eta + gamma)) * inner_vals * ln_dist.pdf(z)
-    return ((1 - lambda_) * p1 + lambda_ * p2 + lambda_ * p3)**(-(eta + gamma) / (gamma * eta - 1))
+    return ((1 - lambda_) * p1 + lambda_ * (p2 + p3))**(-(eta + gamma) / (gamma * eta - 1))
 
 
 def cycle(vs, max_cycles=100):
