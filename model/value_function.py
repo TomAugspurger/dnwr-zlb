@@ -194,7 +194,7 @@ def get_rigid_output(params, ws, flex_ws, gp):
 
         p3 += (1 / z)**(gamma * (eta - 1) / (eta + gamma)) * inner_vals * ln_dist.pdf(z)
     
-    z_part = ((1 - lambda_) * p1 + lambda_ * (p2 + p3))**(-(eta + gamma) / (gamma * eta - 1))
+    z_part = ((1 - lambda_) * p1 + lambda_ * (p2 + p3))**(-gamma / ((eta - 1) * (gamma + eta)))
     return ((eta - 1) / eta)**(gamma / (1 + gamma)) * (1 / z_part)**(gamma / (1 + gamma))
 
 
