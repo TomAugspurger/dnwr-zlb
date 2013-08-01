@@ -47,7 +47,7 @@ def setup_shocks():
     pass
 
 
-def truncate_normal(original, lower, upper):
+def truncate_distribution(original, lower, upper):
     """
     Return a new normal distribution that is truncated given a
     lower upper tail in probabilities.
@@ -67,7 +67,7 @@ def truncate_normal(original, lower, upper):
     Example
     -------
     z_dist = norm(loc=mu, scale=sigma)
-    trunc = truncate_normal(z_dist, .05, .95)
+    trunc = truncate_distribution(z_dist, .05, .95)
     """
     a, b = original.ppf(lower), original.ppf(upper)
     mu, sigma = original.mean(), original.std()

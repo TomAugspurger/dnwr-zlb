@@ -5,8 +5,8 @@ import json
 
 import nose
 
-from ..vf_iteration import (truncate_normal, ut_c, ut_l, ss_output_flexible,
-                            ss_wage_flexible)
+from ..vf_iteration import (truncate_distribution, ut_c, ut_l,
+                            ss_output_flexible, ss_wage_flexible)
 
 import numpy as np
 from scipy.stats import norm
@@ -72,7 +72,7 @@ class TestDistribution(unittest.TestCase):
 
     def test_truncate(self):
         dist = norm()
-        res = truncate_normal(dist, .05, .95)
+        res = truncate_distribution(dist, .05, .95)
         expected = -np.inf, np.inf
         result = res.ppf(0), res.ppf(1)
         self.assertEquals(expected, result)
