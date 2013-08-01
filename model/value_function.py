@@ -16,7 +16,7 @@ from scipy.interpolate import pchip, pchip_interpolate
 from scipy.optimize import fminbound
 from scipy.stats import norm
 
-from vf_iteration import truncate_normal
+from vf_iteration import truncate_distribution
 
 from lininterp import LinInterp
 #-----------------------------------------------------------------------------
@@ -31,7 +31,7 @@ pi = .02
 grid = np.linspace(0.1, 4, 100)
 sigma = 0.2
 mu = -(sigma ** 2) / 2
-trunc = truncate_normal(norm(loc=mu, scale=sigma), .05, .95)
+trunc = truncate_distribution(norm(loc=mu, scale=sigma), .05, .95)
 shock = np.sort(np.exp(trunc.rvs(30)))
 
 
@@ -85,7 +85,7 @@ def bellman(w, u_fn=u_, grid=None, lambda_=0.8, shock=None, pi=.02,
     if shock is None:
         sigma = 0.2
         mu = -(sigma ** 2) / 2
-        trunc = truncate_normal(norm(loc=mu, scale=sigma), .05, .95)
+        trunc = truncate_distribution(norm(loc=mu, scale=sigma), .05, .95)
         shock = np.sort(np.exp(trunc.rvs(30)))
 
     #--------------------------------------------------------------------------
@@ -303,7 +303,7 @@ def unrestricted_wage_shock_schedule(w0, u_fn, shock=None, pi=pi, grid=None):
     if shock is None:
         sigma = 0.2
         mu = -(sigma ** 2) / 2
-        trunc = truncate_normal(norm(loc=mu, scale=sigma), .05, .95)
+        trunc = truncate_distribution(norm(loc=mu, scale=sigma), .05, .95)
         shock = np.sort(np.exp(trunc.rvs(30)))
 
     w = get_iters_takewhile(w0, tol=.1, maxiter=15, shock=shocks)
@@ -326,7 +326,7 @@ def restricted_wage_shock_schedule(w0, u_fn, shock=None, lambda_=.8, pi=pi,
     if shock is None:
         sigma = 0.2
         mu = -(sigma ** 2) / 2
-        trunc = truncate_normal(norm(loc=mu, scale=sigma), .05, .95)
+        trunc = truncate_distribution(norm(loc=mu, scale=sigma), .05, .95)
         shock = np.sort(np.exp(trunc.rvs(30)))
 
     w = get_iters_takewhile(w0, tol=.1, maxiter=15, shock=shocks)

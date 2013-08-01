@@ -10,7 +10,7 @@ from scipy.stats import norm
 
 from ..lininterp import LinInterp
 from ..value_function import bellman, u_
-from test_vf_iteration import truncate_normal
+from test_vf_iteration import truncate_distribution
 
 np.random.seed(42)
 
@@ -28,7 +28,7 @@ class TestValueFunction(unittest.TestCase):
         grid = np.linspace(0.1, 4, 100)
         sigma = 0.2
         mu = -(sigma ** 2) / 2
-        trunc = truncate_normal(norm(loc=mu, scale=sigma), .05, .95)
+        trunc = truncate_distribution(norm(loc=mu, scale=sigma), .05, .95)
         shock = np.sort(np.exp(trunc.rvs(30)))
         w0 = LinInterp(grid, -grid + 4)
 
