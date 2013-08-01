@@ -14,9 +14,9 @@ import numpy as np
 from scipy import absolute as abs
 from scipy.interpolate import pchip, pchip_interpolate
 from scipy.optimize import fminbound
-from scipy.stats import norm
+from scipy.stats import norm, lognorm
 
-from vf_iteration import truncate_distribution
+from vf_iteration import truncate_distribution, load_params
 
 from lininterp import LinInterp
 #-----------------------------------------------------------------------------
@@ -153,27 +153,47 @@ def g_p(g, f_dist, tol=1e-3, full_output=False):
         return gp
 
 
-def get_rigid_output(grid, shock, eta, gammau, flex):
+def get_rigid_output(params, ws, flex_ws, gp):
     """
-    Eq 18 in DH. Not done yet.
+    Eq 18 in DH. Don't actually use this. p3 is slow.
 
     Parameters
     ----------
 
-
+    params : dict of parameters
+    ws : rigid wage schedule.  Callable e.g. instance of LinInterp.
+    flex_ws: flexible wage schedule.  Also callable.
+    gp: Probability densitity function for wage distribution.
+        Derived from g_p.
 
     Returns
     -------
 
-
+    output: float.  Also equal to labor in this model.
     """
-    get_sub_w = lambda x: grid[grid > z]
-    p1 = ((eta - 1) / eta) ** (gamma / (1 + gamma))
-    z1 = (1 - lambda_) * sum((1 / shock) ** (gamma * (eta - 1) / (gamma + eta)) * (flex / ws.Y) ** (eta - 1))
-    z2 = lambda_ * sum((1 / shock) ** (gamma * (eta - 1) / (eta + gamma)) * g * (ws.Y) * (1 + pi) * (flex / ws.Y) ** (eta - 1))
-    z3 = lambda_ * sum((1 / shock) ** (gamma * (eta - 1) / (eta + gamma)) * sum((1 + pi) * dg(sub_w * (1 + pi)) * (flex /  sub_w) ** (eta - 1)))
-    p2 = (1 / z_star) ** (gamma / (1 + gamma))
-    return p1 * p2
+    sigma, grid, shock, eta, gamma = (params['sigma'][0], params['grid'][0],
+                                      params['shock'][0], params['eta'][0],
+                                      params['gamma'][0])
+    ln_dist = lognorm(sigma, scale=np.exp(-(sigma)**2 / 2))
+    sub_w = lambda z: grid[grid > ws(z)]  # TODO: check on > vs >=
+    dg = pchip(gp.X, gp.Y).derivative
+
+    p1 = (((1 / shock) ** (gamma * (eta - 1) / (gamma + eta)) *
+           (flex_ws(shock) / ws(shock)) ** (eta - 1)) * ln_dist.pdf(shock)).sum()
+
+    p2 = (((1 / shock) ** (gamma * (eta - 1) / (gamma + eta)) *
+          gp(ws(shock) * (1 + pi)) * (flex_ws(shock) / ws(shock)) ** (eta - 1)) *
+          ln_dist.pdf(shock)).sum()
+
+    p3 = 0.0
+    for z in shock:
+        inner_range = sub_w(shock[0])
+        inner_vals = 0.0
+        for w in inner_range:
+            inner_vals += (1 + pi) * dg(w * (1 + pi)) * (flex_ws(z) / w)**(eta - 1)
+
+        p3 += (1 / z)**(gamma * (eta - 1) / (eta + gamma)) * inner_vals * ln_dist.pdf(z)
+    return ((1 - lambda_) * p1 + lambda_ * p2 + lambda_ * p3)**(-(eta + gamma) / (gamma * eta - 1))
 
 
 def cycle(vs, max_cycles=100):
