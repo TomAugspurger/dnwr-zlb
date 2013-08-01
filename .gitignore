@@ -104,3 +104,5 @@ data_wrangling/cps_wrangling/panel_construction/store_log.txt
 *.noseids
 *.ipynb_checkpoints/
 *.npy
+*.pck
+*.pkl
