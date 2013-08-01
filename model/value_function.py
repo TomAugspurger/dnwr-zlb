@@ -193,9 +193,9 @@ def get_rigid_output(params, ws, flex_ws, gp):
             inner_vals += (1 + pi) * dg(w * (1 + pi)) * (flex_ws(z) / w)**(eta - 1)
 
         p3 += (1 / z)**(gamma * (eta - 1) / (eta + gamma)) * inner_vals * ln_dist.pdf(z)
-    
-    z_part = ((1 - lambda_) * p1 + lambda_ * (p2 + p3))**(-gamma / ((eta - 1) * (gamma + eta)))
-    return ((eta - 1) / eta)**(gamma / (1 + gamma)) * (1 / z_part)**(gamma / (1 + gamma))
+    # z_part is \tilde{Z} in my notes.
+    z_part = ((1 - lambda_) * p1 + lambda_ * (p2 + p3))**(1 / (1 - eta))
+    return ((eta - 1) / eta)**(gamma / (1 + gamma)) * (1 / z_part)**((gamma + eta) / (1 + gamma))
 
 
 def cycle(vs, max_cycles=100):
