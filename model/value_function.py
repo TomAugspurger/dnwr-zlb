@@ -18,7 +18,7 @@ from scipy.stats import norm, lognorm
 
 from vf_iteration import truncate_distribution, load_params
 
-from lininterp import LinInterp
+from lininterp import LinInterp, Interp
 #-----------------------------------------------------------------------------
 np.random.seed(42)
 # Parameters
@@ -53,7 +53,7 @@ def u_(wage, shock=1, eta=2.5, gamma=0.5, aggL=0.85049063822172699):
 
 
 def bellman(w, u_fn=u_, grid=None, lambda_=0.8, shock=None, pi=.02,
-            cubic=False):
+            kind=None):
     """
     Differs from bellman by optimizing for *each* shock, rather than
     for the mean.  I think this is right since the agent observes Z_{it}
@@ -71,6 +71,8 @@ def bellman(w, u_fn=u_, grid=None, lambda_=0.8, shock=None, pi=.02,
     lambda : float. Degree of wage rigidity. 0 = flexible, 1 = fully rigid
     shock : array. Draws from a lognormal distribution.
     pi : steady-state (for now) inflation level.  Will be changed.
+    kind : type of interpolation.  Defualt taken from w.
+        Overridden if not None. str or int.  See scipy.interpolate.interp1d
 
     Returns
     -------
@@ -88,6 +90,7 @@ def bellman(w, u_fn=u_, grid=None, lambda_=0.8, shock=None, pi=.02,
         trunc = truncate_distribution(norm(loc=mu, scale=sigma), .05, .95)
         shock = np.sort(np.exp(trunc.rvs(30)))
 
+    kind = kind or w.kind
     #--------------------------------------------------------------------------
     vals = []
     w_max = grid[-1]
@@ -110,13 +113,9 @@ def bellman(w, u_fn=u_, grid=None, lambda_=0.8, shock=None, pi=.02,
     split = np.array(np.split(vals, len(grid)))
     SHOCKS = 1
     FREE = 3
-    if cubic:
-        Tv = pchip(grid, split.mean(SHOCKS)[:, 2])
-        wage_schedule = pchip(shock, split[0][:, FREE])
-    else:
-        Tv = LinInterp(grid, split.mean(SHOCKS)[:, 2])  # operate on this
-        # Wage(shock).  Doesn't matter which row for free case.
-        wage_schedule = LinInterp(shock, split[0][:, FREE])
+    Tv = Interp(grid, split.mean(SHOCKS)[:, 2], kind=kind)  # operate on this
+    # Wage(shock).  Doesn't matter which row for free case.
+    wage_schedule = Interp(shock, split[0][:, FREE], kind=kind)
     return Tv, wage_schedule, vals
 
 
@@ -128,7 +127,7 @@ def g_p(g, f_dist, tol=1e-3, full_output=False):
     Parameters
     ----------
 
-    g : instance of LinInterp.  e.g. LinInterp(grid, grid/4) with Y
+    g : instance of pchip.  e.g. pchip(grid, grid/4) with Y
         going from [0, 1].
     f_dist : instance of lognormal with cdf callable.
     tol : tolerance for convergence.
@@ -136,12 +135,12 @@ def g_p(g, f_dist, tol=1e-3, full_output=False):
     Returns
     -------
 
-    gp : instance of LinInterp.  Approximation to wage distribution.
+    gp : instance of pchip.  Approximation to wage distribution.
     """
     e = 1
     vals = []
     while e > tol:
-        gp = LinInterp(grid, ((1 - lambda_) * f_dist.cdf(grid) +
+        gp = pchip(grid, ((1 - lambda_) * f_dist.cdf(grid) +
                               lambda_ * f_dist.cdf(grid) * g.Y))
         e = np.max(np.abs(gp - g))
         g = gp
@@ -195,7 +194,7 @@ def get_rigid_output(params, ws, flex_ws, gp):
         p3 += (1 / z)**(gamma * (eta - 1) / (eta + gamma)) * inner_vals * ln_dist.pdf(z)
     # z_part is \tilde{Z} in my notes.
     z_part = ((1 - lambda_) * p1 + lambda_ * (p2 + p3))**(1 / (1 - eta))
-    return ((eta - 1) / eta)**(gamma / (1 + gamma)) * (1 / z_part)**((gamma + eta) / (1 + gamma))
+    return ((eta - 1) / eta)**(gamma / (1 + gamma)) * (1 / z_part)**((gamma + eta) / ((eta - 1) * (1 + gamma)))
 
 
 def cycle(vs, max_cycles=100):
@@ -232,13 +231,15 @@ def cycle(vs, max_cycles=100):
         yield out, ax
 
 
-def burn_in_vf(w, maxiter=15, lamda_=.8, pi=2, shock=1, argmax=False, cubic=False):
+def burn_in_vf(w, maxiter=15, lamda_=.8, pi=2, shock=1, argmax=False,
+               kind=None):
     try:
         grid = w.X
     except AttributeError:
         grid = grid
 
     w_max = grid[-1]
+    kind = kind or w.kind
 
     for i in range(1, maxiter + 1):
         vals = []
@@ -258,10 +259,7 @@ def burn_in_vf(w, maxiter=15, lamda_=.8, pi=2, shock=1, argmax=False, cubic=Fals
         if argmax:
             raise NotImplementedError
         else:
-            if cubic:
-                w = pchip(grid, vals)
-            else:
-                w = LinInterp(grid, vals)
+            w = Interp(grid, vals, kind=kind)
     return w
 
 

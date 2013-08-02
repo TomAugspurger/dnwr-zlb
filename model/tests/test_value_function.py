@@ -8,7 +8,7 @@ from numpy.testing.decorators import slow
 from scipy.optimize import fminbound
 from scipy.stats import norm
 
-from ..lininterp import LinInterp
+from ..lininterp import LinInterp, Interp
 from ..value_function import bellman, u_
 from test_vf_iteration import truncate_distribution
 
@@ -30,7 +30,7 @@ class TestValueFunction(unittest.TestCase):
         mu = -(sigma ** 2) / 2
         trunc = truncate_distribution(norm(loc=mu, scale=sigma), .05, .95)
         shock = np.sort(np.exp(trunc.rvs(30)))
-        w0 = LinInterp(grid, -grid + 4)
+        w0 = Interp(grid, -grid + 4)
 
         Tv, ws, vals = bellman(w0, u_, grid=grid, lambda_=.8, shock=shock)
         expected_y = np.array([

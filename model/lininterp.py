@@ -66,7 +66,7 @@ class Interp(object):
         This method makes an instance f of LinInterp callable,
         so f(z) returns the interpolation value(s) at z.
         """
-        return interp1d(z, self.X, self.Y, kind=self.kind)
+        return interp1d(self.X, self.Y, kind=self.kind)(z)
 
     def __add__(self, other):
         assert (self.X == other.X).all()
