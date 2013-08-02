@@ -91,4 +91,3 @@ class Interp(object):
     def inverse(self):
         return Interp(self.Y, self.X, kind=self.kind)
 
-

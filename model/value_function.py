@@ -172,28 +172,31 @@ def get_rigid_output(params, ws, flex_ws, gp):
     sigma, grid, shock, eta, gamma = (params['sigma'][0], params['grid'][0],
                                       params['shock'][0], params['eta'][0],
                                       params['gamma'][0])
-    ln_dist = lognorm(sigma, scale=np.exp(-(sigma)**2 / 2))
     sub_w = lambda z: grid[grid > ws(z)]  # TODO: check on > vs >=
     dg = pchip(gp.X, gp.Y).derivative
 
-    p1 = (((1 / shock) ** (gamma * (eta - 1) / (gamma + eta)) *
-           (flex_ws(shock) / ws(shock)) ** (eta - 1)) * ln_dist.pdf(shock)).sum()
+    p1 = ((1 / shock) ** (gamma * (eta - 1) / (gamma + eta)) *
+          (flex_ws(shock) / ws(shock)) ** (eta - 1)).mean()
 
-    p2 = (((1 / shock) ** (gamma * (eta - 1) / (gamma + eta)) *
-          gp(ws(shock) * (1 + pi)) * (flex_ws(shock) / ws(shock)) ** (eta - 1)) *
-          ln_dist.pdf(shock)).sum()
+    p2 = ((1 / shock) ** (gamma * (eta - 1) / (gamma + eta)) *
+          gp(ws(shock) * (1 + pi)) * (flex_ws(shock) / ws(shock)) ** (eta - 1)).mean()
+
+    inner_f = lambda w, z: ((1 + pi) * dg(w * (1 + pi)) *
+                            (flex_ws(z) / w)**(eta - 1))
 
     p3 = 0.0
     for z in shock:
-        inner_range = sub_w(shock[0])
-        inner_vals = 0.0
-        for w in inner_range:
-            inner_vals += (1 + pi) * dg(w * (1 + pi)) * (flex_ws(z) / w)**(eta - 1)
+        inner_range = sub_w(z)
+        inner_vals = inner_f(inner_range, z).mean()
+        p3 += (1 / z)**(gamma * (eta - 1) / (eta + gamma)) * inner_vals
 
-        p3 += (1 / z)**(gamma * (eta - 1) / (eta + gamma)) * inner_vals * ln_dist.pdf(z)
+    p3 = p3 / len(shock)
+
     # z_part is \tilde{Z} in my notes.
-    z_part = ((1 - lambda_) * p1 + lambda_ * (p2 + p3))**(1 / (1 - eta))
-    return ((eta - 1) / eta)**(gamma / (1 + gamma)) * (1 / z_part)**((gamma + eta) / ((eta - 1) * (1 + gamma)))
+    z_part = ((1 - lambda_) * p1 +
+              lambda_ * (p2 + p3))**(-(eta + gamma) / (gamma * (eta - 1)))
+
+    return ((eta - 1) / eta)**(gamma / (1 + gamma)) * (1 / z_part)**(gamma / (1 + gamma))
 
 
 def cycle(vs, max_cycles=100):
