@@ -11,12 +11,11 @@ import itertools as it
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import absolute as abs
-from scipy.interpolate import pchip, pchip_interpolate
+from scipy.interpolate import pchip
 from scipy.optimize import fminbound
 from scipy.stats import norm, lognorm
 
-from vf_iteration import truncate_distribution, load_params
+from vf_iteration import truncate_distribution
 
 from lininterp import LinInterp, Interp
 #-----------------------------------------------------------------------------
@@ -140,9 +139,9 @@ def g_p(g, f_dist, tol=1e-3, full_output=False):
     e = 1
     vals = []
     while e > tol:
-        gp = pchip(grid, ((1 - lambda_) * f_dist.cdf(grid) +
-                              lambda_ * f_dist.cdf(grid) * g.Y))
-        e = np.max(np.abs(gp - g))
+        gp = Interp(grid, ((1 - lambda_) * f_dist.cdf(grid) +
+                    lambda_ * f_dist.cdf(grid) * g.Y), kind='pchip')
+        e = np.max(np.abs(gp.Y - g.Y))
         g = gp
         if full_output:
             vals.append(g)
@@ -362,8 +361,6 @@ def restricted_wage_shock_schedule(w0, u_fn, shock=None, lambda_=.8, pi=pi,
     by_shock = np.array(by_shock)
     split = np.split(by_shock, len(shock))
     return split
-
-
 
 
 if __name__ == '__main__':

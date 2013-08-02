@@ -4,7 +4,7 @@
 # Corresponds to: Listing 6.4
 
 from scipy import interp
-from scipy.interpolate import pchip_interpolate, interp1d
+from scipy.interpolate import interp1d, pchip
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -46,6 +46,7 @@ class LinInterp(object):
         """Elementwise Multiplication"""
         return LinInterp(self.X, other.Y * self.Y)
 
+
 class Interp(object):
     """Provides an interpolation in one dimension.
     Mostly just compatability.
@@ -66,7 +67,11 @@ class Interp(object):
         This method makes an instance f of LinInterp callable,
         so f(z) returns the interpolation value(s) at z.
         """
-        return interp1d(self.X, self.Y, kind=self.kind)(z)
+        if self.kind == 'pchip':
+            return pchip(self.X, self.Y)(z)
+        else:
+            return interp1d(self.X, self.Y, kind=self.kind,
+                            bounds_error=False)(z)
 
     def __add__(self, other):
         assert (self.X == other.X).all()
