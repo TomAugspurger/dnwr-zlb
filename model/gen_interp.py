@@ -1,5 +1,7 @@
-# Filename: lininterp.py
-# Author: John Stachurski
+"""
+Wrapper for scipy's interpolation module.
+"""
+# Based on work by John Stachurski
 # Date: August 2009
 # Corresponds to: Listing 6.4
 
@@ -89,4 +91,3 @@ class Interp(object):
 
     def inverse(self):
         return Interp(self.Y, self.X, kind=self.kind)
-
