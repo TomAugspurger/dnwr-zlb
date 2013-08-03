@@ -5,7 +5,6 @@
 
 from scipy import interp
 from scipy.interpolate import interp1d, pchip
-import numpy as np
 import matplotlib.pyplot as plt
 
 
