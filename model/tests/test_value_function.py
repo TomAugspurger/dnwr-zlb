@@ -1,5 +1,6 @@
 from __future__ import division
 
+import json
 import unittest
 
 import nose
@@ -8,11 +9,74 @@ from numpy.testing.decorators import slow
 from scipy.optimize import fminbound
 from scipy.stats import norm
 
-from ..lininterp import LinInterp, Interp
+from ..gen_interp import Interp
 from ..value_function import bellman, u_
-from test_vf_iteration import truncate_distribution
+
+from ..helpers import (truncate_distribution, ss_output_flexible,
+                       ss_wage_flexible)
 
 np.random.seed(42)
+
+
+class TestJson(unittest.TestCase):
+    def setUp(self):
+        # figure out relative filepaths
+        with open('./parameters.json') as f:
+            params = json.load(f)
+        self.params = params
+
+    def test_dtypes(self):
+        wl = self.params['wl'][0]
+        self.assertTrue(isinstance(wl, (float, int)))
+
+        wl_desc = self.params['wl'][1]
+        try:  # Python 2.7
+            self.assertTrue(isinstance(wl_desc, basestring))
+        except NameError:  # py3
+            self.assertTrue(isinstance(wl_desc, str))
+
+
+class testFunctions(unittest.TestCase):
+
+    def test_utility(self):
+        wage = 2
+        # eta = 1.5
+        # gamma = 0.5
+        expected = 0.32409060804383427
+        result = u_(wage, shock=.25, eta=2.5, gamma=0.5, aggL=4)
+        self.assertAlmostEqual(expected, result)
+
+    def test_ss_out(self):
+        params = {'gamma': [0.5, '_'], 'eta': [1.5, '_'],
+                  'sigma': [.02, '_']}
+        expected = ((.5 / 1.5) ** (.5 / 1.5) *
+                    (1 / (np.exp(-.5 * 1.5 * 1.5 / 2 * .02 ** 2))) ** (.5 / 1.5)
+                    )
+        result = ss_output_flexible(params)
+        self.assertAlmostEqual(expected, result)
+
+    def test_ss_wage(self):
+        params = {'gamma': [0.5, '_'], 'eta': [2.5, '_'], 'sigma': [0.2, '_']}
+        shock = 1
+        agg_l = ss_output_flexible(params)  # probably bad
+        expected = ((2.5 / 1.5) ** (.5 / 3) * shock ** ((0.5) / (3)) *
+                    agg_l ** (1.5 / 3))
+        self.assertAlmostEqual(expected, ss_wage_flexible(params))
+
+        expected_shock = ((2.5 / 1.5) ** (.5 / 3) * 2 ** (0.5 / 3) *
+                          agg_l ** (1.5 / 3))
+        self.assertAlmostEqual(expected_shock,
+                               ss_wage_flexible(params, shock=2))
+
+
+class TestDistribution(unittest.TestCase):
+
+    def test_truncate(self):
+        dist = norm()
+        res = truncate_distribution(dist, .05, .95)
+        expected = -np.inf, np.inf
+        result = res.ppf(0), res.ppf(1)
+        self.assertEquals(expected, result)
 
 
 class TestValueFunction(unittest.TestCase):
@@ -25,35 +89,52 @@ class TestValueFunction(unittest.TestCase):
 
     @slow
     def test_bellman_smoke(self):
+
+        params = {
+            "lambda_": [0.8, "degree of rigidity"],
+            "pi": [0.02, "target inflation"],
+            "eta": [2.5, "elas. of subs among labor types"],
+            "gamma": [0.5, "frisch elas. of labor supply"],
+            "sigma": [0.2, "std. dev. of log(Z) (shocks)"],
+            "wl": [0.3, "wage lower bound"],
+            "wu": [2.0, "wage upper bound"],
+            "wn": [400, "wage grid point"],
+            "beta": [0.97, "disount factor. check this"],
+            "tol": [10e-6, "error tolerance for iteration"],
+            "sigma": [0.2, "standard dev. of underlying normal dist"]}
+
         grid = np.linspace(0.1, 4, 100)
-        sigma = 0.2
+
+        sigma = params['sigma'][0]
         mu = -(sigma ** 2) / 2
+        params['mu'] = mu, 'mean of underlying nomral distribution.'
         trunc = truncate_distribution(norm(loc=mu, scale=sigma), .05, .95)
         shock = np.sort(np.exp(trunc.rvs(30)))
         w0 = Interp(grid, -grid + 4)
 
-        Tv, ws, vals = bellman(w0, u_, grid=grid, lambda_=.8, shock=shock)
+        Tv, ws, vals = bellman(w0, params=params, u_fn=u_, grid=grid,
+                               shock=shock)
         expected_y = np.array([
-        3.74665947,  3.74665947,  3.74665947,  3.74665947,  3.74665947,
-        3.74665947,  3.74665947,  3.74665947,  3.74665947,  3.74665947,
-        3.74665947,  3.74665947,  3.74665947,  3.74665947,  3.74665947,
-        3.74665947,  3.74665947,  3.74665947,  3.74665947,  3.74665947,
-        3.74664792,  3.74463417,  3.73239643,  3.70625003,  3.66983646,
-        3.62708705,  3.58058904,  3.53201732,  3.48246496,  3.4326414,
-        3.38300242,  3.33383518,  3.28531418,  3.23753869,  3.19055775,
-        3.1443871,   3.09902072,  3.05443862,  3.01061217,  2.96750779,
-        2.92508935,  2.8833198,   2.84216236,  2.80158119,  2.76154183,
-        2.7220115,   2.68295914,  2.64435559,  2.60617344,  2.56838711,
-        2.53097267,  2.49390785,  2.45717186,  2.42074226,  2.38460727,
-        2.34874697,  2.31314575,  2.27778904,  2.24266328,  2.20775582,
-        2.17305483,  2.1385493,   2.10422896,  2.07008418,  2.0361059,
-        2.00228569,  1.96861564,  1.93508832,  1.90169679,  1.86843451,
-        1.83529533,  1.80227066,  1.76936072,  1.73655755,  1.70385633,
-        1.67125251,  1.63874183,  1.60632027,  1.57398393,  1.54172917,
-        1.50955257,  1.47745088,  1.44541826,  1.41345732,  1.38156251,
-        1.3497313,   1.31796122,  1.28624979,  1.25459204,  1.22299126,
-        1.19144269,  1.15994467,  1.12849508,  1.09708945,  1.06573173,
-        1.03441492,  1.00314295,  0.97190926,  0.9407163,   0.90956239])
+            3.77756583,  3.77756583,  3.77756583,  3.77756583,  3.77756583,
+            3.77756583,  3.77756583,  3.77756583,  3.77756583,  3.77756583,
+            3.77756583,  3.77756583,  3.77756583,  3.77756583,  3.77756583,
+            3.77756583,  3.77756583,  3.77756583,  3.77756583,  3.77756583,
+            3.77755226,  3.77546776,  3.76298984,  3.73654061,  3.69981807,
+            3.65675965,  3.60995268,  3.56107198,  3.51121065,  3.46107811,
+            3.41113017,  3.36165395,  3.31282399,  3.26473953,  3.21744961,
+            3.17096999,  3.12529464,  3.08040356,  3.03626814,  2.9928548,
+            2.95012738,  2.90804886,  2.86658245,  2.82569231,  2.78534398,
+            2.74550467,  2.70614335,  2.66723082,  2.62873971,  2.5906444,
+            2.552921,    2.5155472,   2.47850224,  2.44176365,  2.40531968,
+            2.36915041,  2.33324022,  2.29757454,  2.26213981,  2.22692338,
+            2.19191342,  2.15709892,  2.12246961,  2.08801586,  2.05372861,
+            2.01959943,  1.9856204,   1.95178412,  1.91808362,  1.88451237,
+            1.85106422,  1.81773055,  1.78451164,  1.7513995,   1.71838931,
+            1.68547652,  1.65265686,  1.61992634,  1.58728103,  1.5547173,
+            1.52223173,  1.48982107,  1.45747946,  1.42520954,  1.39300577,
+            1.36086559,  1.32878654,  1.29676615,  1.2647994,   1.23288965,
+            1.20103212,  1.16922513,  1.13746658,  1.10575196,  1.07408528,
+            1.04245948,  1.01087856,  0.97933589,  0.94783396,  0.91637111])
 
         np.testing.assert_almost_equal(expected_y, Tv.Y)
 
