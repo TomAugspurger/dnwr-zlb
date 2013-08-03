@@ -72,30 +72,28 @@ def bellman(w, params=None, u_fn=u_, lambda_=None, shock=None, pi=None,
 
     kind = kind or w.kind
     #--------------------------------------------------------------------------
-    vals = []
+    vals = np.zeros((len(grid), len(shock), 5))
     w_max = grid[-1]
 
     # See equatioon 13 in DH
     h_ = lambda x, ashock: -1 * ((u_fn(x, shock=ashock)) +
                                  beta * w((x / (1 + pi))))
 
-    for y in grid:
-        for z in shock:
+    for i, y in enumerate(grid):
+        for j, z in enumerate(shock):
             if y == grid[0]:
                 m1 = maximizer(h_, 0, w_max, args=(z,))  # can be pre-cached/z
             else:
-                m1 = vals[np.where(z == shock)[0]][3]
+                m1 = vals[0, j, 3]  # first page, shock j, m1 in 3rd pos.
             m2 = maximizer(h_, y, w_max, args=(z,))
             value = -1 * ((1 - lambda_) * h_(m1, z) + lambda_ * h_(m2, z))
-            vals.append([y, z, value, m1, m2])
-    vals = np.array(vals)
-    # split is grid x shocks x [w, z, w*, m1, m2]
-    split = np.array(np.split(vals, len(grid)))
+            vals[i, j] = (y, z, value, m1, m2)
+
     SHOCKS = 1
     FREE = 3
-    Tv = Interp(grid, split.mean(SHOCKS)[:, 2], kind=kind)  # operate on this
+    Tv = Interp(grid, vals.mean(SHOCKS)[:, 2], kind=kind)  # operate on this
     # Wage(shock).  Doesn't matter which row for free case.
-    wage_schedule = Interp(shock, split[0][:, FREE], kind=kind)
+    wage_schedule = Interp(shock, vals[0][:, FREE], kind=kind)
     return Tv, wage_schedule, vals
 
 
