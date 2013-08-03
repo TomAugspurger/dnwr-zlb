@@ -60,10 +60,15 @@ def bellman(w, params=None, u_fn=u_, lambda_=None, shock=None, pi=None,
 
     beta = params['beta'][0]
 
-    grid = grid or params['grid'][0]
     lambda_ = lambda_ or params['lambda_'][0]
     pi = pi or params['pi'][0]
-    shock = shock or params['shock'][0]
+
+    # Need if since it's checking using or checks truth of array so any/all
+    if grid is None:
+        grid = params['grid'][0]
+
+    if shock is None:
+        shock = params['shock'][0]
 
     kind = kind or w.kind
     #--------------------------------------------------------------------------
