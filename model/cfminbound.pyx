@@ -23,7 +23,7 @@ cpdef double ch_(double x, double shock, object w,
     res = -1 * (x ** (1 - eta) - ((gamma / (gamma + 1)) * shock * (x ** (-eta) * aggL) ** ((gamma + 1) / gamma)) + beta * w((x / (1 + pi))))
     return res
 
-cdef cfminbound(double x1, double x2, w,
+cpdef cfminbound(double x1, double x2, w,
                  double shock, double pi, double eta=2.5, double gamma=0.5, double beta=.97,
                  int maxfun=500, double xtol=.00001, aggL=0.85049063822172699):
     """
