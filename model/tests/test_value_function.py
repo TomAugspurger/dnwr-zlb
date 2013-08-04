@@ -70,7 +70,7 @@ class testFunctions(unittest.TestCase):
                                ss_wage_flexible(params, shock=2))
 
     def test_ch_(self):
-        expected = -2.308934801683754
+        expected = -2.3293269585464986
         grid = np.linspace(0.1, 4, 100)
         w0 = Interp(grid, -grid + 4)
         result = ch_(2.0, 2.0, w0, .02)

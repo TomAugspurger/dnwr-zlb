@@ -9,7 +9,7 @@ import numpy as np
 cimport numpy as np
 
 cpdef double ch_(double x, double shock, w,
-                    double pi, double beta=.96, double eta=2.5, double gamma=0.5, aggL=0.85049063822172699):
+                    double pi, double beta=.97, double eta=2.5, double gamma=0.5, aggL=0.85049063822172699):
     """
     x: wage for tomorrow
     shock:
@@ -19,7 +19,7 @@ cpdef double ch_(double x, double shock, w,
     return -1 * (x ** (1 - eta) - ((gamma / (gamma + 1)) * shock * (x ** (-eta) * aggL) ** ((gamma + 1) / gamma)) + beta * w((x / (1 + pi))))
 
 cpdef cfminbound(func, double x1, double x2, w,
-                 float shock, double pi, double eta=2.5, double gamma=0.5,
+                 float shock, double pi, double eta=2.5, double gamma=0.5, double beta=.97,
                  int maxfun=500, double xtol=.00001, aggL=0.85049063822172699):
     """
     Minimize the negative of the value function.
@@ -51,7 +51,7 @@ cpdef cfminbound(func, double x1, double x2, w,
         double rat = 0.0
         double e = 0.0
         double x = xf
-        double fx = func(x, shock, w, pi)
+        double fx = func(x, shock, w, pi, beta)
         int num = 1
         fmin_data = (1, xf, fx) # array
 
