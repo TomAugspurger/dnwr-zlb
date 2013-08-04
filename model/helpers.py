@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import fminbound
 from scipy.stats import norm, lognorm
 
+import value_function
 np.random.seed(42)
 #-----------------------------------------------------------------------------
 # Optimizatoin
@@ -137,15 +138,33 @@ def ss_wage_flexible(params, shock=None):
 #
 
 
-def sample_path(ws, params=None, nseries=50):
+def sample_path(ws, params, nseries=50):
     """
     Given a wage schedule, simulate the sample path of length nseries.
     """
-    if params is None:
-        params = load_params()
 
     ln_dist = params['ln_dist'][0]
     shocks = clean_shocks(ln_dist.rvs(nseries), params['shock'][0])
 
     line = plt.plot(ws(shocks))
     return line
+
+
+def iter_bellman(v, tol=1e-3, maxiter=100, strict=True, **kwargs):
+    """
+    """
+    e = 1
+    for i in range(maxiter):
+        Tv, ws, rest = value_function.bellman(v, **kwargs)
+        e = np.max(np.abs(Tv.Y - v.Y))
+        if e < tol:
+            return Tv, ws, rest
+        v = Tv
+        print("At iteration {} the error is {}".format(i, e))
+    else:
+        print("Returning before convergence! specified tolerance was {},"
+              " but current error is {}".format(tol, e))
+        if strict:
+            raise ValueError
+        else:
+            return Tv, ws, rest

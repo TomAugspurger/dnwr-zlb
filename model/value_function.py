@@ -11,7 +11,7 @@ import numpy as np
 from scipy.interpolate import pchip
 
 from gen_interp import Interp
-from helpers import load_params, maximizer
+from helpers import maximizer
 from cfminbound import opt_loop
 #-----------------------------------------------------------------------------
 np.random.seed(42)
@@ -26,7 +26,7 @@ def u_(wage, shock=1, eta=2.5, gamma=0.5, aggL=0.85049063822172699):
 #-----------------------------------------------------------------------------
 
 
-def bellman(w, params=None, u_fn=u_, lambda_=None, shock=None, pi=None,
+def bellman(w, params, u_fn=u_, lambda_=None, shock=None, pi=None,
             kind=None, grid=None):
     """
     Differs from bellman by optimizing for *each* shock, rather than
@@ -56,8 +56,6 @@ def bellman(w, params=None, u_fn=u_, lambda_=None, shock=None, pi=None,
     vals : everything else. temporary. [(wage, shock, free_w*, res_w*)]
         This will be grid X shocks X 5
     """
-    if params is None:
-        params = load_params()
 
     lambda_ = lambda_ or params['lambda_'][0]
     pi = pi or params['pi'][0]
@@ -82,7 +80,7 @@ def bellman(w, params=None, u_fn=u_, lambda_=None, shock=None, pi=None,
     return Tv, wage_schedule, vals
 
 
-def g_p(g, f_dist, params=None, tol=1e-3, full_output=False):
+def g_p(g, f_dist, params, tol=1e-3, full_output=False):
     """
     Once you have the wage/shock schedule, use this to get the distribution
     of wages.
@@ -100,9 +98,6 @@ def g_p(g, f_dist, params=None, tol=1e-3, full_output=False):
 
     gp : instance of pchip.  Approximation to wage distribution.
     """
-    if params is None:
-        params = load_params()
-
     lambda_ = params['lambda_'][0]
     grid = params['grid'][0]
 
@@ -170,9 +165,7 @@ def get_rigid_output(params, ws, flex_ws, gp):
     return ((eta - 1) / eta)**(gamma / (1 + gamma)) * (1 / z_part)**(gamma / (1 + gamma))
 
 
-def burn_in_vf(w, params=None, maxiter=15, shock=1, kind=None):
-    if params is None:
-        params = load_params()
+def burn_in_vf(w, params, maxiter=15, shock=1, kind=None):
     lambda_, pi, beta = params['lambda_'][0], params['pi'][0], params['beta'][0]
     try:
         grid = w.X
