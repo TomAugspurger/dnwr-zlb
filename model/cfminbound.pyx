@@ -136,3 +136,47 @@ cpdef cfminbound(func, double x1, double x2, w,
 
     fval = fx
     return xf
+#-----------------------------------------------------------------------------
+# Main eval loop
+
+cpdef np.ndarray opt_loop(np.ndarray vals, np.ndarray grid, np.ndarray shock,
+                           object w, double pi, double lambda_):
+    """
+    This is the double loop at the heart of the optimization problem.
+
+    Parameters
+    ----------
+    vals : ndarray :: Initially zeros; will be filled.
+        (len(grid) x len(shock) x 5) where 5 is
+        (wage, shock, convex combo of vals, free val, restricted val)
+    grid : ndarray :: discrete set of wages
+    shock : ndarray :: discrete set of shocks.
+
+    Returns
+    -------
+
+    vals : ndarray :: filled in values.
+    """
+    cdef:
+        int i = 0
+        int j = 0
+        double w_max = grid[-1]
+        double y, z, m1, m2, value
+
+        ngrid = range(len(grid))
+        nshock = range(len(shock))
+
+    for i in ngrid:
+        y = grid[i]
+        for j in nshock:
+            z = shock[j]
+
+            if i == 0:
+                m1 = cfminbound(ch_, 0, w_max, w, z, pi)
+            else:
+                m1 = vals[0, j, 3]
+            m2 = cfminbound(ch_, y, w_max, w, z, pi)
+            value = -1 * ((1 - lambda_) * ch_(m1, z, w, pi) + lambda_ * ch_(m2, z, w, pi))
+            vals[i, j] = (y, z, value, m1, m2)
+
+    return vals

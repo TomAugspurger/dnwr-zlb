@@ -12,7 +12,7 @@ from scipy.interpolate import pchip
 
 from gen_interp import Interp
 from helpers import load_params, maximizer
-from cfminbound import ch_, cfminbound
+from cfminbound import opt_loop
 #-----------------------------------------------------------------------------
 np.random.seed(42)
 
@@ -72,18 +72,7 @@ def bellman(w, params=None, u_fn=u_, lambda_=None, shock=None, pi=None,
     kind = kind or w.kind
     #--------------------------------------------------------------------------
     vals = np.zeros((len(grid), len(shock), 5))
-    w_max = grid[-1]
-
-    for i, y in enumerate(grid):
-        for j, z in enumerate(shock):
-            if y == grid[0]:
-                m1 = cfminbound(ch_, 0, w_max, w, z, pi)  # can be pre-cached/z
-            else:
-                m1 = vals[0, j, 3]  # first page, shock j, m1 in 3rd pos.
-            m2 = cfminbound(ch_, y, w_max, w, z, pi)
-            value = -1 * ((1 - lambda_) * ch_(m1, z, w, pi) +
-                          lambda_ * ch_(m2, z, w, pi))
-            vals[i, j] = (y, z, value, m1, m2)
+    vals = opt_loop(vals, grid, shock, w, pi, lambda_)
 
     SHOCKS = 1
     FREE = 3
