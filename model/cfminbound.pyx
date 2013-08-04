@@ -1,3 +1,5 @@
+# cython: profile=True
+
 cdef extern from "/usr/include/math.h":
     double sqrt(double x)
     double fabs(double)

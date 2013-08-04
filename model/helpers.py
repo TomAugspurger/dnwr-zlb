@@ -9,7 +9,7 @@ from __future__ import division
 import json
 
 import numpy as np
-
+import matplotlib.pyplot as plt
 from scipy.optimize import fminbound
 from scipy.stats import norm, lognorm
 
@@ -55,7 +55,7 @@ def load_params(pth='parameters.json'):
     ln_dist = truncate_distribution(
         lognorm(sigma, scale=np.exp(-(sigma)**2 / 2)), .05, .95)
 
-    params['ln_dist'] = ln_dist, 'Frozen log-normal distribution'
+    params['ln_dist'] = ln_dist, 'Truncated Frozen log-normal distribution'
     return params
 
 
@@ -132,3 +132,20 @@ def ss_wage_flexible(params, shock=None):
             shock ** (gamma / (gamma + eta)) *
             agg_l ** ((1 + gamma) / (gamma + eta)))
     return wage
+
+#----------------------------------------------------------------------------
+#
+
+
+def sample_path(ws, params=None, nseries=50):
+    """
+    Given a wage schedule, simulate the sample path of length nseries.
+    """
+    if params is None:
+        params = load_params()
+
+    ln_dist = params['ln_dist'][0]
+    shocks = clean_shocks(ln_dist.rvs(nseries), params['shock'][0])
+
+    line = plt.plot(ws(shocks))
+    return line
