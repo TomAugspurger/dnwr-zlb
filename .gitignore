@@ -35,7 +35,7 @@ nosetests.xml
 .pydevproject
 
 ###LaTeX###
- 
+
 *.acn
 *.acr
 *.alg
@@ -71,7 +71,7 @@ nosetests.xml
 *.fls
 
 ###SublimeText###
- 
+
 # SublimeText project files
 /*.sublime-project
 *.sublime-workspace
@@ -106,3 +106,4 @@ data_wrangling/cps_wrangling/panel_construction/store_log.txt
 *.npy
 *.pck
 *.pkl
+model/*.html

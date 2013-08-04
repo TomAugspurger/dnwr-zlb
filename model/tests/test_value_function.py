@@ -9,7 +9,7 @@ from numpy.testing.decorators import slow
 from scipy.optimize import fminbound
 from scipy.stats import norm
 
-from ..cfminbound import cfminbound, ch_
+from ..cfminbound import ch_
 from ..gen_interp import Interp
 from ..value_function import bellman, u_
 

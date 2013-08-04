@@ -6,29 +6,29 @@ cdef extern from "/usr/include/math.h":
     int copysign(int, double)
 
 import numpy as np
-cimport numpy as np
 cimport cython
 cimport numpy as np
 
-cpdef double ch_(double x, double shock, w,
-                    double pi, double beta=.97, double eta=2.5, double gamma=0.5, aggL=0.85049063822172699):
+cpdef double ch_(double x, double shock, object w,
+                    double pi, double beta=.97, double eta=2.5, double gamma=0.5, double aggL=0.85049063822172699):
     """
     x: wage for tomorrow
     shock:
     w:
     pi:
     """
-    return -1 * (x ** (1 - eta) - ((gamma / (gamma + 1)) * shock * (x ** (-eta) * aggL) ** ((gamma + 1) / gamma)) + beta * w((x / (1 + pi))))
+    cdef double res
+    res = -1 * (x ** (1 - eta) - ((gamma / (gamma + 1)) * shock * (x ** (-eta) * aggL) ** ((gamma + 1) / gamma)) + beta * w((x / (1 + pi))))
+    return res
 
-cpdef cfminbound(func, double x1, double x2, w,
-                 float shock, double pi, double eta=2.5, double gamma=0.5, double beta=.97,
+cdef cfminbound(double x1, double x2, w,
+                 double shock, double pi, double eta=2.5, double gamma=0.5, double beta=.97,
                  int maxfun=500, double xtol=.00001, aggL=0.85049063822172699):
     """
     Minimize the negative of the value function.
 
     Parameters
     ----------
-    func: function to be minimized
     x1 : lower bound
     x2 : upper bound
     w : value function
@@ -53,9 +53,9 @@ cpdef cfminbound(func, double x1, double x2, w,
         double rat = 0.0
         double e = 0.0
         double x = xf
-        double fx = func(x, shock, w, pi, beta)
+        double fx = ch_(x, shock, w, pi, beta)
         int num = 1
-        fmin_data = (1, xf, fx) # array
+        # fmin_data = (1, xf, fx) # array
 
         double ffulc = fx
         double fnfc = fx
@@ -63,7 +63,7 @@ cpdef cfminbound(func, double x1, double x2, w,
         double tol1 = sqrt_eps * fabs(xf) + xtol / 3.0
         double tol2 = 2.0 * tol1
 
-        int golden, flag
+        int golden, flag, si
         double r, q, p
 
     while (fabs(xf - xm) > (tol2 - 0.5 * (b - a))):
@@ -105,9 +105,9 @@ cpdef cfminbound(func, double x1, double x2, w,
 
         si = copysign(1, rat) + (rat == 0)
         x = xf + si * fmaxf(fabs(rat), tol1)
-        fu = func(x, shock, w, pi, beta)
+        fu = ch_(x, shock, w, pi, beta)
         num += 1
-        fmin_data = (num, x, fu)
+        # fmin_data = (num, x, fu)
 
         if fu <= fx:
             if x >= xf:
@@ -182,10 +182,10 @@ def opt_loop(np.ndarray[DTYPE_t, ndim=3] vals, np.ndarray[DTYPE_t, ndim=1] grid,
             z = shock[j]
 
             if i == 0:
-                m1 = cfminbound(ch_, 0, w_max, w, z, pi)
+                m1 = cfminbound(0, w_max, w, z, pi)
             else:
                 m1 = vals[0, j, 3]
-            m2 = cfminbound(ch_, y, w_max, w, z, pi)
+            m2 = cfminbound(y, w_max, w, z, pi)
             value = -1 * ((1 - lambda_) * ch_(m1, z, w, pi) + lambda_ * ch_(m2, z, w, pi))
             vals[i, j, 0] = y
             vals[i, j, 1] = z
