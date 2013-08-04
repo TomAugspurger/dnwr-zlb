@@ -7,6 +7,8 @@ cdef extern from "/usr/include/math.h":
 
 import numpy as np
 cimport numpy as np
+cimport cython
+cimport numpy as np
 
 cpdef double ch_(double x, double shock, w,
                     double pi, double beta=.97, double eta=2.5, double gamma=0.5, aggL=0.85049063822172699):
@@ -138,9 +140,17 @@ cpdef cfminbound(func, double x1, double x2, w,
     return xf
 #-----------------------------------------------------------------------------
 # Main eval loop
+DTYPE = np.double
+# "ctypedef" assigns a corresponding compile-time type to DTYPE_t. For
+# every type in the numpy module there's a corresponding compile-time
+# type with a _t-suffix.
+ctypedef np.double_t DTYPE_t
 
-cpdef np.ndarray opt_loop(np.ndarray vals, np.ndarray grid, np.ndarray shock,
-                           object w, double pi, double lambda_):
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def opt_loop(np.ndarray[DTYPE_t, ndim=3] vals, np.ndarray[DTYPE_t, ndim=1] grid, np.ndarray[DTYPE_t, ndim=1] shock,
+             object w, double pi, double lambda_):
     """
     This is the double loop at the heart of the optimization problem.
 
@@ -160,15 +170,15 @@ cpdef np.ndarray opt_loop(np.ndarray vals, np.ndarray grid, np.ndarray shock,
     cdef:
         int i = 0
         int j = 0
-        double w_max = grid[-1]
+        int ngrid = grid.shape[0]
+        int nshock = shock.shape[0]
+        double w_max = grid[ngrid - 1]
+
         double y, z, m1, m2, value
 
-        ngrid = range(len(grid))
-        nshock = range(len(shock))
-
-    for i in ngrid:
+    for i in range(ngrid):
         y = grid[i]
-        for j in nshock:
+        for j in range(nshock):
             z = shock[j]
 
             if i == 0:
@@ -177,6 +187,10 @@ cpdef np.ndarray opt_loop(np.ndarray vals, np.ndarray grid, np.ndarray shock,
                 m1 = vals[0, j, 3]
             m2 = cfminbound(ch_, y, w_max, w, z, pi)
             value = -1 * ((1 - lambda_) * ch_(m1, z, w, pi) + lambda_ * ch_(m2, z, w, pi))
-            vals[i, j] = (y, z, value, m1, m2)
+            vals[i, j, 0] = y
+            vals[i, j, 1] = z
+            vals[i, j, 2] = value
+            vals[i, j, 3] = m1
+            vals[i, j, 4] = m2
 
     return vals
