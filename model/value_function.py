@@ -12,6 +12,7 @@ from scipy.interpolate import pchip
 
 from gen_interp import Interp
 from helpers import load_params, maximizer
+from cfminbound import ch_, cfminbound
 #-----------------------------------------------------------------------------
 np.random.seed(42)
 
@@ -58,8 +59,6 @@ def bellman(w, params=None, u_fn=u_, lambda_=None, shock=None, pi=None,
     if params is None:
         params = load_params()
 
-    beta = params['beta'][0]
-
     lambda_ = lambda_ or params['lambda_'][0]
     pi = pi or params['pi'][0]
 
@@ -75,18 +74,15 @@ def bellman(w, params=None, u_fn=u_, lambda_=None, shock=None, pi=None,
     vals = np.zeros((len(grid), len(shock), 5))
     w_max = grid[-1]
 
-    # See equatioon 13 in DH
-    h_ = lambda x, ashock: -1 * ((u_fn(x, shock=ashock)) +
-                                 beta * w((x / (1 + pi))))
-
     for i, y in enumerate(grid):
         for j, z in enumerate(shock):
             if y == grid[0]:
-                m1 = maximizer(h_, 0, w_max, args=(z,))  # can be pre-cached/z
+                m1 = cfminbound(ch_, 0, w_max, w, z, pi)  # can be pre-cached/z
             else:
                 m1 = vals[0, j, 3]  # first page, shock j, m1 in 3rd pos.
-            m2 = maximizer(h_, y, w_max, args=(z,))
-            value = -1 * ((1 - lambda_) * h_(m1, z) + lambda_ * h_(m2, z))
+            m2 = cfminbound(ch_, y, w_max, w, z, pi)
+            value = -1 * ((1 - lambda_) * ch_(m1, z, w, pi) +
+                          lambda_ * ch_(m2, z, w, pi))
             vals[i, j] = (y, z, value, m1, m2)
 
     SHOCKS = 1
