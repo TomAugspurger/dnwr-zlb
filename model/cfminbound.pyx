@@ -25,7 +25,7 @@ cpdef double ch_(double x, double shock, object w,
 
 cpdef cfminbound(double x1, double x2, w,
                  double shock, double pi, double eta=2.5, double gamma=0.5, double beta=.97,
-                 int maxfun=500, double xtol=.00001, aggL=0.85049063822172699):
+                 int maxfun=500, double xtol=.00001, double aggL=0.85049063822172699):
     """
     Minimize the negative of the value function.
 
