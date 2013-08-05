@@ -21,7 +21,7 @@ def bin_results(res_dir):
     binned_results : dict of type -> filename
     """
     binned_results = defaultdict(list)
-    groups = ['results', 'vf', 'ws', 'rigid_output']
+    groups = ['results', 'vf', 'ws', 'gp', 'rigid_output']
     for child in res_dir:
         if child.match('.DS_Store'):
             continue
@@ -33,7 +33,7 @@ def bin_results(res_dir):
 
 def load_pickleable(pth):
     """
-    Use in a comprehension for ws, vf.
+    Use in a comprehension for ws, vf, gp
         pth is a str.
     """
     with open(pth, 'r') as f:

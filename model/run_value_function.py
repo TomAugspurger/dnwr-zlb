@@ -10,7 +10,7 @@ from gen_interp import Interp
 from value_function import get_rigid_output, g_p, iter_bellman
 
 
-def iter_bellman_wrapper(pi):
+def iter_bellman_wrapper(params):
     """
     Call this from a joblib Parallel like.
 
@@ -24,9 +24,9 @@ def iter_bellman_wrapper(pi):
     -------
     None:  Does have side effects.
     """
-    params = load_params()
     grid = params['grid'][0]
     v = Interp(grid, -grid + 29)
+    pi = params['pi'][0]
     Tv, ws, rest = iter_bellman(
         v, tol=0.005, strict=False, log=False, params=params, pi=pi)
     res_dict = {'Tv': Tv, 'ws': ws, 'rest': rest}
@@ -74,11 +74,28 @@ def write_results(res_dict, pi):
                             'pi_' + piname)
     print('Added results for {}'.format(pi))
 
-if __name__ == '__main__':
-    params = load_params()
+
+def unique_param_generator(params):
+    """
+    This is where we'll use argparse to generalize.
+
+    When you generalize add some kind of id for what is special about
+    that run.  Use that for filenaming etc.  E.g. if going over
+    lambda x pi space, set params['id'] = (lambda, pi)
+    """
     pi_low = params['pi_low'][0]
     pi_high = params['pi_high'][0]
     pi_n = params['pi_n'][0]
-
     pi_grid = np.linspace(pi_low, pi_high, pi_n)
-    Parallel(n_jobs=-1)(delayed(iter_bellman_wrapper)(pi) for pi in pi_grid)
+    for pi in pi_grid:
+        params['pi'] = pi, 'Target inflation rate.'
+        yield params
+
+if __name__ == '__main__':
+    # keep load_params outside so that each fork has the same random seed.
+    np.random.seed(42)
+    params = load_params()
+
+    unique_params_set = unique_param_generator(params)
+    Parallel(n_jobs=-1)(delayed(iter_bellman_wrapper)(unique_params)
+                        for unique_params in unique_params_set)
