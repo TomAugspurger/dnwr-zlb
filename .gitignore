@@ -107,3 +107,4 @@ data_wrangling/cps_wrangling/panel_construction/store_log.txt
 *.pck
 *.pkl
 model/*.html
+model/results/*
