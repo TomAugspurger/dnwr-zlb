@@ -104,7 +104,7 @@ def g_p(g, f_dist, params, tol=1e-3, full_output=False):
     gp : instance of pchip.  Approximation to wage distribution.
     """
     lambda_ = params['lambda_'][0]
-    grid = params['grid'][0]
+    grid = g.X
 
     e = 1
     vals = []
@@ -112,6 +112,7 @@ def g_p(g, f_dist, params, tol=1e-3, full_output=False):
         gp = Interp(grid, ((1 - lambda_) * f_dist.cdf(grid) +
                     lambda_ * f_dist.cdf(grid) * g.Y), kind='pchip')
         e = np.max(np.abs(gp.Y - g.Y))
+        print("The error is {}".format(e))
         g = gp
         if full_output:
             vals.append(g)
