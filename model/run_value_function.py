@@ -30,11 +30,6 @@ def iter_bellman_wrapper(params):
     Tv, ws, rest = iter_bellman(
         v, tol=0.005, strict=False, log=False, params=params, pi=pi)
     res_dict = {'Tv': Tv, 'ws': ws, 'rest': rest}
-
-    # full_df = pd.DataFrame({'vfs': vfs, 'wss': wss,
-                            # 'rests': rests, 'wss': wss})
-    # full_df.to_csv('results/vf_results' + str(pi) + '.csv')
-
     #--------------------------------------------------------------------------
     gp, flex_ws = get_wage_distribution(params)
     res_dict['gp'] = gp
