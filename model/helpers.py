@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 from scipy.optimize import fminbound
 from scipy.stats import norm, lognorm
 
-import value_function
 np.random.seed(42)
 #-----------------------------------------------------------------------------
 # Optimizatoin
@@ -148,23 +147,3 @@ def sample_path(ws, params, nseries=50):
 
     line = plt.plot(ws(shocks))
     return line
-
-
-def iter_bellman(v, tol=1e-3, maxiter=100, strict=True, **kwargs):
-    """
-    """
-    e = 1
-    for i in range(maxiter):
-        Tv, ws, rest = value_function.bellman(v, **kwargs)
-        e = np.max(np.abs(Tv.Y - v.Y))
-        if e < tol:
-            return Tv, ws, rest
-        v = Tv
-        print("At iteration {} the error is {}".format(i, e))
-    else:
-        print("Returning before convergence! specified tolerance was {},"
-              " but current error is {}".format(tol, e))
-        if strict:
-            raise ValueError
-        else:
-            return Tv, ws, rest

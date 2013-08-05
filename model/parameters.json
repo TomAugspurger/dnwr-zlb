@@ -9,5 +9,9 @@
     "wn"      : [400, "wage grid point"],
     "beta"    : [0.97, "disount factor. check this"],
     "tol"     : [10e-6, "error tolerance for iteration"],
-    "sigma"   : [0.2, "standard dev. of underlying normal dist"]
+    "sigma"   : [0.2, "standard dev. of underlying normal dist"],
+    "pi_low"  : [0.005, "lowest inflation"],
+    "pi_high" : [0.05, "highest inflation"],
+    "pi_n"    : [20, "number of points in pi grid"]
+
 }

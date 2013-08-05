@@ -8,6 +8,7 @@ v(w) = (1 - lambda_) * (u(today | w' >= 0) + beta * v(w')) +
 from __future__ import division
 
 import numpy as np
+import pandas as pd
 from scipy.interpolate import pchip
 
 from gen_interp import Interp
@@ -77,6 +78,10 @@ def bellman(w, params, u_fn=u_, lambda_=None, shock=None, pi=None,
     Tv = Interp(grid, vals.mean(SHOCKS)[:, 2], kind=kind)  # operate on this
     # Wage(shock).  Doesn't matter which row for free case.
     wage_schedule = Interp(shock, vals[0][:, FREE], kind=kind)
+    vals = pd.Panel(vals, items=grid, major_axis=shock,
+                    minor_axis=['wage', 'shock', 'value', 'm1', 'm2'])
+    vals.major_axis.name = 'shock'
+
     return Tv, wage_schedule, vals
 
 
@@ -189,3 +194,34 @@ def burn_in_vf(w, params, maxiter=15, shock=1, kind=None):
         vals = np.array(vals)
         w = Interp(grid, vals, kind=kind)
     return w
+
+
+def iter_bellman(v, tol=1e-3, maxiter=100, strict=True, log=True, **kwargs):
+    """
+    """
+    params = kwargs.pop('params')
+    e = 1
+    vfs, wss, rests, es = [], [], [], []
+    for i in range(maxiter):
+        Tv, ws, rest = bellman(v, params, **kwargs)
+        e = np.max(np.abs(Tv.Y - v.Y))
+        print("At iteration {} the error is {}".format(i, e))
+        if e < tol:
+            if log:
+                return Tv, ws, rest, vfs, wss, rests, ws
+            else:
+                return Tv, ws, rest
+        if log:
+            vfs.append(Tv)
+            wss.append(ws)
+            rests.append(rest)
+            es.append(es)
+
+        v = Tv
+    else:
+        print("Returning before convergence! specified tolerance was {},"
+              " but current error is {}".format(tol, e))
+        if strict:
+            raise ValueError
+        else:
+            return Tv, ws, rest
