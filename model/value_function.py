@@ -172,6 +172,22 @@ def get_rigid_output(params, ws, flex_ws, gp):
 
 
 def burn_in_vf(w, params, maxiter=15, shock=1, kind=None):
+    """
+    Use to get a rough shape of the vf.
+
+    Parameters
+    ----------
+
+    w : Interp :: value function.
+    params: dict :: parameters
+    maxiter: int :: number of times to run
+    shock: float or array-like
+    kind: str :: interpolation kind
+    Returns
+    -------
+
+    burned :: Interp
+    """
     lambda_, pi, beta = params['lambda_'][0], params['pi'][0], params['beta'][0]
     try:
         grid = w.X
