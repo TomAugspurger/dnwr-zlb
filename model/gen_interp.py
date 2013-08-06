@@ -6,6 +6,7 @@ Wrapper for scipy's interpolation module.
 # Corresponds to: Listing 6.4
 
 from scipy import interp
+from scipy.interpolate.polyint import PchipInterpolator
 from scipy.interpolate import interp1d, pchip
 import matplotlib.pyplot as plt
 
@@ -48,7 +49,7 @@ class LinInterp(object):
         return LinInterp(self.X, other.Y * self.Y)
 
 
-class Interp(object):
+class Interp(PchipInterpolator, object):
     """Provides an interpolation in one dimension.
     Mostly just compatability.
     """
@@ -62,6 +63,9 @@ class Interp(object):
         self.X = X
         self.Y = Y
         self.kind = kind
+        # This will change the methods available fyi.  Be careful w/ linear.
+        if self.kind == 'pchip':
+            PchipInterpolator.__init__(self, X, Y)
 
     def __call__(self, z):
         """Parameters: z is a number, sequence or array.
