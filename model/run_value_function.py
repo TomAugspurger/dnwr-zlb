@@ -47,7 +47,7 @@ def get_wage_distribution(params):
     grid = params['grid'][0]
     # fine_grid = params['fine_grid'][0]
     g0 = Interp(grid, grid/4, kind='pchip')
-    gp = g_p(g0, params['ln_dist'][0], params)
+    gp = g_p(g0, params)
     flex_ws = Interp(shock, ss_wage_flexible(params, shock=shock))
     return gp, flex_ws
 

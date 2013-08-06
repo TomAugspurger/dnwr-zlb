@@ -85,7 +85,7 @@ def bellman(w, params, u_fn=u_, lambda_=None, shock=None, pi=None,
     return Tv, wage_schedule, vals
 
 
-def g_p(g, f_dist, params, tol=1e-3, full_output=False):
+def g_p(g, params, tol=1e-3, full_output=False):
     """
     Once you have the wage/shock schedule, use this to get the distribution
     of wages.
@@ -95,7 +95,6 @@ def g_p(g, f_dist, params, tol=1e-3, full_output=False):
 
     g : instance of pchip.  e.g. pchip(grid, grid/4) with Y
         going from [0, 1].
-    f_dist : instance of lognormal with cdf callable.
     tol : tolerance for convergence.
 
     Returns
@@ -105,6 +104,7 @@ def g_p(g, f_dist, params, tol=1e-3, full_output=False):
     """
     lambda_ = params['lambda_'][0]
     grid = g.X
+    f_dist = params['ln_dist'][0]
 
     e = 1
     vals = []
