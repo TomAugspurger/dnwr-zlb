@@ -30,26 +30,29 @@ def iter_bellman_wrapper(pi):
     grid = params['grid'][0]
     v = Interp(grid, -grid + 29)
     # pi = params['pi'][0]
-    Tv, ws, rest = iter_bellman(
-        v, tol=0.005, strict=False, log=False, params=params, pi=pi)
+    Tv, ws, rest = iter_bellman(v, tol=0.005, strict=False, log=False,
+                                params=params, pi=pi)
     res_dict = {'Tv': Tv, 'ws': ws, 'rest': rest}
-    #--------------------------------------------------------------------------
-    gp, flex_ws = get_wage_distribution(params)
+    #-------------------------------------------------------------------------
+    shock = params['shock'][0]
+    flex_ws = Interp(shock, ss_wage_flexible(params))
+    #-------------------------------------------------------------------------
+    gp = get_wage_distribution(ws, params)
     res_dict['gp'] = gp
-    rigid_out = get_rigid_output(params, ws, flex_ws, gp)
+    #-------------------------------------------------------------------------
+    rigid_out = get_rigid_output(ws, params, flex_ws, gp)
     res_dict['rigid_out'] = rigid_out
+    #-------------------------------------------------------------------------
     write_results(res_dict, pi)
     pass
 
 
-def get_wage_distribution(params):
-    shock = params['shock'][0]
+def get_wage_distribution(ws, params):
     grid = params['grid'][0]
     # fine_grid = params['fine_grid'][0]
     g0 = Interp(grid, grid/4, kind='pchip')
-    gp = g_p(g0, params)
-    flex_ws = Interp(shock, ss_wage_flexible(params, shock=shock))
-    return gp, flex_ws
+    gp = g_p(g0, ws, params)
+    return gp
 
 
 def write_results(res_dict, pi):
@@ -98,7 +101,6 @@ if __name__ == '__main__':
     pi_low = params['pi_low'][0]
     pi_high = params['pi_high'][0]
     pi_n = params['pi_n'][0]
-    params = load_params()
     pi_grid = np.linspace(pi_low, pi_high, pi_n)
     # Parallel(n_jobs=-1)(delayed(iter_bellman_wrapper)(unique_params)
                         # for unique_params in unique_param_generator(params))
