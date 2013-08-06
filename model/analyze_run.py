@@ -1,5 +1,6 @@
 from collections import defaultdict
 import pickle
+import re
 
 from pathlib import Path
 
@@ -49,6 +50,17 @@ def load_single(pth):
         res = float(f.read())
     return res
 
+
+def read_output(fnames):
+    reg = re.compile(r"[tst_]*rigid_output_(\d*).*")
+    pi_out_dict = {}
+    for fname in fnames:
+        # Change the first zero to a decimal point that was
+        # removed during writing.
+        pi = float(reg.match(fname).groups()[0].replace('0', '.', 1))
+        with open(fname, 'rb') as f:
+            pi_out_dict[pi] = float(f.read())
+    return pi_out_dict
 
 if __name__ == '__main__':
     params = load_params()
