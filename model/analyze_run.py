@@ -1,8 +1,10 @@
 from collections import defaultdict
+import itertools as it
 import os
 import pickle
 import re
 
+import pandas as pd
 from pathlib import Path
 
 from helpers import load_params
@@ -52,7 +54,7 @@ def load_single(pth):
     return res
 
 
-def read_output(fnames):
+def _read_rigid_output(fnames, prepend=''):
     """
     Construct a dict of {pi: output} given a list of files.
 
@@ -61,10 +63,6 @@ def read_output(fnames):
     res = read_output(all_files)
     """
     # Trouble with where they run it from.
-    if not os.path.exists(fnames[1]):
-        prepend = 'results/'
-    else:
-        prepend = ''
     reg = re.compile(r"[tst_]*rigid_output_(\d*).*")
     pi_out_dict = {}
     for fname in fnames:
@@ -77,6 +75,72 @@ def read_output(fnames):
         with open(prepend + fname, 'rb') as f:
             pi_out_dict[pi] = float(f.read())
     return pi_out_dict
+
+
+def _read_pickleable(fnames, kind, prepend=''):
+    reg = re.compile(r"[tst_]*" + kind + "_(\d*).*")
+    pi_dict = {}
+    for fname in fnames:
+        # Change the first zero to a decimal point that was
+        # removed during writing.
+        try:
+            pi = float(reg.match(fname).groups()[0].replace('0', '.', 1))
+        except AttributeError:
+            continue
+        with open(prepend + fname, 'rb') as f:
+            pi_dict[pi] = pickle.load(f)
+    return pi_dict
+
+
+def _read_results(fnames, prepend=''):
+    return pd.HDFStore(prepend + 'grouped_results.h5')
+
+
+def group_results(fnames, prepend=''):
+    reg = re.compile(r"[tst_]*results_(\d*).*")
+
+    def filt(x):
+        if x[1] is None:
+            return False
+        else:
+            return True
+
+    matches = it.izip(fnames, map(reg.match, fnames))
+    filtered = it.ifilter(filt, matches)
+    dic = {x[1].groups()[0]: x[0] for x in filtered}
+    store = pd.HDFStore(prepend + 'grouped_results.h5')
+
+    for key, f in dic.iteritems():
+        pan = pd.read_hdf(prepend + f, 'pi_' + key)
+        store.append('pi_' + key, pan)
+    else:
+        store.close()
+
+
+def read_output(fnames, kind):
+    """
+    Public API for reading files of type kind.
+    kind is one of:
+        - rigid_output :: float for output
+        - vf :: Interp for value function
+        - gp :: Interp for wage dist
+        - results :: HDFStore of panels
+    """
+    if not os.path.exists(fnames[1]):
+        prepend = 'results/'
+    else:
+        prepend = ''
+
+    if kind == 'rigid_output':
+        return _read_rigid_output(fnames, prepend)
+    elif kind == 'vf':
+        return _read_pickleable(fnames, kind='vf', prepend=prepend)
+    elif kind == 'gp':
+        return _read_pickleable(fnames, kind='gp', prepend=prepend)
+    elif kind == 'results':
+        if not os.path.exists('results/grouped_results.h5'):
+            group_results(fnames, 'prepend')
+        return _read_results(fnames, prepend)
 
 if __name__ == '__main__':
     params = load_params()
