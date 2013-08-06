@@ -10,7 +10,7 @@ from gen_interp import Interp
 from value_function import get_rigid_output, g_p, iter_bellman
 
 
-def iter_bellman_wrapper(params):
+def iter_bellman_wrapper(pi):
     """
     Call this from a joblib Parallel like.
 
@@ -24,9 +24,12 @@ def iter_bellman_wrapper(params):
     -------
     None:  Does have side effects.
     """
+    np.random.seed(42)
+    params = load_params()
+    params['pi'] = pi, 'inflation target'
     grid = params['grid'][0]
     v = Interp(grid, -grid + 29)
-    pi = params['pi'][0]
+    # pi = params['pi'][0]
     Tv, ws, rest = iter_bellman(
         v, tol=0.005, strict=False, log=False, params=params, pi=pi)
     res_dict = {'Tv': Tv, 'ws': ws, 'rest': rest}
@@ -84,13 +87,20 @@ def unique_param_generator(params):
     pi_grid = np.linspace(pi_low, pi_high, pi_n)
     for pi in pi_grid:
         params['pi'] = pi, 'Target inflation rate.'
+        print(params['pi'])
         yield params
+
 
 if __name__ == '__main__':
     # keep load_params outside so that each fork has the same random seed.
     np.random.seed(42)
     params = load_params()
-
-    unique_params_set = unique_param_generator(params)
-    Parallel(n_jobs=-1)(delayed(iter_bellman_wrapper)(unique_params)
-                        for unique_params in unique_params_set)
+    pi_low = params['pi_low'][0]
+    pi_high = params['pi_high'][0]
+    pi_n = params['pi_n'][0]
+    params = load_params()
+    pi_grid = np.linspace(pi_low, pi_high, pi_n)
+    # Parallel(n_jobs=-1)(delayed(iter_bellman_wrapper)(unique_params)
+                        # for unique_params in unique_param_generator(params))
+    Parallel(n_jobs=-1)(delayed(iter_bellman_wrapper)(pi)
+                        for pi in pi_grid)

@@ -1,4 +1,5 @@
 from collections import defaultdict
+import os
 import pickle
 import re
 
@@ -52,13 +53,28 @@ def load_single(pth):
 
 
 def read_output(fnames):
+    """
+    Construct a dict of {pi: output} given a list of files.
+
+    Example
+    all_files = os.listdir('results/')
+    res = read_output(all_files)
+    """
+    # Trouble with where they run it from.
+    if not os.path.exists(fnames[1]):
+        prepend = 'results/'
+    else:
+        prepend = ''
     reg = re.compile(r"[tst_]*rigid_output_(\d*).*")
     pi_out_dict = {}
     for fname in fnames:
         # Change the first zero to a decimal point that was
         # removed during writing.
-        pi = float(reg.match(fname).groups()[0].replace('0', '.', 1))
-        with open(fname, 'rb') as f:
+        try:
+            pi = float(reg.match(fname).groups()[0].replace('0', '.', 1))
+        except AttributeError:
+            continue
+        with open(prepend + fname, 'rb') as f:
             pi_out_dict[pi] = float(f.read())
     return pi_out_dict
 

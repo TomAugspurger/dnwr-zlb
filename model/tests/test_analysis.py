@@ -15,7 +15,9 @@ class TestAnalysis(unittest.TestCase):
 
     def test_output_name_parse(self):
         fnames = ['tst_rigid_output_000973684210526_.txt',
-                  'tst_rigid_output_000736842105263_.txt']
+                  'tst_rigid_output_000736842105263_.txt',
+                  'thisshouldnotmatch.txt',
+                  '.DS_Store']
         for fname in fnames:
             with open(fname, 'w') as f:
                 f.write('1.0')
