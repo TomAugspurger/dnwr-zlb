@@ -124,6 +124,7 @@ def read_output(fnames, kind):
         - rigid_output :: float for output
         - vf :: Interp for value function
         - gp :: Interp for wage dist
+        - ws :: Interp for wage schedule
         - results :: HDFStore of panels
     """
     if not os.path.exists(fnames[1]):
@@ -133,15 +134,16 @@ def read_output(fnames, kind):
 
     if kind == 'rigid_output':
         return _read_rigid_output(fnames, prepend)
-    elif kind == 'vf':
-        return _read_pickleable(fnames, kind='vf', prepend=prepend)
-    elif kind == 'gp':
-        return _read_pickleable(fnames, kind='gp', prepend=prepend)
+    elif kind in ('vf', 'gp', 'ws'):
+        return _read_pickleable(fnames, kind=kind, prepend=prepend)
     elif kind == 'results':
         if not os.path.exists('results/grouped_results.h5'):
             group_results(fnames, 'prepend')
         return _read_results(fnames, prepend)
-
+    else:
+        raise ValueError("Kind must be one of 'rigid_output'",
+                         "'vf', 'ws', 'gp', or 'results'.",
+                         " Got {} instead.".format(kind))
 if __name__ == '__main__':
     params = load_params()
     res_path = params['results_path'][0]
