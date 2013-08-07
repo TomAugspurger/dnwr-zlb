@@ -62,7 +62,7 @@ class testFunctions(unittest.TestCase):
         agg_l = ss_output_flexible(params)  # probably bad
         expected = ((2.5 / 1.5) ** (.5 / 3) * shock ** ((0.5) / (3)) *
                     agg_l ** (1.5 / 3))
-        self.assertAlmostEqual(expected, ss_wage_flexible(params))
+        self.assertAlmostEqual(expected, ss_wage_flexible(params, shock=shock))
 
         expected_shock = ((2.5 / 1.5) ** (.5 / 3) * 2 ** (0.5 / 3) *
                           agg_l ** (1.5 / 3))
