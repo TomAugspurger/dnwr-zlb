@@ -11,7 +11,7 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import fminbound
-from scipy.stats import norm, lognorm
+from scipy.stats import lognorm, norm, truncnorm
 
 np.random.seed(42)
 #-----------------------------------------------------------------------------
@@ -44,7 +44,7 @@ def load_params(pth='parameters.json'):
     sigma = params['sigma'][0]
     mu = -(sigma ** 2) / 2
     params['mu'] = mu, 'mean of underlying nomral distribution.'
-    trunc = truncate_distribution(norm(loc=mu, scale=sigma), .05, .95)
+    trunc = truncate_norm(norm(loc=mu, scale=sigma), .05, .95)
 
     shock = np.sort(np.exp(trunc.rvs(30)))
     fine_shock = np.sort(np.exp(trunc.rvs(1000)))  # need to deal with endoints
@@ -55,14 +55,14 @@ def load_params(pth='parameters.json'):
     params['fine_grid'] = fine_grid, 'fine_grid'
     params['fine_shock'] = fine_shock, 'fine_shock'
 
-    ln_dist = truncate_distribution(
+    ln_dist = truncate_norm(
         lognorm(sigma, scale=np.exp(-(sigma)**2 / 2)), .05, .95)
 
     params['ln_dist'] = ln_dist, 'Truncated Frozen log-normal distribution'
     return params
 
 
-def truncate_distribution(original, lower, upper):
+def truncate_norm(original, lower, upper):
     """
     Return a new normal distribution that is truncated given a
     lower upper tail in probabilities.
@@ -86,7 +86,7 @@ def truncate_distribution(original, lower, upper):
     """
     a, b = original.ppf(lower), original.ppf(upper)
     mu, sigma = original.mean(), original.std()
-    return norm(loc=mu, scale=sigma, a=a, b=b)
+    return truncnorm(loc=mu, scale=sigma, a=a, b=b)
 
 
 def clean_shocks(new_shocks, calibrated_shocks):

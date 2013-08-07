@@ -255,3 +255,29 @@ def iter_bellman(v, tol=1e-3, maxiter=100, strict=True, log=True, **kwargs):
             raise ValueError
         else:
             return Tv, ws, rest
+
+#-----------------------------------------------------------------------------
+
+
+def py_opt_loop(grid, shock, w, vals, params):
+    """Python dropin for cfminbound.opt_loop"""
+    lambda_ = params['lambda_'][0]
+    beta = params['beta'][0]
+    pi = params['pi'][0]
+    vals = np.zeros((len(grid), len(shock), 5))
+    w_max = grid[-1]
+
+    # See equatioon 13 in DH
+    h_ = lambda x, ashock: -1 * ((u_(x, shock=ashock)) +
+                                 beta * w((x / (1 + pi))))
+
+    for i, y in enumerate(grid):
+        for j, z in enumerate(shock):
+            if y == grid[0]:
+                m1 = maximizer(h_, 0, w_max, args=(z,))  # can be pre-cached/z
+            else:
+                m1 = vals[0, j, 3]  # first page, shock j, m1 in 3rd pos.
+            m2 = maximizer(h_, y, w_max, args=(z,))
+            value = -1 * ((1 - lambda_) * h_(m1, z) + lambda_ * h_(m2, z))
+            vals[i, j] = (y, z, value, m1, m2)
+    return vals
