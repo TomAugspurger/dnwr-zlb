@@ -35,8 +35,11 @@ def load_params(pth='parameters.json'):
     with open(pth) as f:
         params = json.load(f)
 
-    grid = np.linspace(0.1, 4, 100)
-    fine_grid = np.linspace(.1, grid[-1], 10000)
+    wl = params['wl'][0]
+    wu = params['wu'][0]
+    wn = params['wn'][0]
+    grid = np.linspace(wl, wu, wn)
+    fine_grid = np.linspace(wl, wu, 10000)
 
     sigma = params['sigma'][0]
     mu = -(sigma ** 2) / 2
@@ -126,7 +129,7 @@ def ss_wage_flexible(params, shock=None):
     agg_l = ss_output_flexible(params)
 
     if shock is None:
-        shock = 1
+        shock = params['shock'][0]
 
     wage = ((eta / (eta - 1)) ** (gamma / (gamma + eta)) *
             shock ** (gamma / (gamma + eta)) *
