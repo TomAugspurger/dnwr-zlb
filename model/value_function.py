@@ -27,8 +27,8 @@ def u_(wage, shock=1, eta=2.5, gamma=0.5, aggL=0.85049063822172699):
 #-----------------------------------------------------------------------------
 
 
-def bellman(w, params, u_fn=u_, lambda_=None, shock=None, pi=None,
-            kind=None, grid=None):
+def bellman(w, params, u_fn=u_, lambda_=None, z_grid=None, pi=None,
+            kind=None, w_grid=None):
     """
     Differs from bellman by optimizing for *each* shock, rather than
     for the mean.  I think this is right since the agent observes Z_{it}
@@ -56,32 +56,45 @@ def bellman(w, params, u_fn=u_, lambda_=None, shock=None, pi=None,
     wage_schedule : LinInterp. Wage as function of shock.
     vals : everything else. temporary. [(wage, shock, free_w*, res_w*)]
         This will be grid X shocks X 5
+    #-------------------------------------------------------------------------
+    A note on `shock`:  Why am I taking draws from a distribution?
+    I optimize at each draw, and then take the mean over those.  But
+    wouldn't it be better to take a uniform sample over the *support*
+    of the distribution, and then weight the resulting utilities by
+    the *pdf at that point*?  This branch (`rethink_distribution`) attempts
+    to implement this alternative strategy.
     """
 
     lambda_ = lambda_ or params['lambda_'][0]
     pi = pi or params['pi'][0]
+    ln_dist = params['full_ln_dist'][0]
 
     # Need if since it's checking using or checks truth of array so any/all
-    if grid is None:
-        grid = params['grid'][0]
+    if w_grid is None:
+        w_grid = params['w_grid'][0]
 
-    if shock is None:
-        shock = params['shock'][0]
+    if z_grid is None:
+        z_grid = params['z_grid'][0]
 
     kind = kind or w.kind
     #--------------------------------------------------------------------------
-    vals = np.zeros((len(grid), len(shock), 5))
-    vals = opt_loop(vals, grid, shock, w, pi, lambda_)
+    vals = np.zeros((len(w_grid), len(z_grid), 5))
+    vals = opt_loop(vals, w_grid, z_grid, w, pi, lambda_)
 
-    SHOCKS = 1
-    FREE = 3
-    Tv = Interp(grid, vals.mean(SHOCKS)[:, 2], kind=kind)  # operate on this
-    # Wage(shock).  Doesn't matter which row for free case.
-    wage_schedule = Interp(shock, vals[0][:, FREE], kind=kind)
-    vals = pd.Panel(vals, items=grid, major_axis=shock,
-                    minor_axis=['wage', 'shock', 'value', 'm1', 'm2'])
-    vals.major_axis.name = 'shock'
+    vals = pd.Panel(vals, items=w_grid, major_axis=z_grid,
+                    minor_axis=['wage', 'z_grid', 'value', 'm1', 'm2'])
 
+    vals.items.name = 'w_grid'
+    vals.major_axis.name = 'z_grid'
+
+    weights = pd.Series(ln_dist.pdf(vals.major_axis.values.astype('float64')),
+                        index=vals.major_axis)
+    weights /= weights.sum()
+
+    weighted_values = pan.apply(lambda x: x * weights).sum(axis='major').ix['value']
+    Tv = Interp(w_grid, weighted_values.values, kind=kind)
+    # Wage(z_grid).  Doesn't matter which row for free case.
+    wage_schedule = Interp(z_grid, vals.iloc[0]['m1'].values, kind=kind)
     return Tv, wage_schedule, vals
 
 
@@ -137,7 +150,9 @@ def g_p(g, ws, params, tol=1e-3, full_output=False):
 
 def get_rigid_output(ws, params, flex_ws, gp):
     """
-    Eq 18 in DH. Don't actually use this. p3 is slow.
+    This will need to change when using grid.
+
+    Eq 18 in DH.
 
     Parameters
     ----------
@@ -259,21 +274,21 @@ def iter_bellman(v, tol=1e-3, maxiter=100, strict=True, log=True, **kwargs):
 #-----------------------------------------------------------------------------
 
 
-def py_opt_loop(grid, shock, w, vals, params):
+def py_opt_loop(w_grid, z_grid, w, vals, params):
     """Python dropin for cfminbound.opt_loop"""
     lambda_ = params['lambda_'][0]
     beta = params['beta'][0]
     pi = params['pi'][0]
-    vals = np.zeros((len(grid), len(shock), 5))
-    w_max = grid[-1]
+    vals = np.zeros((len(w_grid), len(z_grid), 5))
+    w_max = w_grid[-1]
 
     # See equatioon 13 in DH
     h_ = lambda x, ashock: -1 * ((u_(x, shock=ashock)) +
                                  beta * w((x / (1 + pi))))
 
-    for i, y in enumerate(grid):
-        for j, z in enumerate(shock):
-            if y == grid[0]:
+    for i, y in enumerate(w_grid):
+        for j, z in enumerate(z_grid):
+            if y == w_grid[0]:
                 m1 = maximizer(h_, 0, w_max, args=(z,))  # can be pre-cached/z
             else:
                 m1 = vals[0, j, 3]  # first page, shock j, m1 in 3rd pos.
