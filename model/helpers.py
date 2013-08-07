@@ -68,7 +68,7 @@ def load_params(pth='parameters.json'):
     return params
 
 
-def truncated_draw(params, lower, upper, type='lognorm', size=1000):
+def truncated_draw(params, lower, upper, kind='lognorm', size=1000):
     """
     Return a new normal distribution that is truncated given a
     lower upper tail in probabilities.
@@ -79,7 +79,7 @@ def truncated_draw(params, lower, upper, type='lognorm', size=1000):
     params : dict
     lower : probability chopped off lower end
     upper : probability chopper off the top
-    type : one of:
+    kind : one of:
                 -norm
                 -lognorm
     size : How many draws to take. Default 1000.
@@ -99,13 +99,13 @@ def truncated_draw(params, lower, upper, type='lognorm', size=1000):
     where mu is -(sigma**2) / 2.
     """
     mu, sigma = params['mu'][0], params['sigma'][0]
-    norm_dist = stats.norm(loc=mu, scale=sigma)
+    ln_dist = stats.lognorm(sigma, scale=np.exp(-(sigma) ** 2 / 2))
     a, b = ln_dist.ppf(lower), ln_dist.ppf(upper)
     truncated = stats.truncnorm(a, b).rvs(size)
-    if type == 'lognorm':
-        return np.exp(truncated.rvs(size=size))
-    elif type == 'norm':
-        return truncated.rvs(size=size)
+    if kind == 'lognorm':
+        return np.exp(truncated)
+    elif kind == 'norm':
+        return truncated
     else:
         raise ValueError("Type must be one of 'norm' or 'lognorm'.")
 
