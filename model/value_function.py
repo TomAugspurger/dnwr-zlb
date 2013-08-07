@@ -85,7 +85,7 @@ def bellman(w, params, u_fn=u_, lambda_=None, shock=None, pi=None,
     return Tv, wage_schedule, vals
 
 
-def g_p(g, params, tol=1e-3, full_output=False):
+def g_p(g, ws, params, tol=1e-3, full_output=False):
     """
     Once you have the wage/shock schedule, use this to get the distribution
     of wages.
@@ -105,12 +105,25 @@ def g_p(g, params, tol=1e-3, full_output=False):
     lambda_ = params['lambda_'][0]
     grid = g.X
     f_dist = params['ln_dist'][0]
+    pi = params['pi'][0]
+
+    # z_t(w) in the paper; zs :: wage -> shock
+    # Was having trouble with them choosing wages only on a subset of grid.
+    # Then when I invert I try to map z :: w -> shock I got a bunch of NaNs
+    # since most of the grid was *NOT* covered by the range of ws = z^-1.
+    # I'm renormalizing the grid to cover *just* the area chosen by our
+    # guys.  Need to be careful at the edgees... here and in cfminbound.
+    zs = ws.inverse()
+    good_grid = grid[~np.isnan(zs(grid))]
+    new_low, new_high = good_grid[0], good_grid[-1]
+    new_grid = np.linspace(new_low, new_high, params['wn'][0])
 
     e = 1
     vals = []
     while e > tol:
-        gp = Interp(grid, ((1 - lambda_) * f_dist.cdf(grid) +
-                    lambda_ * f_dist.cdf(grid) * g.Y), kind='pchip')
+        gp = Interp(grid, ((1 - lambda_) * f_dist.cdf(zs(new_grid)) +
+                    lambda_ * f_dist.cdf(zs(new_grid)) * g.Y * (1 + pi)),
+                    kind='pchip')
         e = np.max(np.abs(gp.Y - g.Y))
         print("The error is {}".format(e))
         g = gp
@@ -122,7 +135,7 @@ def g_p(g, params, tol=1e-3, full_output=False):
         return gp
 
 
-def get_rigid_output(params, ws, flex_ws, gp):
+def get_rigid_output(ws, params, flex_ws, gp):
     """
     Eq 18 in DH. Don't actually use this. p3 is slow.
 
