@@ -151,7 +151,7 @@ ctypedef np.double_t DTYPE_t
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def opt_loop(np.ndarray[DTYPE_t, ndim=3] vals, np.ndarray[DTYPE_t, ndim=1] grid, np.ndarray[DTYPE_t, ndim=1] shock,
+def opt_loop(np.ndarray[DTYPE_t, ndim=3] vals, np.ndarray[DTYPE_t, ndim=1] w_grid, np.ndarray[DTYPE_t, ndim=1] z_grid,
              object w, double pi, double lambda_):
     """
     This is the double loop at the heart of the optimization problem.
@@ -159,10 +159,10 @@ def opt_loop(np.ndarray[DTYPE_t, ndim=3] vals, np.ndarray[DTYPE_t, ndim=1] grid,
     Parameters
     ----------
     vals : ndarray :: Initially zeros; will be filled.
-        (len(grid) x len(shock) x 5) where 5 is
-        (wage, shock, convex combo of vals, free val, restricted val)
-    grid : ndarray :: discrete set of wages
-    shock : ndarray :: discrete set of shocks.
+        (len(w_grid) x len(z_grid) x 5) where 5 is
+        (wage, z_grid, convex combo of vals, free val, restricted val)
+    w_grid : ndarray :: discrete set of wages
+    z_grid : ndarray :: discrete set of shocks.
 
     Returns
     -------
@@ -172,16 +172,16 @@ def opt_loop(np.ndarray[DTYPE_t, ndim=3] vals, np.ndarray[DTYPE_t, ndim=1] grid,
     cdef:
         int i = 0
         int j = 0
-        int ngrid = grid.shape[0]
-        int nshock = shock.shape[0]
-        double w_max = grid[ngrid - 1]
+        int ngrid = w_grid.shape[0]
+        int nshock = z_grid.shape[0]
+        double w_max = w_grid[ngrid - 1]
 
         double y, z, m1, m2, value
 
     for i in range(ngrid):
-        y = grid[i]
+        y = w_grid[i]
         for j in range(nshock):
-            z = shock[j]
+            z = z_grid[j]
 
             if i == 0:
                 m1 = cfminbound(0, w_max, w, z, pi)

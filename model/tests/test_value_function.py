@@ -7,13 +7,13 @@ import nose
 import numpy as np
 from numpy.testing.decorators import slow
 from scipy.optimize import fminbound
-from scipy.stats import norm
+from scipy.stats import norm, lognorm
 
 from ..cfminbound import ch_
 from ..gen_interp import Interp
 from ..value_function import bellman, u_
 
-from ..helpers import (truncate_distribution, ss_output_flexible,
+from ..helpers import (ss_output_flexible, truncated_draw,
                        ss_wage_flexible)
 
 np.random.seed(42)
@@ -77,14 +77,14 @@ class testFunctions(unittest.TestCase):
         self.assertEquals(expected, result)
 
 
-class TestDistribution(unittest.TestCase):
+# class TestDistribution(unittest.TestCase):
 
-    def test_truncate(self):
-        dist = norm()
-        res = truncate_distribution(dist, .05, .95)
-        expected = -np.inf, np.inf
-        result = res.ppf(0), res.ppf(1)
-        self.assertEquals(expected, result)
+    # def test_truncate(self):
+    # #     dist = norm()
+    # #     res = truncate_distribution(dist, .05, .95)
+    # #     expected = -np.inf, np.inf
+    # #     result = res.ppf(0), res.ppf(1)
+    #     self.assertEquals(expected, result)
 
 
 class TestValueFunction(unittest.TestCase):
@@ -116,8 +116,10 @@ class TestValueFunction(unittest.TestCase):
         sigma = params['sigma'][0]
         mu = -(sigma ** 2) / 2
         params['mu'] = mu, 'mean of underlying nomral distribution.'
-        trunc = truncate_distribution(norm(loc=mu, scale=sigma), .05, .95)
-        shock = np.sort(np.exp(trunc.rvs(30)))
+        # ln_dist = lognorm(sigma, scale=np.exp(-(sigma) ** 2 / 2))
+        # trunc = truncate_distribution(norm(loc=mu, scale=sigma), .05, .95)
+        np.random.seed(42)
+        shock = np.sort(truncated_draw(params, .05, .95, kind='lognorm', size=30))
         w0 = Interp(grid, -grid + 4)
 
         Tv, ws, vals = bellman(w0, params=params, u_fn=u_, grid=grid,
