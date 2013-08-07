@@ -2,6 +2,11 @@
 Several helper functions for use in value function
 iteration.
 
+API CHANGES:
+
+    trunc, ln_dist, fine_grid, grid > w_grid
+    shock > z_grid; fine_shock > z_grid_fine
+
 """
 
 from __future__ import division
@@ -11,7 +16,7 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import fminbound
-from scipy.stats import lognorm, norm, truncnorm
+from scipy import stats
 
 np.random.seed(42)
 #-----------------------------------------------------------------------------
@@ -38,31 +43,32 @@ def load_params(pth='parameters.json'):
     wl = params['wl'][0]
     wu = params['wu'][0]
     wn = params['wn'][0]
-    grid = np.linspace(wl, wu, wn)
-    fine_grid = np.linspace(wl, wu, 10000)
+    w_grid = np.linspace(wl, wu, wn)
+    w_grid_fine = np.linspace(wl, wu, 10000)
+    params['w_grid'] = w_grid, 'Wage support.'
+    params['w_grid_fine'] = w_grid_fine, 'Finer wage support'
 
     sigma = params['sigma'][0]
     mu = -(sigma ** 2) / 2
     params['mu'] = mu, 'mean of underlying nomral distribution.'
-    trunc = truncate_norm(norm(loc=mu, scale=sigma), .05, .95)
 
-    shock = np.sort(np.exp(trunc.rvs(30)))
-    fine_shock = np.sort(np.exp(trunc.rvs(1000)))  # need to deal with endoints
-    fine_shock = clean_shocks(fine_shock, shock)
+    ln_dist = stats.lognorm(sigma, scale=np.exp(-(sigma) ** 2 / 2))
+    params['full_ln_dist'] = ln_dist, "Frozen lognormal distribution."
+    ln_dist_lb = ln_dist.ppf(.05)
+    ln_dist_ub = ln_dist.ppf(.95)
+    params['ln_dist_lb'] = ln_dist_lb, "lower bound of lognorm dist."
+    params['ln_dist_ub'] = ln_dist_ub, "upper bound of lognorm dist."
 
-    params['shock'] = shock, 'Random sample from lognomral'
-    params['grid'] = grid, 'Wage grid'
-    params['fine_grid'] = fine_grid, 'fine_grid'
-    params['fine_shock'] = fine_shock, 'fine_shock'
+    zn = 50
+    z_grid = np.linspace(ln_dist_lb, ln_dist_ub, zn)
+    params['z_grid'] = z_grid, "Trucnated support of shocks."
+    params['z_grid_fine'] = (np.linspace(ln_dist_lb, ln_dist_ub, zn),
+                             "Finer shock support,")
 
-    ln_dist = truncate_norm(
-        lognorm(sigma, scale=np.exp(-(sigma)**2 / 2)), .05, .95)
-
-    params['ln_dist'] = ln_dist, 'Truncated Frozen log-normal distribution'
     return params
 
 
-def truncate_norm(original, lower, upper):
+def truncated_draw(params, lower, upper, type='lognorm', size=1000):
     """
     Return a new normal distribution that is truncated given a
     lower upper tail in probabilities.
@@ -70,23 +76,39 @@ def truncate_norm(original, lower, upper):
     Parameters
     ----------
 
-    original: frozen normal distribution with loc and scale specified.
+    params : dict
     lower : probability chopped off lower end
     upper : probability chopper off the top
+    type : one of:
+                -norm
+                -lognorm
+    size : How many draws to take. Default 1000.
 
     Returns
     -------
 
-    frozen_normal
+    array.
 
     Example
     -------
-    z_dist = norm(loc=mu, scale=sigma)
-    trunc = truncate_distribution(z_dist, .05, .95)
+    This:
+        >>>stats.lognorm(sigma, scale=np.exp(-(sigma) ** 2 / 2))
+    is equivalent to
+        >>>stats.norm(loc=mu, scale=sigma)
+
+    where mu is -(sigma**2) / 2.
     """
-    a, b = original.ppf(lower), original.ppf(upper)
-    mu, sigma = original.mean(), original.std()
-    return truncnorm(loc=mu, scale=sigma, a=a, b=b)
+    mu, sigma = params['mu'][0], params['sigma'][0]
+    norm_dist = stats.norm(loc=mu, scale=sigma)
+    a, b = ln_dist.ppf(lower), ln_dist.ppf(upper)
+    truncated = stats.truncnorm(a, b).rvs(size)
+    if type == 'lognorm':
+        return np.exp(truncated.rvs(size=size))
+    elif type == 'norm':
+        return truncated.rvs(size=size)
+    else:
+        raise ValueError("Type must be one of 'norm' or 'lognorm'.")
+
 
 
 def clean_shocks(new_shocks, calibrated_shocks):
