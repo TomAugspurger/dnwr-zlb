@@ -1,6 +1,7 @@
 from __future__ import division
 
 import pickle
+import itertools.product
 
 from helpers import load_params, ss_wage_flexible
 from joblib import Parallel, delayed
@@ -88,6 +89,13 @@ def unique_param_generator(params):
     pi_high = params['pi_high'][0]
     pi_n = params['pi_n'][0]
     pi_grid = np.linspace(pi_low, pi_high, pi_n)
+
+    lambda_l = params['lambda_l'][0]
+    lambda_h = params['lambda_h'][0]
+    lambda_n = params['lambda_n'][0]
+    lambda_grid = np.linspace(lambda_l, lambda_h, lambda_n)
+
+    hyper_space = itertools.product(pi_grid, lambda_grid)
     for pi in pi_grid:
         params['pi'] = pi, 'Target inflation rate.'
         print(params['pi'])
