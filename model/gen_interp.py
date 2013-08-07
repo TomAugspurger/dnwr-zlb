@@ -4,7 +4,7 @@ Wrapper for scipy's interpolation module.
 # Based on work by John Stachurski
 # Date: August 2009
 # Corresponds to: Listing 6.4
-
+import numpy as np
 from scipy import interp
 from scipy.interpolate.polyint import PchipInterpolator
 from scipy.interpolate import interp1d, pchip
@@ -94,4 +94,9 @@ class Interp(PchipInterpolator, object):
         return plt.plot(self.X, self.Y, **kwargs)
 
     def inverse(self):
-        return Interp(self.Y, self.X, kind=self.kind)
+        if (np.diff(self.Y) < 0).all():
+            return Interp(self.Y, self.X, kind=self.kind)
+        elif (np.diff(self.Y) > -.001).all():
+            return Interp(np.sort(self.Y), self.X, kind=self.kind)
+        else:
+            raise ValueError("Cannot resort Y to invert.")
