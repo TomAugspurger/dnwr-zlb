@@ -12,6 +12,8 @@ from helpers import load_params
 
 def bin_results(res_dir):
     """
+    Essentially deprecatied.
+
     Take a Path object and return a dict based on type of result.
 
     Parameters
@@ -144,6 +146,17 @@ def read_output(fnames, kind):
         raise ValueError("Kind must be one of 'rigid_output'",
                          "'vf', 'ws', 'gp', or 'results'.",
                          " Got {} instead.".format(kind))
+
+
+def get_all_files(params=None):
+    """Get the files from the results path"""
+    if params is None:
+        params = load_params()
+
+    pth = params['results_path/'][0]
+    all_files = os.listdir(pth)
+    return all_files
+
 if __name__ == '__main__':
     params = load_params()
     res_path = params['results_path'][0]
