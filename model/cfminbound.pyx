@@ -189,6 +189,8 @@ def opt_loop(np.ndarray[DTYPE_t, ndim=3] vals, np.ndarray[DTYPE_t, ndim=1] grid,
                 m1 = vals[0, j, 3]
             m2 = cfminbound(y, w_max, w, z, pi)
             value = -1 * ((1 - lambda_) * ch_(m1, z, w, pi) + lambda_ * ch_(m2, z, w, pi))
+            if np.isnan(value):
+                raise ValueError
             vals[i, j, 0] = y
             vals[i, j, 1] = z
             vals[i, j, 2] = value
