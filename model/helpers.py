@@ -59,7 +59,7 @@ def load_params(pth='parameters.json'):
     params['ln_dist_lb'] = ln_dist_lb, "lower bound of lognorm dist."
     params['ln_dist_ub'] = ln_dist_ub, "upper bound of lognorm dist."
 
-    zn = 50
+    zn = params['zn']
     z_grid = np.linspace(ln_dist_lb, ln_dist_ub, zn)
     params['z_grid'] = z_grid, "Trucnated support of shocks."
     params['z_grid_fine'] = (np.linspace(ln_dist_lb, ln_dist_ub, zn),
@@ -151,7 +151,7 @@ def ss_wage_flexible(params, shock=None):
     agg_l = ss_output_flexible(params)
 
     if shock is None:
-        shock = params['shock'][0]
+        shock = params['z_grid'][0]
 
     wage = ((eta / (eta - 1)) ** (gamma / (gamma + eta)) *
             shock ** (gamma / (gamma + eta)) *
