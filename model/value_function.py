@@ -12,7 +12,7 @@ import pandas as pd
 from scipy.interpolate import pchip
 
 from gen_interp import Interp
-from helpers import maximizer
+from helpers import maximizer, truncated_draw
 from cfminbound import opt_loop
 #-----------------------------------------------------------------------------
 np.random.seed(42)
@@ -91,7 +91,7 @@ def bellman(w, params, u_fn=u_, lambda_=None, z_grid=None, pi=None,
                         index=vals.major_axis)
     weights /= weights.sum()
 
-    weighted_values = pan.apply(lambda x: x * weights).sum(axis='major').ix['value']
+    weighted_values = vals.apply(lambda x: x * weights).sum(axis='major').ix['value']
     Tv = Interp(w_grid, weighted_values.values, kind=kind)
     # Wage(z_grid).  Doesn't matter which row for free case.
     wage_schedule = Interp(z_grid, vals.iloc[0]['m1'].values, kind=kind)
@@ -117,7 +117,7 @@ def g_p(g, ws, params, tol=1e-3, full_output=False):
     """
     lambda_ = params['lambda_'][0]
     grid = g.X
-    f_dist = params['ln_dist'][0]
+    f_dist = params['full_ln_dist'][0]
     pi = params['pi'][0]
 
     # z_t(w) in the paper; zs :: wage -> shock
@@ -168,29 +168,31 @@ def get_rigid_output(ws, params, flex_ws, gp):
 
     output: float.  Also equal to labor in this model.
     """
-    sigma, grid, shock, eta, gamma, pi = (params['sigma'][0], params['grid'][0],
-                                          params['shock'][0], params['eta'][0],
-                                          params['gamma'][0], params['pi'][0])
+    sigma, w_grid, eta, gamma, pi = (params['sigma'][0], params['w_grid'][0],
+                                     params['eta'][0], params['gamma'][0],
+                                     params['pi'][0])
+    shocks = np.sort(truncated_draw(params, lower=.05, upper=.95,
+                                    kind='lognorm', size=1000))
     lambda_ = params['lambda_'][0]
-    sub_w = lambda z: grid[grid > ws(z)]  # TODO: check on > vs >=
+    sub_w = lambda z: w_grid[w_grid > ws(z)]  # TODO: check on > vs >=
     dg = pchip(gp.X, gp.Y).derivative
 
-    p1 = ((1 / shock) ** (gamma * (eta - 1) / (gamma + eta)) *
-          (flex_ws(shock) / ws(shock)) ** (eta - 1)).mean()
+    p1 = ((1 / shocks) ** (gamma * (eta - 1) / (gamma + eta)) *
+          (flex_ws(shocks) / ws(shocks)) ** (eta - 1)).mean()
 
-    p2 = ((1 / shock) ** (gamma * (eta - 1) / (gamma + eta)) *
-          gp(ws(shock) * (1 + pi)) * (flex_ws(shock) / ws(shock)) ** (eta - 1)).mean()
+    p2 = ((1 / shocks) ** (gamma * (eta - 1) / (gamma + eta)) *
+          gp(ws(shocks) * (1 + pi)) * (flex_ws(shocks) / ws(shocks)) ** (eta - 1)).mean()
 
     inner_f = lambda w, z: ((1 + pi) * dg(w * (1 + pi)) *
                             (flex_ws(z) / w)**(eta - 1))
 
     p3 = 0.0
-    for z in shock:
+    for z in shocks:
         inner_range = sub_w(z)
         inner_vals = inner_f(inner_range, z).mean()
         p3 += (1 / z)**(gamma * (eta - 1) / (eta + gamma)) * inner_vals
 
-    p3 = p3 / len(shock)
+    p3 = p3 / len(shocks)
 
     # z_part is \tilde{Z} in my notes.
     z_part = ((1 - lambda_) * p1 +
