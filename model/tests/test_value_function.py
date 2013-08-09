@@ -7,14 +7,13 @@ import nose
 import numpy as np
 from numpy.testing.decorators import slow
 from scipy.optimize import fminbound
-from scipy.stats import norm, lognorm
+from scipy.stats import lognorm
 
 from ..cfminbound import ch_
 from ..gen_interp import Interp
 from ..value_function import bellman, u_
 
-from ..helpers import (ss_output_flexible, truncated_draw,
-                       ss_wage_flexible)
+from ..helpers import ss_output_flexible, ss_wage_flexible
 
 np.random.seed(42)
 
@@ -77,16 +76,6 @@ class testFunctions(unittest.TestCase):
         self.assertEquals(expected, result)
 
 
-# class TestDistribution(unittest.TestCase):
-
-    # def test_truncate(self):
-    # #     dist = norm()
-    # #     res = truncate_distribution(dist, .05, .95)
-    # #     expected = -np.inf, np.inf
-    # #     result = res.ppf(0), res.ppf(1)
-    #     self.assertEquals(expected, result)
-
-
 class TestValueFunction(unittest.TestCase):
 
     def test_flexible(self):
@@ -95,7 +84,6 @@ class TestValueFunction(unittest.TestCase):
         xopt = fminbound(h_, .5, 3)
         self.assertAlmostEqual(xopt, ss_w, places=5)
 
-    @slow
     def test_bellman_smoke(self):
 
         params = {
@@ -111,7 +99,7 @@ class TestValueFunction(unittest.TestCase):
             "tol": [10e-6, "error tolerance for iteration"],
             "sigma": [0.2, "standard dev. of underlying normal dist"]}
 
-        grid = np.linspace(0.1, 4, 100)
+        w_grid = np.linspace(0.1, 4, 5)
 
         sigma = params['sigma'][0]
         mu = -(sigma ** 2) / 2
@@ -119,33 +107,20 @@ class TestValueFunction(unittest.TestCase):
         # ln_dist = lognorm(sigma, scale=np.exp(-(sigma) ** 2 / 2))
         # trunc = truncate_distribution(norm(loc=mu, scale=sigma), .05, .95)
         np.random.seed(42)
-        shock = np.sort(truncated_draw(params, .05, .95, kind='lognorm', size=30))
-        w0 = Interp(grid, -grid + 4)
+        sigma = params['sigma'][0]
+        mu = -(sigma ** 2) / 2
+        ln_dist = lognorm(sigma, scale=np.exp(-(sigma) ** 2 / 2))
+        params['full_ln_dist'] = ln_dist, "Frozen lognormal distribution."
+        ln_dist_lb = ln_dist.ppf(.05)
+        ln_dist_ub = ln_dist.ppf(.95)
+        zn = 5
+        z_grid = np.linspace(ln_dist_lb, ln_dist_ub, zn)
+        w0 = Interp(w_grid, -w_grid + 4)
 
-        Tv, ws, vals = bellman(w0, params=params, u_fn=u_, grid=grid,
-                               shock=shock)
-        expected_y = np.array([
-            3.77756583,  3.77756583,  3.77756583,  3.77756583,  3.77756583,
-            3.77756583,  3.77756583,  3.77756583,  3.77756583,  3.77756583,
-            3.77756583,  3.77756583,  3.77756583,  3.77756583,  3.77756583,
-            3.77756583,  3.77756583,  3.77756583,  3.77756583,  3.77756583,
-            3.77755226,  3.77546776,  3.76298984,  3.73654061,  3.69981807,
-            3.65675965,  3.60995268,  3.56107198,  3.51121065,  3.46107811,
-            3.41113017,  3.36165395,  3.31282399,  3.26473953,  3.21744961,
-            3.17096999,  3.12529464,  3.08040356,  3.03626814,  2.9928548,
-            2.95012738,  2.90804886,  2.86658245,  2.82569231,  2.78534398,
-            2.74550467,  2.70614335,  2.66723082,  2.62873971,  2.5906444,
-            2.552921,    2.5155472,   2.47850224,  2.44176365,  2.40531968,
-            2.36915041,  2.33324022,  2.29757454,  2.26213981,  2.22692338,
-            2.19191342,  2.15709892,  2.12246961,  2.08801586,  2.05372861,
-            2.01959943,  1.9856204,   1.95178412,  1.91808362,  1.88451237,
-            1.85106422,  1.81773055,  1.78451164,  1.7513995,   1.71838931,
-            1.68547652,  1.65265686,  1.61992634,  1.58728103,  1.5547173,
-            1.52223173,  1.48982107,  1.45747946,  1.42520954,  1.39300577,
-            1.36086559,  1.32878654,  1.29676615,  1.2647994,   1.23288965,
-            1.20103212,  1.16922513,  1.13746658,  1.10575196,  1.07408528,
-            1.04245948,  1.01087856,  0.97933589,  0.94783396,  0.91637111])
-
+        Tv, ws, vals = bellman(w0, params=params, w_grid=w_grid,
+                               z_grid=z_grid)
+        expected_y = np.array([3.76732473, 3.66307253, 2.56966702,
+                               1.70810273, 0.91432274])
         np.testing.assert_almost_equal(expected_y, Tv.Y)
 
 if __name__ == '__main__':
