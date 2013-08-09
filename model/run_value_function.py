@@ -56,7 +56,8 @@ def iter_bellman_wrapper(hyperparams):
 def get_wage_distribution(ws, params):
     w_grid = params['w_grid'][0]
     # fine_grid = params['fine_grid'][0]
-    g0 = Interp(w_grid, w_grid/4, kind='pchip')
+    w_max = w_grid[-1]
+    g0 = Interp(w_grid, w_grid/w_max, kind='pchip')
     gp = g_p(g0, ws, params)
     return gp
 

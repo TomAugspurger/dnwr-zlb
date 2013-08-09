@@ -59,7 +59,7 @@ def load_params(pth='parameters.json'):
     params['ln_dist_lb'] = ln_dist_lb, "lower bound of lognorm dist."
     params['ln_dist_ub'] = ln_dist_ub, "upper bound of lognorm dist."
 
-    zn = params['zn']
+    zn = params['zn'][0]
     z_grid = np.linspace(ln_dist_lb, ln_dist_ub, zn)
     params['z_grid'] = z_grid, "Trucnated support of shocks."
     params['z_grid_fine'] = (np.linspace(ln_dist_lb, ln_dist_ub, zn),
@@ -108,7 +108,6 @@ def truncated_draw(params, lower, upper, kind='lognorm', size=1000):
         return truncated
     else:
         raise ValueError("Type must be one of 'norm' or 'lognorm'.")
-
 
 
 def clean_shocks(new_shocks, calibrated_shocks):
