@@ -99,9 +99,9 @@ def truncated_draw(params, lower, upper, kind='lognorm', size=1000):
     where mu is -(sigma**2) / 2.
     """
     mu, sigma = params['mu'][0], params['sigma'][0]
-    ln_dist = stats.lognorm(sigma, scale=np.exp(-(sigma) ** 2 / 2))
-    a, b = ln_dist.ppf(lower), ln_dist.ppf(upper)
-    truncated = stats.truncnorm(a, b).rvs(size)
+    n_dist = stats.norm(mu, sigma)
+    a, b = n_dist.ppf([.05, .95])
+    truncated = stats.truncnorm(a, b, loc=mu, scale=sigma).rvs(size)
     if kind == 'lognorm':
         return np.exp(truncated)
     elif kind == 'norm':
