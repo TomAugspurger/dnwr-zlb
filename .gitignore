@@ -109,3 +109,4 @@ data_wrangling/cps_wrangling/panel_construction/store_log.txt
 model/*.html
 model/results/*
 model/results2/*
+.smt/*

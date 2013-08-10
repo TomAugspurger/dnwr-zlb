@@ -10,6 +10,7 @@ cdef extern from "/usr/include/math.h":
 import numpy as np
 cimport cython
 cimport numpy as np
+from cpython.exc cimport PyErr_CheckSignals
 
 cpdef double ch_(double x, double shock, object w,
                     double pi, double beta=.97, double eta=2.5, double gamma=0.5, double aggL=0.85049063822172699):
@@ -182,6 +183,9 @@ def opt_loop(np.ndarray[DTYPE_t, ndim=3] vals, np.ndarray[DTYPE_t, ndim=1] w_gri
         y = w_grid[i]
         for j in range(nshock):
             z = z_grid[j]
+
+            if j % 10 == 0:
+                PyErr_CheckSignals()
 
             if i == 0:
                 m1 = cfminbound(0, w_max, w, z, pi)
