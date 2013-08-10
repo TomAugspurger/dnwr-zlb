@@ -36,7 +36,7 @@ def iter_bellman_wrapper(hyperparams):
 
     write_metadeta(params)
 
-    v = Interp(w_grid, -w_grid + 29)
+    v = Interp(w_grid, -w_grid + 29, kind='cubic')
     Tv, ws, rest = iter_bellman(v, tol=0.005, strict=False, log=False,
                                 params=params, pi=pi)
     res_dict = {'Tv': Tv, 'ws': ws, 'rest': rest}
