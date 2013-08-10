@@ -148,7 +148,7 @@ def g_p(g, ws, params, tol=1e-3, full_output=False):
         return gp
 
 
-def get_rigid_output(ws, params, flex_ws, gp):
+def get_rigid_output(ws, params, flex_ws, gp, kind='lognorm', size=1000):
     """
     This will need to change when using grid.
 
@@ -172,7 +172,7 @@ def get_rigid_output(ws, params, flex_ws, gp):
                                      params['eta'][0], params['gamma'][0],
                                      params['pi'][0])
     shocks = np.sort(truncated_draw(params, lower=.05, upper=.95,
-                                    kind='lognorm', size=1000))
+                                    kind=kind, size=size))
     lambda_ = params['lambda_'][0]
     sub_w = lambda z: w_grid[w_grid > ws(z)]  # TODO: check on > vs >=
     dg = pchip(gp.X, gp.Y).derivative
