@@ -134,7 +134,7 @@ def g_p(g, ws, params, tol=1e-3, full_output=False):
         ok = False
         while not ok:
             if not np.isnan([zs(nlv), zs(nhp)]).all():
-                ok =True
+                ok = True
             elif np.isnan([zs(nlv), zs(nhp)]).all():
                 nlv = (nlv + good_val) / 2
                 nhv = (nhv + good_val) / 2
@@ -154,10 +154,11 @@ def g_p(g, ws, params, tol=1e-3, full_output=False):
     good_grid = grid[~np.isnan(zs(grid))]
     if len(good_grid) == 1:
         new_low, new_high = _handle_solo_grid(zs, grid, good_grid)
+        new_grid = np.linspace(new_low, new_high, params['wn'][0])
+        # g = Interp(new_grid, new_grid/new_grid[-1], kind='pchip')
     else:
         new_low, new_high = good_grid[0], good_grid[-1]
-
-    new_grid = np.linspace(new_low, new_high, params['wn'][0])
+        new_grid = np.linspace(new_low, new_high, params['wn'][0])
 
     e = 1
     vals = []

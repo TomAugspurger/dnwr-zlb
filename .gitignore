@@ -110,3 +110,8 @@ model/*.html
 model/results/*
 model/results2/*
 .smt/*
+model/20130810-215344.json
+model/metadata.json
+model/prependresults_001_0721052631579.h5
+results*/*
+model/results*/*
