@@ -9,13 +9,13 @@
     "sigma"        : [0.2, "std. dev. of log(Z) (shocks)"],
     "wl"           : [0.4, "wage lower bound"],
     "wu"           : [3.5, "wage upper bound"],
-    "wn"           : [100, "wage grid point"],
+    "wn"           : [40, "wage grid point"],
     "beta"         : [0.97, "disount factor. check this"],
     "tol"          : [10e-6, "error tolerance for iteration"],
     "sigma"        : [0.2, "standard dev. of underlying normal dist"],
     "pi_low"       : [0.005, "lowest inflation"],
     "pi_high"      : [0.05, "highest inflation"],
-    "pi_n"         : [20, "number of points in pi grid"],
+    "pi_n"         : [10, "number of points in pi grid"],
     "results_path" : ["results/", "path to results directory"],
-    "zn"           : [100, "number of points in shock grid"]
+    "zn"           : [20, "number of points in shock grid"]
 }
