@@ -65,32 +65,36 @@ def _read_rigid_output(fnames, prepend=''):
     res = read_output(all_files)
     """
     # Trouble with where they run it from.
-    reg = re.compile(r"[tst_]*rigid_output_(\d*).*")
+    reg = re.compile(r"[tst_]*rigid_output_(\d*)_(\d*).*")
     pi_out_dict = {}
     for fname in fnames:
         # Change the first zero to a decimal point that was
         # removed during writing.
         try:
-            pi = float(reg.match(fname).groups()[0].replace('0', '.', 1))
+            match = reg.match(fname)
+            pi = float(match.groups()[0].replace('0', '.', 1))
+            lambda_ = float(match.groups()[1].replace('0', '.', 1))
         except AttributeError:
             continue
         with open(prepend + fname, 'rb') as f:
-            pi_out_dict[pi] = float(f.read())
+            pi_out_dict[(pi, lambda_)] = float(f.read())
     return pi_out_dict
 
 
 def _read_pickleable(fnames, kind, prepend=''):
-    reg = re.compile(r"[tst_]*" + kind + "_(\d*).*")
+    reg = re.compile(r"[tst_]*" + kind + "_(\d*)_(\d*).*")
     pi_dict = {}
     for fname in fnames:
         # Change the first zero to a decimal point that was
         # removed during writing.
         try:
-            pi = float(reg.match(fname).groups()[0].replace('0', '.', 1))
+            match = reg.match(fname)
+            pi = float(match.groups()[0].replace('0', '.', 1))
+            lambda_ = float(match.groups()[1].replace('0', '.', 1))
         except AttributeError:
             continue
         with open(prepend + fname, 'rb') as f:
-            pi_dict[pi] = pickle.load(f)
+            pi_dict[(pi, lambda_)] = pickle.load(f)
     return pi_dict
 
 

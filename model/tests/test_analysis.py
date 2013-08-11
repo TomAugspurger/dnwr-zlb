@@ -22,16 +22,16 @@ def assert_interp_equal(left, right):
 class TestAnalysis(unittest.TestCase):
 
     def test_output_name_parse(self):
-        fnames = ['tst_rigid_output_000973684210526_.txt',
-                  'tst_rigid_output_000736842105263_.txt',
+        fnames = ['rigid_output_0005_0497368421053_.txt',
+                  'rigid_output_0005_09_.txt',
                   'thisshouldnotmatch.txt',
                   '.DS_Store']
         for fname in fnames:
             with open(fname, 'w') as f:
                 f.write('1.0')
 
-        expected = {.00973684210526: 1.0,
-                    .00736842105263: 1.0}
+        expected = {(.005, .497368421053): 1.0,
+                    (.005, .9): 1.0}
         try:
             result = read_output(fnames, kind='rigid_output')
         finally:
@@ -39,16 +39,16 @@ class TestAnalysis(unittest.TestCase):
         self.assertDictEqual(expected, result)
 
     def test_read_vf(self):
-        fnames = ['vf_00476315789474.pkl',
-                  'vf_005.pkl',
+        fnames = ['vf_001_0139473684211.pkl',
+                  'vf_005_09.pkl',
                   'thisshouldnotmatch.txt']
         vf = Interp([0, 1], [0, 1])
         for fname in fnames:
             with open(fname, 'w') as f:
                 pickle.dump(vf, f)
 
-        expected = {.0476315789474: vf,
-                    .05: vf}
+        expected = {(.01, .139473684211): vf,
+                    (.05, .9): vf}
         try:
             result = read_output(fnames, kind='vf')
         finally:
