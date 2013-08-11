@@ -44,7 +44,7 @@ def fixup_bad_gps():
         _replace(key, out_name, all_files, params)
         print("Fixed {}".format(key))
 
-    with open('results/fixup_notice.txt', 'w') as f:
+    with open('results/fixup_notice.txt', 'a') as f:
         x = str(datetime.datetime.now())
         f.write("FIXED gps AT {}".format(x))
 
