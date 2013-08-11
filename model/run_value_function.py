@@ -45,8 +45,6 @@ def iter_bellman_wrapper(hyperparams):
     w_grid = params['w_grid'][0]
     z_grid = params['z_grid'][0]
 
-    write_metadeta(params)
-
     v = Interp(w_grid, -w_grid + 29, kind='cubic')
     Tv, ws, rest = iter_bellman(v, tol=0.005, strict=False, log=False,
                                 params=params, pi=pi)
@@ -122,7 +120,6 @@ def unique_param_generator(params):
 
 
 def write_metadeta(params, outname='metadata.json'):
-    """This is horribly broken right now; gets overwritten..."""
     time = str(datetime.now())
     params['time'] = time, 'start of run'
 
@@ -133,7 +130,7 @@ def write_metadeta(params, outname='metadata.json'):
 
     writeable = all_keys - nonserial
     out_dict = {k: v for k, v in params.iteritems() if k in writeable}
-    with open(outname, 'w') as f:
+    with open('results/' + outname, 'w') as f:
         json.dump(out_dict, f)
 
 
@@ -144,6 +141,9 @@ if __name__ == '__main__':
     np.random.seed(42)
     params = load_params(params_path)
     params['call_dir'] = os.getcwd(), 'Path from which the script was called.'
+
+    write_metadeta(params)
+
     pi_low = params['pi_low'][0]
     pi_high = params['pi_high'][0]
     pi_n = params['pi_n'][0]
