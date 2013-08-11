@@ -10,7 +10,7 @@ from scipy.stats import lognorm
 
 from ..cfminbound import ch_
 from ..gen_interp import Interp
-from ..value_function import bellman, u_
+from ..value_function import bellman, u_, g_p
 
 from ..helpers import ss_output_flexible, ss_wage_flexible
 
@@ -72,7 +72,6 @@ class TestValueFunction(unittest.TestCase):
             "pi": [0.02, "target inflation"],
             "eta": [2.5, "elas. of subs among labor types"],
             "gamma": [0.5, "frisch elas. of labor supply"],
-            "sigma": [0.2, "std. dev. of log(Z) (shocks)"],
             "wl": [0.3, "wage lower bound"],
             "wu": [2.0, "wage upper bound"],
             "wn": [400, "wage grid point"],
@@ -103,6 +102,37 @@ class TestValueFunction(unittest.TestCase):
         expected_y = np.array([3.76732473, 3.66307253, 2.56966702,
                                1.70810273, 0.91432274])
         np.testing.assert_almost_equal(expected_y, Tv.Y)
+
+    def test_handle_solo(self):
+        ws = Interp(np.array([ 0.70541378, 0.73997213, 0.77453049, 0.80908884,
+            0.84364719, 0.87820555, 0.9127639 ,  0.94732226, 0.98188061, 1.01643896,
+            1.05099732, 1.08555567, 1.12011402, 1.15467238, 1.18923073,
+            1.22378908, 1.25834744, 1.29290579, 1.32746414, 1.3620225 ]),
+            np.array([ 0.94864294, 0.95732392, 0.96597872, 0.9736925 ,  0.98001698,
+            0.98540488, 0.99011949, 0.99432335, 0.9981246 ,  1.00160187,
+            1.00480861, 1.00778999, 1.01057645, 1.01319409, 1.01566555,
+            1.01800755, 1.020233,  1.0223574,  1.02438508, 1.02632872]))
+
+        w_grid = np.linspace(0.4, 3.5, 40)
+        w_max = w_grid[-1]
+        g = Interp(w_grid, w_grid/w_max, kind='pchip')
+        params = {'lambda_': (0.855263157895, 'a'),
+                  'pi': (.01, 'pi'),
+                  'gamma': (0.5, "frisch elas. of labor supply"),
+                  'sigma': (0.2, "standard dev. of underlying normal dist"),
+                  'wn': (40, u'wage grid point')}
+        np.random.seed(42)
+        sigma = params['sigma'][0]
+        mu = -(sigma ** 2) / 2
+        ln_dist = lognorm(sigma, scale=np.exp(-(sigma) ** 2 / 2))
+        params['full_ln_dist'] = ln_dist, "Frozen lognormal distribution."
+        actual = g_p(g, ws, params)
+
+        expected_X_mean = 1.9500000000000004
+        expected_Y_mean = 0.011953608465323638
+
+        self.assertEquals(expected_X_mean, actual.X.mean())
+        self.assertEquals(expected_Y_mean, actual.Y.mean())
 
 if __name__ == '__main__':
     nose.runmodule(argv=[__file__, '-vvs', '-x', '--pdb', '--pdb-failure'],

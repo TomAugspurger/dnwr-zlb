@@ -120,6 +120,30 @@ def g_p(g, ws, params, tol=1e-3, full_output=False):
     f_dist = params['full_ln_dist'][0]
     pi = params['pi'][0]
 
+    def _handle_solo_grid(zs, grid, good_grid):
+        """
+        Sometimes only one value isn't nan.
+        """
+        good_pos = np.where(grid == good_grid)[0]
+        good_val = grid[good_pos]
+        if good_pos in [0, len(grid) - 1]:
+            raise IndexError("Cannot deal with endpoints.")
+
+        nlp, nhp = good_pos - 1, good_pos + 1
+        nlv, nhv = (grid[nlp] + good_val) / 2, (grid[nhp] + good_val) / 2
+        ok = False
+        while not ok:
+            if not np.isnan([zs(nlv), zs(nhp)]).all():
+                ok =True
+            elif np.isnan([zs(nlv), zs(nhp)]).all():
+                nlv = (nlv + good_val) / 2
+                nhv = (nhv + good_val) / 2
+            elif np.isnan(zs(nlv)):
+                nlv = (nlv + good_val) / 2
+            elif np.isnan(zs(nhv)):
+                nhv = (nhv + good_val) / 2
+
+        return nlv, nhv
     # z_t(w) in the paper; zs :: wage -> shock
     # Was having trouble with them choosing wages only on a subset of grid.
     # Then when I invert I try to map z :: w -> shock I got a bunch of NaNs
@@ -128,7 +152,11 @@ def g_p(g, ws, params, tol=1e-3, full_output=False):
     # guys.  Need to be careful at the edgees... here and in cfminbound.
     zs = ws.inverse()
     good_grid = grid[~np.isnan(zs(grid))]
-    new_low, new_high = good_grid[0], good_grid[-1]
+    if len(good_grid) == 1:
+        new_low, new_high = _handle_solo_grid(zs, grid, good_grid)
+    else:
+        new_low, new_high = good_grid[0], good_grid[-1]
+
     new_grid = np.linspace(new_low, new_high, params['wn'][0])
 
     e = 1
