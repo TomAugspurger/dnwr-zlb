@@ -103,7 +103,7 @@ def _read_results(fnames, prepend=''):
 
 
 def group_results(fnames, prepend=''):
-    reg = re.compile(r"[tst_]*results_(\d*).*")
+    reg = re.compile(r"[tst_]*results_(\d*)_(\d*).*")
 
     def filt(x):
         if x[1] is None:
@@ -113,12 +113,13 @@ def group_results(fnames, prepend=''):
 
     matches = it.izip(fnames, map(reg.match, fnames))
     filtered = it.ifilter(filt, matches)
-    dic = {x[1].groups()[0]: x[0] for x in filtered}
+    dic = {x[1].groups(): x[0] for x in filtered}
     store = pd.HDFStore(prepend + 'grouped_results.h5')
 
     for key, f in dic.iteritems():
-        pan = pd.read_hdf(prepend + f, 'pi_' + key)
-        store.append('pi_' + key, pan)
+        storename = '_'.join(key)
+        pan = pd.read_hdf(prepend + f, 'pi_' + storename)
+        store.append('pi_' + '_lambda_'.join(key), pan)
     else:
         store.close()
 
@@ -144,7 +145,7 @@ def read_output(fnames, kind):
         return _read_pickleable(fnames, kind=kind, prepend=prepend)
     elif kind == 'results':
         if not os.path.exists('results/grouped_results.h5'):
-            group_results(fnames, 'prepend')
+            group_results(fnames, prepend)
         return _read_results(fnames, prepend)
     else:
         raise ValueError("Kind must be one of 'rigid_output'",
