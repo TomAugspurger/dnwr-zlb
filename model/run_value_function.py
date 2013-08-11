@@ -3,6 +3,7 @@ from __future__ import division
 from datetime import datetime
 import itertools
 import json
+import os
 import pickle
 
 from helpers import load_params, ss_wage_flexible
@@ -27,10 +28,18 @@ def iter_bellman_wrapper(hyperparams):
     None:  Does have side effects.
     """
     pi, lambda_ = hyperparams
-    np.random.seed(42)
+    piname = str(pi).replace('.', '')
+    lname = str(lambda_).replace('.', '')
+    out_name = '_'.join([piname, lname])
     params = load_params()
     params['pi'] = pi, 'inflation target'
     params['lambda_'] = lambda_, 'rigidity'
+
+    # check for pre-computed values.
+    if os.path.exists(params['call_dir'][0] + '/results/' + 'vf_' + out_name + '.pkl'):
+        pass
+
+    np.random.seed(42)
     w_grid = params['w_grid'][0]
     z_grid = params['z_grid'][0]
 
@@ -111,6 +120,7 @@ def unique_param_generator(params):
 
 
 def write_metadeta(params, outname='metadata.json'):
+    """This is horribly broken right now; gets overwritten..."""
     time = str(datetime.now())
     params['time'] = time, 'start of run'
 
@@ -131,6 +141,7 @@ if __name__ == '__main__':
     # keep load_params outside so that each fork has the same random seed.
     np.random.seed(42)
     params = load_params(params_path)
+    params['call_dir'] = os.getcwd(), 'Path from which the script was called.'
     pi_low = params['pi_low'][0]
     pi_high = params['pi_high'][0]
     pi_n = params['pi_n'][0]
