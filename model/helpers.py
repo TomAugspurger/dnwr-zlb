@@ -68,7 +68,7 @@ def load_params(pth='parameters.json'):
     return params
 
 
-def truncated_draw(params, lower, upper, kind='lognorm', size=1000):
+def truncated_draw(params, lower=.05, upper=.95, kind='lognorm', size=1000):
     """
     Return a new normal distribution that is truncated given a
     lower upper tail in probabilities.
