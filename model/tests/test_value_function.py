@@ -1,6 +1,5 @@
 from __future__ import division
 
-import json
 import unittest
 
 import nose
@@ -16,24 +15,6 @@ from ..value_function import bellman, u_
 from ..helpers import ss_output_flexible, ss_wage_flexible
 
 np.random.seed(42)
-
-
-class TestJson(unittest.TestCase):
-    def setUp(self):
-        # figure out relative filepaths
-        with open('./parameters.json') as f:
-            params = json.load(f)
-        self.params = params
-
-    def test_dtypes(self):
-        wl = self.params['wl'][0]
-        self.assertTrue(isinstance(wl, (float, int)))
-
-        wl_desc = self.params['wl'][1]
-        try:  # Python 2.7
-            self.assertTrue(isinstance(wl_desc, basestring))
-        except NameError:  # py3
-            self.assertTrue(isinstance(wl_desc, str))
 
 
 class testFunctions(unittest.TestCase):

@@ -107,7 +107,7 @@ def truncated_draw(params, lower, upper, kind='lognorm', size=1000):
     elif kind == 'norm':
         return truncated
     else:
-        raise ValueError("Type must be one of 'norm' or 'lognorm'.")
+        raise ValueError("kind must be one of 'norm' or 'lognorm'.")
 
 
 def clean_shocks(new_shocks, calibrated_shocks):
