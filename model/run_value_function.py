@@ -36,8 +36,10 @@ def iter_bellman_wrapper(hyperparams):
     params['lambda_'] = lambda_, 'rigidity'
 
     # check for pre-computed values.
-    if os.path.exists(params['call_dir'][0] + '/results/' + 'vf_' + out_name + '.pkl'):
-        pass
+    if os.path.exists(
+            params['call_dir'][0] + '/results/' + 'vf_' + out_name + '.pkl'):
+        print("Skipping pi:{}, lambda:{}".format(pi, lambda_))
+        return None
 
     np.random.seed(42)
     w_grid = params['w_grid'][0]
