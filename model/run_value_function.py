@@ -126,9 +126,11 @@ def write_metadeta(params, outname='metadata.json'):
 
 
 if __name__ == '__main__':
+    import sys
+    params_path = sys.argv[1]
     # keep load_params outside so that each fork has the same random seed.
     np.random.seed(42)
-    params = load_params()
+    params = load_params(params_path)
     pi_low = params['pi_low'][0]
     pi_high = params['pi_high'][0]
     pi_n = params['pi_n'][0]
