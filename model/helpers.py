@@ -161,26 +161,32 @@ def ss_wage_flexible(params, shock=None):
 #
 
 
-def sample_path(ws, params, w0=None, nseries=1):
+def sample_path(ws, params, w0=None, nseries=1, nperiods=1000):
     """
     Given a wage schedule, simulate the sample path of length nseries.
 
     w0 is the initial wage now (a float) not the initial wage schedule.
     """
-
-    w_grid = params['w_grid'][0]
-    shocks = truncated_draw(params)
+    # TODO: Change to idio shock rather than same for everyone
+    shocks = truncated_draw(params, size=nperiods)
     lambda_ = params['lambda_'][0]
 
-    w = w0 or w_grid.mean()
+    # initialize as empty.  Fill first row with values from w, the initial wage
+    vals = np.empty([nperiods, nseries])
+    w = w0 or .9
+    w = np.ones_like(vals[0, :]) * w
+    vals[0] = w
 
-    vals = []
+    shocks = (np.ones_like(vals).T * shocks).T  # double T for broadcasting
+    # To vectorize, we take nseries draws from unif and check if less than lamb
+    # If greater, cannot_change is 0, so 0 * p2 is 0, so they always choose
+    # ws(shock), i.e. they are free to choose whatever.
+
     for i, shock in enumerate(shocks):
-        can_change = np.random.uniform(0, 1) > lambda_
-        if can_change:
-            wp = ws(shock)
-        else:
-            wp = np.max(w, ws(shock))
-        vals.append(wp)
-        w = wp
+        cannot_change = np.random.uniform(0, 1, nseries) < lambda_
+        p1 = ws(shock)
+        p2 = cannot_change * np.amax([w, ws(shock)], axis=0)
+        vals[i] = np.amax([p1, p2], axis=0)
+        w = vals[i]
+
     return np.array(vals)
