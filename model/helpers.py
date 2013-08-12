@@ -161,13 +161,26 @@ def ss_wage_flexible(params, shock=None):
 #
 
 
-def sample_path(ws, params, nseries=50):
+def sample_path(ws, params, w0=None, nseries=1):
     """
     Given a wage schedule, simulate the sample path of length nseries.
+
+    w0 is the initial wage now (a float) not the initial wage schedule.
     """
 
-    ln_dist = params['ln_dist'][0]
-    shocks = clean_shocks(ln_dist.rvs(nseries), params['shock'][0])
+    w_grid = params['w_grid'][0]
+    shocks = truncated_draw(params)
+    lambda_ = params['lambda_'][0]
 
-    line = plt.plot(ws(shocks))
-    return line
+    w = w0 or w_grid.mean()
+
+    vals = []
+    for i, shock in enumerate(shocks):
+        can_change = np.random.uniform(0, 1) > lambda_
+        if can_change:
+            wp = ws(shock)
+        else:
+            wp = np.max(w, ws(shock))
+        vals.append(wp)
+        w = wp
+    return np.array(vals)
