@@ -8,7 +8,6 @@ from numpy.testing.decorators import slow
 from scipy.optimize import fminbound
 from scipy.stats import lognorm
 
-from ..cfminbound import ch_
 from ..gen_interp import Interp
 from ..value_function import bellman, u_, g_p
 
@@ -48,13 +47,6 @@ class testFunctions(unittest.TestCase):
                           agg_l ** (1.5 / 3))
         self.assertAlmostEqual(expected_shock,
                                ss_wage_flexible(params, shock=2))
-
-    def test_ch_(self):
-        expected = -2.3293269585464986
-        grid = np.linspace(0.1, 4, 100)
-        w0 = Interp(grid, -grid + 4)
-        result = ch_(2.0, 2.0, w0, .02)
-        self.assertEquals(expected, result)
 
 
 class TestValueFunction(unittest.TestCase):

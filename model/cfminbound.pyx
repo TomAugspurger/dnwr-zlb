@@ -11,7 +11,7 @@ import numpy as np
 cimport cython
 cimport numpy as np
 
-cpdef double ch_(double x, double shock, object w,
+cdef inline double ch_(double x, double shock, object w,
                     double pi, double beta=.97, double eta=2.5, double gamma=0.5, double aggL=0.85049063822172699):
     """
     x: wage for tomorrow
@@ -23,7 +23,7 @@ cpdef double ch_(double x, double shock, object w,
     res = -1 * (x ** (1 - eta) - ((gamma / (gamma + 1)) * shock * (x ** (-eta) * aggL) ** ((gamma + 1) / gamma)) + beta * w((x / (1 + pi))))
     return res
 
-cpdef cfminbound(double x1, double x2, w,
+cdef inline double cfminbound(double x1, double x2, w,
                  double shock, double pi, double eta=2.5, double gamma=0.5, double beta=.97,
                  int maxfun=500, double xtol=.00001, double aggL=0.85049063822172699):
     """
@@ -151,7 +151,7 @@ ctypedef np.double_t DTYPE_t
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def opt_loop(np.ndarray[DTYPE_t, ndim=3] vals, np.ndarray[DTYPE_t, ndim=1] w_grid, np.ndarray[DTYPE_t, ndim=1] z_grid,
+cpdef opt_loop(np.ndarray[DTYPE_t, ndim=3] vals, np.ndarray[DTYPE_t, ndim=1] w_grid, np.ndarray[DTYPE_t, ndim=1] z_grid,
              object w, double pi, double lambda_):
     """
     This is the double loop at the heart of the optimization problem.
