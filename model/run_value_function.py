@@ -36,9 +36,10 @@ def iter_bellman_wrapper(hyperparams):
     params['lambda_'] = lambda_, 'rigidity'
 
     # check for pre-computed values.
+    params['call_dir'] = os.getcwd(), 'Path from which the script was called.'
     if os.path.exists(
             params['call_dir'][0] + '/results/' + 'vf_' + out_name + '.pkl'):
-        print("Skipping pi:{}, lambda:{}".format(pi, lambda_))
+        print("Skipping pi:{}, lambda:{}.".format(pi, lambda_))
         return None
 
     np.random.seed(42)
@@ -153,7 +154,6 @@ if __name__ == '__main__':
     # keep load_params outside so that each fork has the same random seed.
     np.random.seed(42)
     params = load_params(params_path)
-    params['call_dir'] = os.getcwd(), 'Path from which the script was called.'
 
     write_metadeta(params)
 
