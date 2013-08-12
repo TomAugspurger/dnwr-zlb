@@ -160,7 +160,7 @@ def get_all_files(params=None):
     if params is None:
         params = load_params()
 
-    pth = params['results_path/'][0]
+    pth = params['results_path'][0]
     all_files = os.listdir(pth)
     return all_files
 
