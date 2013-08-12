@@ -79,7 +79,7 @@ def get_wage_distribution(ws, params):
         pi = params['pi']
         lambda_ = params['lambda_']
         with open('notices.txt', 'a') as f:
-            f.write("FAILED wage_distribution on {}".format(pi, lambda_))
+            f.write("FAILED wage_distribution on {}, {}".format(pi, lambda_))
         raise
     return gp
 
