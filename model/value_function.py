@@ -131,18 +131,16 @@ def g_p(g, ws, params, tol=1e-3, full_output=False):
 
         nlp, nhp = good_pos - 1, good_pos + 1
         DEC = .95
-        nlv, nhv = DEC * (grid[nlp] + good_val), DEC * (grid[nhp] + good_val)
+        nlv = DEC * grid[nlp] + (1 - DEC) * good_val
+        nhv = DEC * grid[nhp] + (1 - DEC) * good_val
         ok = False
         while not ok:
+            if np.isnan(zs(nlv)):
+                nlv = DEC * nlv + (1 - DEC) * good_val
+            if np.isnan(zs(nhv)):
+                nhv = DEC * nhv + (1 - DEC) * good_val
             if not np.isnan([zs(nlv), zs(nhp)]).all():
                 ok = True
-            elif np.isnan([zs(nlv), zs(nhp)]).all():
-                nlv = (nlv + good_val) * DEC
-                nhv = (nhv + good_val) * DEC
-            elif np.isnan(zs(nlv)):
-                nlv = (nlv + good_val) * DEC
-            elif np.isnan(zs(nhv)):
-                nhv = (nhv + good_val) * DEC
 
         return nlv, nhv
     # z_t(w) in the paper; zs :: wage -> shock
