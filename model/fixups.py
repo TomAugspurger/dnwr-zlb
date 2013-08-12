@@ -22,6 +22,10 @@ def fixup_bad_gps():
 
     See commit `e5ace15` and tag `simulation3`.
     """
+    with open('results/fixup_notice.txt', 'a') as f:
+        t = str(datetime.datetime.now())
+        f.write("FIXED gps AT {}\n".format(t))
+
     params = load_params()
     params['results_path/'] = 'results/', 'a'
     all_files = ar.get_all_files(params)
@@ -43,10 +47,9 @@ def fixup_bad_gps():
         shutil.copy2(out_name, 'results/replaced_results/')
         _replace(key, out_name, all_files, params)
         print("Fixed {}".format(key))
+        with open('results/fixup_notice.txt', 'a') as f:
+            f.write("Fixed {}".format(key))
 
-    with open('results/fixup_notice.txt', 'a') as f:
-        x = str(datetime.datetime.now())
-        f.write("FIXED gps AT {}".format(x))
 
 
 def _replace(key, out_name, all_files, params):
