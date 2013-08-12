@@ -71,7 +71,16 @@ def get_wage_distribution(ws, params):
     # fine_grid = params['fine_grid'][0]
     w_max = w_grid[-1]
     g0 = Interp(w_grid, w_grid/w_max, kind='pchip')
-    gp = g_p(g0, ws, params)
+    try:
+        gp = g_p(g0, ws, params)
+    except IndexError as e:
+        # Got an endpoint for the solo good value.
+        print(e)
+        pi = params['pi']
+        lambda_ = params['lambda_']
+        with open('notices.txt', 'a') as f:
+            f.write("FAILED wage_distribution on {}".format(pi, lambda_))
+        raise
     return gp
 
 
