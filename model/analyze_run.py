@@ -4,8 +4,10 @@ import os
 import pickle
 import re
 
+import numpy as np
 import pandas as pd
 from pathlib import Path
+from scipy import interpolate
 
 from helpers import load_params
 
@@ -209,3 +211,43 @@ def filter_(dic, pi=None, lambda_=None):
         raise ValueError("At least one must be not None.")
 
     return {key: val for key, val in dic.iteritems() if key in cond}
+
+
+def flatten(dic):
+    """
+    Take a dict and make it a 2-d array of (pi, lambda, value)
+    """
+    return np.array([(key[0], key[1], val) for key, val in dic.iteritems()])
+
+
+def interp_output(out_dict, kind='cubic'):
+    """
+    2-d interpolation over (pi x lambda) -> output
+    """
+    out_ar = flatten(out_dict)
+    return interpolate.interp2d(out_ar[:, 0], out_ar[:, 1], out_ar[:, 2],
+                                kind=kind)
+
+
+def alt_interp(out_dict):
+    """
+    Just a dump.  Haven't tested.  Especially don't trust the grids and
+    having the axis correct.  Don't trust anything.
+    """
+    out_ar = flatten(out_dict)
+    pis = sorted(list({x[0] for x in out_dict}))
+    lambdas_ = sorted(list({x[1] for x in out_dict}))
+    grid_pi = np.linspace(pis[0], pis[-1], 500)
+    grid_l = np.linspace(lambdas_[0], lambdas_[-1], 500)
+    grid1, grid2 = np.meshgrid(grid_pi, grid_l)
+    z_l = interpolate.griddata(out_ar[:, 0:2], out_ar[:, 2], (grid1, grid2), method='linear')
+    z_c = interpolate.griddata(out_ar[:, 0:2], out_ar[:, 2], (grid1, grid2), method='cubic')
+    z_n = interpolate.griddata(out_ar[:, 0:2], out_ar[:, 2], (grid1, grid2), method='nearest')
+    return z_l, z_c, z_n
+
+
+def get_outs_df(out_dict):
+    idx = pd.MultiIndex.from_tuples(out_dict.keys(), names=['pi', 'lambda_'])
+    df = pd.DataFrame(out_dict.values(), columns=['output'], index=idx)
+    df = df.sort_index()
+    return df
