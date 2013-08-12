@@ -130,18 +130,19 @@ def g_p(g, ws, params, tol=1e-3, full_output=False):
             raise IndexError("Cannot deal with endpoints.")
 
         nlp, nhp = good_pos - 1, good_pos + 1
-        nlv, nhv = (grid[nlp] + good_val) / 2, (grid[nhp] + good_val) / 2
+        DEC = .95
+        nlv, nhv = DEC * (grid[nlp] + good_val), DEC * (grid[nhp] + good_val)
         ok = False
         while not ok:
             if not np.isnan([zs(nlv), zs(nhp)]).all():
                 ok = True
             elif np.isnan([zs(nlv), zs(nhp)]).all():
-                nlv = (nlv + good_val) / 2
-                nhv = (nhv + good_val) / 2
+                nlv = (nlv + good_val) * DEC
+                nhv = (nhv + good_val) * DEC
             elif np.isnan(zs(nlv)):
-                nlv = (nlv + good_val) / 2
+                nlv = (nlv + good_val) * DEC
             elif np.isnan(zs(nhv)):
-                nhv = (nhv + good_val) / 2
+                nhv = (nhv + good_val) * DEC
 
         return nlv, nhv
     # z_t(w) in the paper; zs :: wage -> shock
