@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, Iterable
 import itertools as it
 import os
 import pickle
@@ -172,3 +172,40 @@ if __name__ == '__main__':
 
     binned = bin_results(res_dir)
     print(binned)
+
+
+def filter_(dic, pi=None, lambda_=None):
+    """
+    Given a dict of results like {(pi, lambda): val}, filter
+    down to just those with pi or lambda_.
+
+    Parameters
+    ----------
+
+    dic: dictionary of results
+    pi: float/array of floats in dic keys
+    lambda_: float/array of floats in dic keys
+
+    Returns
+    -------
+
+    filtered_dict
+    """
+    if pi is None and lambda_:
+        if not isinstance(lambda_, Iterable):
+            lambda_ = (lambda_,)
+        cond = set(it.product((x[0] for x in dic.keys()), lambda_))
+    elif pi and lambda_ is None:
+        if not isinstance(pi, Iterable):
+            pi = (pi,)
+        cond = set(it.product(pi, (x[1] for x in dic.keys())))
+    elif pi and lambda_:
+        if not isinstance(pi, Iterable):
+            pi = (pi,)
+        if not isinstance(lambda_, Iterable):
+            lambda_ = (lambda_,)
+        cond = set(it.product(pi, lambda_))
+    else:
+        raise ValueError("At least one must be not None.")
+
+    return {key: val for key, val in dic.iteritems() if key in cond}
