@@ -45,8 +45,12 @@ def iter_bellman_wrapper(hyperparams):
     w_grid = params['w_grid'][0]
     z_grid = params['z_grid'][0]
 
-    v = Interp(w_grid, -w_grid + 29, kind='cubic')
+    v = Interp(w_grid, -w_grid + 29, kind='linear')
+    # Get close with linear first.  Then do a few cubic to finish up
     Tv, ws, rest = iter_bellman(v, tol=0.005, strict=False, log=False,
+                                params=params, pi=pi)
+    Tvc = Interp(Tv.X, Tv.Y, kind='cubic')
+    Tv, ws, rest = iter_bellman(Tvc, tol=0.005, strict=False, log=False,
                                 params=params, pi=pi)
     res_dict = {'Tv': Tv, 'ws': ws, 'rest': rest}
     #-------------------------------------------------------------------------
