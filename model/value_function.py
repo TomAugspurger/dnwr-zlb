@@ -229,48 +229,6 @@ def get_rigid_output(ws, params, flex_ws, gp, kind='lognorm', size=1000):
     return ((eta - 1) / eta)**(gamma / (1 + gamma)) * (1 / z_part)**(gamma / (1 + gamma))
 
 
-def burn_in_vf(w, params, maxiter=15, shock=1, kind=None):
-    """
-    Use to get a rough shape of the vf.
-
-    Parameters
-    ----------
-
-    w : Interp :: value function.
-    params: dict :: parameters
-    maxiter: int :: number of times to run
-    shock: float or array-like
-    kind: str :: interpolation kind
-    Returns
-    -------
-
-    burned :: Interp
-    """
-    lambda_, pi, beta = params['lambda_'][0], params['pi'][0], params['beta'][0]
-    try:
-        grid = w.X
-    except AttributeError:
-        grid = grid
-
-    w_max = grid[-1]
-    kind = kind or w.kind
-
-    for i in range(1, maxiter + 1):
-        vals = []
-        print("{} / {}".format(i, maxiter))
-        h_ = lambda x: -1 * ((u_(x, shock=1)) + beta * w((x / (1 + pi))))
-
-        for y in grid:
-            m1 = maximizer(h_, 0, w_max)  # can be pre-cached/z
-            m2 = maximizer(h_, y, w_max)
-            value = -1 * ((1 - lambda_) * h_(m1) + lambda_ * h_(m2))
-            vals.append(value)
-
-        vals = np.array(vals)
-        w = Interp(grid, vals, kind=kind)
-    return w
-
-
 def iter_bellman(v, tol=1e-3, maxiter=100, strict=True, log=True, **kwargs):
     """
     """
@@ -300,6 +258,32 @@ def iter_bellman(v, tol=1e-3, maxiter=100, strict=True, log=True, **kwargs):
             raise ValueError
         else:
             return Tv, ws, rest
+
+
+def taylor_rule(y, pi, ybar, pibar, gy, gpi, beta):
+    """
+    Equation 14 in DH.
+
+    Parameters
+    ----------
+
+    y : output at time t
+    pi : inflation at time t
+    ybar : steady state output
+    pibar : target inflation
+    gy : reaction coefficent to output gap
+    gpi : reaction coefficent to inflation gap
+    beta : discount factor
+
+    Returns
+    -------
+
+    i : nominal interest rate
+    """
+    p1 = (1 + pibar) / beta * (y / ybar) ** gy
+    p2 = ((1 + pi) / (1 + pibar)) ** (1 + gpi)
+    return p1 * p2 - 1
+
 
 #-----------------------------------------------------------------------------
 
