@@ -1,15 +1,19 @@
+#/Users/tom/python2.7/bin/python
+
 from collections import defaultdict, Iterable
 import itertools as it
 import os
 import pickle
 import re
 
+from astroML.plotting import hist
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from pathlib import Path
 from scipy import interpolate
 
-from helpers import load_params
+from helpers import load_params, sample_path
 
 
 def bin_results(res_dir):
@@ -164,16 +168,8 @@ def get_all_files(params=None):
     all_files = os.listdir(pth)
     return all_files
 
-if __name__ == '__main__':
-    params = load_params()
-    res_path = params['results_path'][0]
-    try:
-        res_dir = Path(res_path)
-    except TypeError:
-        res_dir = Path(str(res_path))
-
-    binned = bin_results(res_dir)
-    print(binned)
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 
 
 def filter_(dic, pi=None, lambda_=None):
@@ -251,3 +247,31 @@ def get_outs_df(out_dict):
     df = pd.DataFrame(out_dict.values(), columns=['output'], index=idx)
     df = df.sort_index()
     return df
+
+
+def make_panel(wses, params, pairs, log=False):
+    dfs = {}
+    for key in pairs:
+        ws = wses[key]
+        pths = sample_path(ws, params, w0=.9, nseries=1000, nperiods=50)
+        df = pd.DataFrame(pths)
+        if log:
+            dfs[key] = np.log(df)
+        else:
+            dfs[key] = np.log(df)
+    pan = pd.Panel(dfs)
+    pan.items.name = 'key'
+    return pan
+
+
+def make_hist(pan, subpairs, ax=None, **kwargs):
+    t = pd.concat([pan.xs(x, axis='items').diff().iloc[30] for x in subpairs],
+                  axis=1)
+    t.columns = map(str, subpairs)
+    _, idx1, fig = hist(t[t.columns[0]], bins='scott', alpha=.35, width=.0005)
+    plt.close()
+    if ax is None:
+        fig = plt.figure(**kwargs)
+        ax = fig.add_subplot(111)
+    return hist(t.values, bins=idx1, ax=ax, histtype='bar',
+                label=t.columns.tolist())
