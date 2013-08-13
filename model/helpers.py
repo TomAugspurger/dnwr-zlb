@@ -68,7 +68,8 @@ def load_params(pth='parameters.json'):
     return params
 
 
-def truncated_draw(params, lower=.05, upper=.95, kind='lognorm', size=1000):
+def truncated_draw(params, lower=.05, upper=.95, kind='lognorm', size=1000,
+                   samples=1):
     """
     Return a new normal distribution that is truncated given a
     lower upper tail in probabilities.
@@ -83,6 +84,9 @@ def truncated_draw(params, lower=.05, upper=.95, kind='lognorm', size=1000):
                 -norm
                 -lognorm
     size : How many draws to take. Default 1000.
+    samples: Number of independent draws of size size to take.
+        i.e. samples is the number of individuals while
+        size is the number of periods.
 
     Returns
     -------
@@ -101,7 +105,7 @@ def truncated_draw(params, lower=.05, upper=.95, kind='lognorm', size=1000):
     mu, sigma = params['mu'][0], params['sigma'][0]
     n_dist = stats.norm(mu, sigma)
     a, b = n_dist.ppf([.05, .95])
-    truncated = stats.truncnorm(a, b, loc=mu, scale=sigma).rvs(size)
+    truncated = stats.truncnorm(a, b, loc=mu, scale=sigma).rvs([size, samples])
     if kind == 'lognorm':
         return np.exp(truncated)
     elif kind == 'norm':
@@ -161,23 +165,21 @@ def ss_wage_flexible(params, shock=None):
 #
 
 
-def sample_path(ws, params, w0=None, nseries=1, nperiods=1000):
+def sample_path(ws, params, w0=.9, nseries=1, nperiods=1000):
     """
     Given a wage schedule, simulate the sample path of length nseries.
 
     w0 is the initial wage now (a float) not the initial wage schedule.
     """
     # TODO: Change to idio shock rather than same for everyone
-    shocks = truncated_draw(params, size=nperiods)
+    shocks = truncated_draw(params, size=nperiods, samples=nseries)
     lambda_ = params['lambda_'][0]
 
     # initialize as empty.  Fill first row with values from w, the initial wage
     vals = np.empty([nperiods, nseries])
-    w = w0 or .9
-    w = np.ones_like(vals[0, :]) * w
+    w = np.ones_like(vals[0, :]) * w0
     vals[0] = w
 
-    shocks = (np.ones_like(vals).T * shocks).T  # double T for broadcasting
     # To vectorize, we take nseries draws from unif and check if less than lamb
     # If greater, cannot_change is 0, so 0 * p2 is 0, so they always choose
     # ws(shock), i.e. they are free to choose whatever.
