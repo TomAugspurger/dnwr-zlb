@@ -295,3 +295,25 @@ def plot_with_ci(df, lower=.05, upper=.95, **kwargs):
     ax.fill_between(tdf.index, tdf['lower'].values, tdf['upper'].values,
                     alpha=.4)
     return fig, ax
+
+
+def tuple_constructor(dic):
+    """
+    Most of my results are of {(pi. lambda) : value} type.
+
+    This helper unpacks the pi x lambda tupes, and returns the Dict as
+    a Series or DataFrame with a MultiIndex.
+    """
+    keys = dic.keys()
+    df = pd.DataFrame.from_dict(dic, orient='index')
+    df.index = pd.MultiIndex.from_tuples(keys, names=['pi', 'lambda_'])
+    return df
+
+def plot_sub(df, pi=None, lambda_=None, **kwargs):
+    """
+    Use if you have series and want to plot just a subset, eg with
+    pi = .05.  Haven't tested for DataFrames.
+    """
+    dic = df.to_dict()
+    subdf = type(df)(filter_(dic, pi, lambda_))
+    pis, lambdas_ = zip(*subdf.index)  # Python win
