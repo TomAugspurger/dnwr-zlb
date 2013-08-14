@@ -134,7 +134,7 @@ def ss_output_flexible(params):
             (1 / zt) ** (gamma / (1 + gamma)))
 
 
-def ss_wage_flexible(params, shock=None):
+def ss_wage_flexible(params, shock=None, nperiods=30, nseries=1):
     """
     Given paraemters, get the ss wage.
 
@@ -142,19 +142,21 @@ def ss_wage_flexible(params, shock=None):
     ----------
 
     params: dict
-    shock: float; Draw from the distribution.  defaults to the mean.
+    shock: float;
+    nperiods: int :: Lenght of shock series. Only used if shock is None
+    nseries: int :: Number of independent series to sample.
 
     Returns
     -------
 
-    wage: float
+    wage: float or array of floats.
     """
     eta = params['eta'][0]
     gamma = params['gamma'][0]
     agg_l = ss_output_flexible(params)
 
     if shock is None:
-        shock = params['z_grid'][0]
+        shock = truncated_draw(params, size=nperiods, samples=nseries)
 
     wage = ((eta / (eta - 1)) ** (gamma / (gamma + eta)) *
             shock ** (gamma / (gamma + eta)) *
