@@ -243,22 +243,26 @@ def alt_interp(out_dict):
 
 
 def get_outs_df(out_dict):
+    """
+    Turn a dictionary of (pi x lambda : output) into a dataframe.
+    """
     idx = pd.MultiIndex.from_tuples(out_dict.keys(), names=['pi', 'lambda_'])
     df = pd.DataFrame(out_dict.values(), columns=['output'], index=idx)
     df = df.sort_index()
     return df
 
 
-def make_panel(wses, params, pairs, log=False):
+def make_panel(wses, params, pairs, log=False, nseries=100, nperiods=50):
     dfs = {}
     for key in pairs:
         ws = wses[key]
-        pths = sample_path(ws, params, w0=.9, nseries=1000, nperiods=50)
+        pths = sample_path(ws, params, w0=.9, nseries=nseries,
+                           nperiods=nperiods)
         df = pd.DataFrame(pths)
         if log:
             dfs[key] = np.log(df)
         else:
-            dfs[key] = np.log(df)
+            dfs[key] = df
     pan = pd.Panel(dfs)
     pan.items.name = 'key'
     return pan
