@@ -279,3 +279,19 @@ def make_hist(pan, subpairs, ax=None, **kwargs):
         ax = fig.add_subplot(111)
     return hist(t.values, bins=idx1, ax=ax, histtype='bar',
                 label=t.columns.tolist())
+
+
+def mean_with_ci(df, lower=.05, upper=.95):
+    tdf = pd.DataFrame({'mean': df.mean(), 'lower': df.quantile(lower),
+                        'upper': df.quantile(upper)})
+    return tdf
+
+
+def plot_with_ci(df, lower=.05, upper=.95, **kwargs):
+    tdf = mean_with_ci(df, lower, upper)
+    fig, ax = plt.subplots()
+    ## Need to figure out who gets which kwargs.  Maybe use a get w/ defaults
+    tdf['mean'].plot(ax=ax, **kwargs)
+    ax.fill_between(tdf.index, tdf['lower'].values, tdf['upper'].values,
+                    alpha=.4)
+    return fig, ax
