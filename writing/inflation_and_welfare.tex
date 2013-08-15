@@ -166,5 +166,242 @@ escapeinside={\%*}{*)}                                     % If you want to add 
 %    CONTENT
 %----------------------------------------------------------------------------------------
 
+\begin{abstract}
+I use a simplified New Keynesian model to explore how Downward Nominal Wage Rigidities affect welfare.
+
+\end{abstract}
+
+\section{Introduction}
+\label{sec:introduction}
+
+One interesting result from prior research on wage rigidities is that idiosyncratic shocks to labor are important for generating aggregate effects on output or employment.\footnote{
+This is stressed in \cite{elsby_2009}, \cite{benigno_ricci_2011}, and \cite{daly_hobijn_2013}.}
+\cite{daly_hobijn_2013} \emph{assert} that ``models need to include heterogeneous shocks to the labor supply or productivity of workers. Such shocks are necessary to make nominal wage cuts desirable when the economy is in steady state.''
+I will describe my setup more fully later, but for now bear in mind that these idiosyncratic shocks are something of a linchpin to my story.
+While we can see how idiosyncratic shocks will distort relative prices, at this time I do not have a compelling explanation for how much these shock matter or what their worldly counterpart is.\footnote{
+Interestingly, \cite{golosov_lucas_2007} introduced similar idiosyncratic shocks in a model with menu costs.
+Their motivation was to reconcile the level of aggregate inflation with individual price changes;
+aggregate shocks alone could not produce the observed dynamics.
+}
+At the very least I will be able to benchmark my model with idiosyncratic shocks against a model with only aggregate shocks to quantify the difference.
+
+% I reiterate that idiosyncratic shocks are important for downward nominal wage rigidities to generate effects at the aggregate level.
+
+%----------------------------------------------------------------------------------------
+% review of coibion
+Some attempts have been made to combine downward-nominal-wage rigidity with the zero-lower bound.
+Most notably \cite{coibon_gorodnichenko_wieland_2012} included downward-nominal-wage rigidity as they investigated optimal monetary policy with the zero-lower bound.
+My approach will be similar to theirs, though with the (perhaps) crucial difference that I will use idiosyncratic shocks to labor.
+If the research on downward-nominal-wage rigidity is to be believed, this difference will prove to be important.
+Contrary to their expectations, \cite{coibon_gorodnichenko_wieland_2012} found that downward-nominal-wage rigidities were actually welfare improving.
+In their model wage rigidities reduced the volatility of marginal costs and output, and so reduced the variance of inflation.
+The wage rigidities were also a bulwark against deflation, so the central bank could target a lower inflation level while maintaining the same probability of the zero-lower bound binding.
+It is not immediately clear if these beneficial effects of downward-nominal-wage rigidity will still be present when idiosyncratic shocks are considered.
+
+%----------------------------------------------------------------------------------------
+\section{Model}
+
+\section{The Model}
+\label{sec:the_model}
+
+I follow \cite{daly_hobijn_2013} almost exactly.
+
+\subsection{Production} % (fold)
+\label{sub:production}
+
+% subsection production (end)
+
+Aggregate output is produced according to the technology
+
+\begin{equation} \label{eq:agg_output}
+    f(L_t) = L_t = Y_t.
+\end{equation}
+
+Aggregate labor \(L_t\) is defined to be the integral of each individual's labor \(L_t(i)\):
+
+\begin{equation} \label{eq:agg_labor}
+    L_t = \left[ \int_0^1 L_t(i)^{\frac{\eta - 1}{\eta}} di \right]^{\frac{\eta}{\eta - 1}}.
+\end{equation}
+
+where $\eta$ is the usual elasticity of substitution.
+
+To simplify the aggregation process, I assume that there is a single final producer / final good who operates in a perfectly competitive market.
+This final good producer's problem is to maximize profits (which will be zero in equilibrium):
+
+\begin{equation} \label{eq:firms_problem}
+    \max_{L_t(i)} P_t L_t - \int_0^1 W_t(i)L_t(i)
+\end{equation}
+
+taking individual wages $W_t(i)$ and the aggregate price level $P_t$ as given.
+In equilibrium, the demand for each type of labor can be written as
+
+We can also define the aggregate wage index $W_t$ as
+
+\begin{equation} \label{eq:wage_index}
+    W_t = \left[\int_{0}^{1}\frac{1}{W_t(i)}^{\eta - 1} di \right]^{-\frac{1}{\eta - 1}}
+\end{equation}
+
+Thanks to the assumption of perfect competition, we know that the aggregate price level must equal the aggregate wage index, $P_t = W_t$.  This implies that the real aggregate wage index is equal to one and so
+
+\begin{equation} \label{eq:real_wage}
+    1 = \frac{W_t}{P_t} = \left[\int_{0}^{1} \left( \frac{P_t}{W_t(i)} \right)^{\eta - 1} di \right]^{-\frac{1}{\eta - 1} } = \left[\int_{0}^{1}w_{it}^{1 - \eta} di \right]^{ \frac{1}{1 - \eta} }
+\end{equation}
+
+\subsection{Households}
+\label{sub:households}
+
+There is a representative household made up of a continuum of individuals.
+Individuals can share consumption risk perfectly, but make wage setting decisions on their own.
+Once an individual has chosen a wage, he then supplies as much labor as is demanded by the firm.
+
+The household's utility function is
+
+\begin{equation} \label{eq:utility}
+    \sum_{t=0}^{\infty} \beta^t \left\{\ln Y_t - \frac{\gamma}{\gamma + 1} \int_{0}^{1} Z_t(i)L_t(i)^{\frac{\gamma + 1}{\gamma}}di\right\}
+\end{equation}
+
+where $\gamma > 0$ is the elasticity of labor supply and $\beta \in (0, 1)$ is the discount factor.
+The import bit of this utility function is that the labor preference shocks, $Z_t(i)$ are specific to each individual.
+
+The utility function is maximized subject to the budget constraint, common across households,
+
+\begin{equation}
+    \label{eq:budget}
+    A_t = \left(1 + i_{t-1}\right)A_{t-1} + \int_{0}^{1} W_t(i)L_t(i)di
+\end{equation}
+
+where $A_t$ is the level of nominal assets held by the household at time $t$ and $i$ is the nominal interest rate.
+As mention earlier each individual sets his own wage and, given that wage, works what is demanded by the firm according to the labor demand curve
+
+\begin{equation}
+    \label{eq:labor_demand}
+    L_t(i) = \left( \frac{W_t(i)}{W_t} \right)^{-\eta}L_t = (w_{it})^{-eta}L_t
+\end{equation}
+
+So, all else equal, individuals will work more the lower their own real wage or the higher aggregate output.
+
+The household takes the paths of aggregate wages, output, and final goods price $\left\{W_t, L_t, P_t \right\}_{t=0}^{\infty}$ as given.
+
+I'll assume that the idiosyncratic shocks to labor preference come from a lognormal distribution, i.i.d. across individuals and time:
+
+\begin{equation}
+    \label{eq:shock_dist}
+    \ln(Z) \sim \mathcal{N}(-\frac{\sigma^2}{2}, \sigma)
+\end{equation}
+
+so that $\mathbb{E}(Z) = 1$.
+This particular specification is chosen mainly out of convenience.
+
+Finally, to the purpose at hand, I assume that nominal wages are rigid in the downward direction.
+In the spirit of \cite{calvo_1983}, every period a randomly selected group of individuals of measure $\lambda$ are not allowed to \emph{lower} their nominal wages.
+The other $(1 - \lambda)$ individuals are free to choose whatever wage they please.
+\subsection{Wage Setting}
+\label{sub:wage_setting}
+
+We'll consider the flexible case ($\lambda = 0$) first.
+
+Letting
+\begin{equation}
+    \label{eq:labor_part}
+    \Omega( w_t(i); Z_t(i), L_t ) = w_{it}^{1 - \eta} - \frac{\gamma}{\gamma + 1}Z_t(i)\left[ w_{it}^{-\eta}L_t \right]^{\frac{\gamma}{1 + \gamma}}
+\end{equation}
+
+be the labor-related terms of the household's problem, the optimal wage in the flexible can can be attained by maximizing
+
+\begin{equation}
+    \label{eq:labor_opt}
+    \mathbb{E}_t\left[\sum_{t=0}^{\infty}\beta^t \Omega( w_t(i); Z_t(i), L_t ) \right].
+\end{equation}
+
+Solving this gives the optimal real wage schedule
+
+\begin{equation}
+    \label{eq:flex}
+    \hat{w}(Z_t(i); L_t) = \hat{w}_{it} = \left( \frac{\eta}{\eta - 1} \right)^{\frac{\gamma}{\eta + \gamma}}\left( Z_t(i) \right)^{\frac{\gamma}{\eta + \gamma}} L_t^{\frac{\gamma + 1}{\gamma + \eta}}
+\end{equation}
+
+
+\section{Monetary Policy}
+\label{sec:monetary_policy}
+
+\section{Equilibrium}
+\label{sec:equilibrium}
+
+\section{Steady State}
+\label{sec:steady_state}
+
+
+%-----------------------------------------------------------------------------
+%-----------------------------------------------------------------------------
+%-----------------------------------------------------------------------------
+%-----------------------------------------------------------------------------
+%-----------------------------------------------------------------------------
+\begin{equation}
+    L_t(i) = \frac{W_t(i)}{W_t}^{-\eta} L_t.
+\end{equation}
+
+
+\begin{equation*}
+    E_{t_0} \sum_{t=t_0}^{\infty} \beta^t \left\{\ln{C_t} - \frac{\eta}{\eta + 1} \int_{0}^{1} Z_t(i) N_t(i)^{\frac{\eta + 1}{\eta}} di \right\}
+\end{equation*}
+where $C_t$ is the household's consumption, $N_t(i)$ is individual $i$'s labor contribution, $\eta > 1$ is the Frisch labor supply elasticity, and $Z_t(i)$ is a stochastic preference shock to labor of type $i$.\footnote{I don't want to commit to a specification too early---tractability will likely put huge importance on the exact forms I choose---but the shock Z will probably be log-normally distributed with independence across time.}
+This will be maximized subject to the period budget constraint:
+
+\begin{equation*}
+    C_t + \frac{S_t}{P_t} \leq \int_{0}^{1} \left( N_t(i) \frac{W_t(i)}{P_t}\right) di + S_{t-1}\frac{R_{t-1}}{P_t} + T_t
+\end{equation*}
+Here, $S_t$ is the stock of one-period bonds carried over to tomorrow, $R_t$ is the gross nominal interest rate, $P_t$ is the price of the final good, $W_t(i)$ is the nominal wage paid to individual $i$, and $T_t$ is a real transfer of profits from the firms to the household.
+
+Like in \cite{erceg_henderson_levin_1999} individuals of the household can share consumption risk but make wage decisions individually.
+Given this wage, each individual supplies labor as demanded.  Additionally, we will construct a labor aggregator who chooses the labor types in the same proportion as the individual firms described below.  It demands a labor index $N_t$ defined as:
+
+\begin{equation*}
+    N_t = \left[ \int_{0}^{1} N_t(h)^{ \frac{\eta - 1}{\eta} } dh \right]^{ \frac{\eta}{\eta - 1} }
+\end{equation*}
+where the integration is over the labor types. The aggregator's total demand for each type of labor equals the sum of the intermediate firms' demand for that type.
+In the usual manner, this aggregator minimizes the input costs required to produce a given level of output by choosing inputs $N_t(h)$ given wages $W_t(h)$.  This leads to the aggregate wage index $W_t$:
+
+\begin{equation*}
+    W_t \equiv \left[ \int_{0}^{1} W_t(h)^{ 1 - \eta }  \right]^{ \frac{1}{1 - \eta} }
+\end{equation*}
+Finally, this implies that the total demand for labor services from individual $h$ is:
+
+\begin{equation*}
+    N_t(h) = \left[ \frac{W_t}{W_t(h)}  \right]^{\eta}N_t
+\end{equation*}
+
+
+The production side of the economy will be characterized by a continuum of monopolistically competitive  intermediate goods producers and a perfectly competitive final good producer.
+The intermediate producers are also indexed on $[0, 1]$.
+As before, we'll construct an aggregator who combines the intermediate products $Y_t(f)$ into an aggregate index $Y_t$.
+The aggregator's choices reflect those of the household:
+\begin{equation*}
+    Y_t = \left[\int_{0}^{1} Y_t(f)^{ \frac{\theta - 1}{\theta}} df \right]^{ \frac{\theta}{\theta - 1} }
+\end{equation*}
+where $\theta > 1$ is the elasticity of substitution among types of intermediate goods.
+This yields the aggregate price index:
+
+\begin{equation*}
+    P_t \equiv \left[\int_{0}^{1} P_t(f)^{1 - \theta} df \right]^{\frac{1}{1 - \theta}}
+\end{equation*}
+where $P_t(f)$ is the price for intermediate product $f$.
+We can also get the total demand for that firm's product:
+
+\begin{equation*}
+    Y_t(f) = \left[ \frac{P_t}{P_t(f)}  \right]^{\theta} Y_t
+\end{equation*}
+
+Meanwhile each intermediate good $f$ is produced according to:
+
+\begin{equation*}
+    Y_t(f) = A_t N_t(f)
+\end{equation*}
+where $A_t$ is the (stochastic) aggregate technology level and $N_t(f)$ is the quantity of the aggregate labor index $N_t$ chosen by that firm.
+The intermediate goods producers will likely face some sort of pricing friction as in \cite{calvo_1983}.
+
+
+\bibliographystyle{apa}
+\bibliography{citations}
+
 
 \end{document}
