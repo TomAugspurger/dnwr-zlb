@@ -195,4 +195,4 @@ def sample_path(ws, params, lambda_=None, w0=.9, nseries=1, nperiods=1000):
         vals[i] = np.amax([p1, p2], axis=0)
         w = vals[i]
 
-    return np.array(vals)
+    return np.array(vals), shocks

@@ -252,7 +252,7 @@ def get_outs_df(out_dict):
     return df
 
 
-def make_panel(wses, params, pairs, log=False, nseries=100, nperiods=50):
+def make_panel(wses, params, pairs=None, log=False, nseries=100, nperiods=50):
     """
     Panel of wage choices where
 
@@ -260,19 +260,31 @@ def make_panel(wses, params, pairs, log=False, nseries=100, nperiods=50):
         major : periods
         minor : series
     """
+    if pairs is None:
+        pairs = wses.iterkeys()
+
     dfs = {}
+    sks = {}
     for key in pairs:
         ws = wses[key]
-        pths = sample_path(ws, params, w0=.9, lambda_=key[1], nseries=nseries,
-                           nperiods=nperiods)
+        pths, shocks = sample_path(ws, params, w0=.9, lambda_=key[1],
+                                   nseries=nseries, nperiods=nperiods)
         df = pd.DataFrame(pths)
+        shocks = pd.DataFrame(shocks)
         if log:
             dfs[key] = np.log(df)
         else:
             dfs[key] = df
-    pan = pd.Panel(dfs)
-    pan.items.name = 'key'
-    return pan
+        sks[key] = shocks
+    df_pan = pd.Panel(dfs)
+    sk_pan = pd.Panel(sks)
+    df_pan.minor_axis.name = 'person'
+    sk_pan.minor_axis.name = 'person'
+    df_pan.items.name = 'key'
+    sk_pan.items.name = 'key'
+    df_pan.major_axis.name = 'period'
+    sk_pan.major_axis.name = 'period'
+    return df_pan, sk_pan
 
 
 def make_hist(pan, subpairs, ax=None, **kwargs):
