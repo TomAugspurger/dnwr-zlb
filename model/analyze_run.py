@@ -253,10 +253,17 @@ def get_outs_df(out_dict):
 
 
 def make_panel(wses, params, pairs, log=False, nseries=100, nperiods=50):
+    """
+    Panel of wage choices where
+
+        items : (pi, lambda)
+        major : periods
+        minor : series
+    """
     dfs = {}
     for key in pairs:
         ws = wses[key]
-        pths = sample_path(ws, params, w0=.9, nseries=nseries,
+        pths = sample_path(ws, params, w0=.9, lambda_=key[1], nseries=nseries,
                            nperiods=nperiods)
         df = pd.DataFrame(pths)
         if log:
@@ -308,6 +315,7 @@ def tuple_constructor(dic):
     df = pd.DataFrame.from_dict(dic, orient='index')
     df.index = pd.MultiIndex.from_tuples(keys, names=['pi', 'lambda_'])
     return df
+
 
 def plot_sub(df, pi=None, lambda_=None, **kwargs):
     """
