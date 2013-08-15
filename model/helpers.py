@@ -167,15 +167,17 @@ def ss_wage_flexible(params, shock=None, nperiods=30, nseries=1):
 #
 
 
-def sample_path(ws, params, w0=.9, nseries=1, nperiods=1000):
+def sample_path(ws, params, lambda_=None, w0=.9, nseries=1, nperiods=1000):
     """
     Given a wage schedule, simulate the sample path of length nseries.
 
     w0 is the initial wage now (a float) not the initial wage schedule.
+
+    Added lambda_ as an arg for easy override of the dict lambda.
     """
     # TODO: Change to idio shock rather than same for everyone
     shocks = truncated_draw(params, size=nperiods, samples=nseries)
-    lambda_ = params['lambda_'][0]
+    lambda_ = lambda_ or params['lambda_'][0]
 
     # initialize as empty.  Fill first row with values from w, the initial wage
     vals = np.empty([nperiods, nseries])
