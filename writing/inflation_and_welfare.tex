@@ -220,7 +220,7 @@ Aggregate output is produced according to the technology
 Aggregate labor \(L_t\) is defined to be the integral of each individual's labor \(L_t(i)\):
 
 \begin{equation} \label{eq:agg_labor}
-    L_t = \left[ \int_0^1 L_t(i)^{\frac{\eta - 1}{\eta}} di \right]^{\frac{\eta}{\eta - 1}}.
+    L_t = \left[ \int_0^1 L_t(i)^{\frac{\eta - 1}{\eta}} \mathrm{d}i \right]^{\frac{\eta}{\eta - 1}}.
 \end{equation}
 
 where $\eta$ is the usual elasticity of substitution.
@@ -238,13 +238,13 @@ In equilibrium, the demand for each type of labor can be written as
 We can also define the aggregate wage index $W_t$ as
 
 \begin{equation} \label{eq:wage_index}
-    W_t = \left[\int_{0}^{1}\frac{1}{W_t(i)}^{\eta - 1} di \right]^{-\frac{1}{\eta - 1}}
+    W_t = \left[\int_{0}^{1}\frac{1}{W_t(i)}^{\eta - 1} \mathrm{d}i \right]^{-\frac{1}{\eta - 1}}
 \end{equation}
 
 Thanks to the assumption of perfect competition, we know that the aggregate price level must equal the aggregate wage index, $P_t = W_t$.  This implies that the real aggregate wage index is equal to one and so
 
 \begin{equation} \label{eq:real_wage}
-    1 = \frac{W_t}{P_t} = \left[\int_{0}^{1} \left( \frac{P_t}{W_t(i)} \right)^{\eta - 1} di \right]^{-\frac{1}{\eta - 1} } = \left[\int_{0}^{1}w_{it}^{1 - \eta} di \right]^{ \frac{1}{1 - \eta} }
+    1 = \frac{W_t}{P_t} = \left[\int_{0}^{1} \left( \frac{P_t}{W_t(i)} \right)^{\eta - 1} \mathrm{d}i \right]^{-\frac{1}{\eta - 1} } = \left[\int_{0}^{1}w_{it}^{1 - \eta} \mathrm{d}i \right]^{ \frac{1}{1 - \eta} }
 \end{equation}
 
 \subsection{Households}
@@ -257,7 +257,7 @@ Once an individual has chosen a wage, he then supplies as much labor as is deman
 The household's utility function is
 
 \begin{equation} \label{eq:utility}
-    \sum_{t=0}^{\infty} \beta^t \left\{\ln Y_t - \frac{\gamma}{\gamma + 1} \int_{0}^{1} Z_t(i)L_t(i)^{\frac{\gamma + 1}{\gamma}}di\right\}
+    \sum_{t=0}^{\infty} \beta^t \left\{\ln Y_t - \frac{\gamma}{\gamma + 1} \int_{0}^{1} Z_t(i)L_t(i)^{\frac{\gamma + 1}{\gamma}}\mathrm{d}i\right\}
 \end{equation}
 
 where $\gamma > 0$ is the elasticity of labor supply and $\beta \in (0, 1)$ is the discount factor.
@@ -267,7 +267,7 @@ The utility function is maximized subject to the budget constraint, common acros
 
 \begin{equation}
     \label{eq:budget}
-    A_t = \left(1 + i_{t-1}\right)A_{t-1} + \int_{0}^{1} W_t(i)L_t(i)di
+    A_t = \left(1 + i_{t-1}\right)A_{t-1} + \int_{0}^{1} W_t(i)L_t(i)\mathrm{d}i
 \end{equation}
 
 where $A_t$ is the level of nominal assets held by the household at time $t$ and $i$ is the nominal interest rate.
@@ -286,7 +286,7 @@ I'll assume that the idiosyncratic shocks to labor preference come from a lognor
 
 \begin{equation}
     \label{eq:shock_dist}
-    \ln(Z) \sim \mathcal{N}(-\frac{\sigma^2}{2}, \sigma)
+    \ln(Z) \sim \mathcal{N}\left(-\frac{\sigma^2}{2}, \sigma\right)
 \end{equation}
 
 so that $\mathbb{E}(Z) = 1$.
@@ -320,84 +320,94 @@ Solving this gives the optimal real wage schedule
     \hat{w}(Z_t(i); L_t) = \hat{w}_{it} = \left( \frac{\eta}{\eta - 1} \right)^{\frac{\gamma}{\eta + \gamma}}\left( Z_t(i) \right)^{\frac{\gamma}{\eta + \gamma}} L_t^{\frac{\gamma + 1}{\gamma + \eta}}
 \end{equation}
 
+For the rigid case, $\lambda > 0$, our approach is slightly different
+Each day, our individuals wake up with their wage from yesterday.
+They receive a labor preference shock, $Z_t(i)$, and find out whether they are allowed to choose any nominal wage, or just a wage greater than yesterday's.
+They then choose the wage for today to optimize today's utility plus the future value of holding that wage.
+As a value function, holding a real wage $w$:
+
+\begin{multline}
+    \label{eq:value_function}
+    V_t(w) = (1 - \lambda) \int_{0}^{\infty} \max_{w_{it} \geq 0} \left\{ \Omega( w_t(i); Z_t(i), L_t ) + \beta V_{t+1}\left( \frac{w_{it}}{(1 + \pi_{t+1})} \right) \right\} \mathrm{d}F(Z_t(i)) \\
+                + \lambda  \int_{0}^{\infty} \max_{w_{it} \geq w} \left\{ \Omega( w_t(i); Z_t(i), L_t ) + \beta V_{t+1}\left( \frac{w_{it}}{(1 + \pi_{t+1})} \right) \right\} \mathrm{d}F(Z_t(i))
+\end{multline}
+
+$F(Z_t(i))$ is the distribution of idiosyncratic shocks across individuals and $\pi_{t+1}$ is the inflation rate from time $t$ to $t+1$.
+
+One thing to note: downward nominal wage rigidities clearly affect workers who fall into the second line of \ref{eq:value_function}, those who can't lower their wage below $w$.
+But the effect of downward nominal wage rigidities actually goes beyond that by lowering the future value of choosing too high a wage today, via the probability of now being able to lower it later.
+This effect tends to compress the wages chosen by the $(1 - \lambda)$ unrestricted workers.
 
 \section{Monetary Policy}
 \label{sec:monetary_policy}
 
+Not really implemented yet, but the central bank follows a normal Taylor Rule:
+
+\begin{equation}
+    \label{eq:taylor_rule}
+    i_t = \frac{1 + \bar{pi}}{\beta} \left( \frac{Y_t}{\bar{Y}} \right)^{\varphi_Y} \left( \frac{1 + \pi_t}{1 + \bar{\pi}} \right)^{1 + \varphi_{\pi}} - 1
+\end{equation}
+
+where $\phi_Y, \phi_{\pi} > 0$ govern the strength of the central bank's reaction to deviations from its target level of inflation, $\bar{\pi}$ and the steady-state output level $\bar{Y}$.
+
 \section{Equilibrium}
 \label{sec:equilibrium}
 
-\section{Steady State}
-\label{sec:steady_state}
+With flexible wages, $\lambda = 0$, we can write the equilibrium level of output and employment in closed form.
 
-
-%-----------------------------------------------------------------------------
-%-----------------------------------------------------------------------------
-%-----------------------------------------------------------------------------
-%-----------------------------------------------------------------------------
-%-----------------------------------------------------------------------------
 \begin{equation}
-    L_t(i) = \frac{W_t(i)}{W_t}^{-\eta} L_t.
+    \label{eq:output_flexible}
+    Y_t = L_t = \left( \frac{\eta - 1}{\eta} \right)^{\frac{\gamma}{1 + \gamma}} \left( \frac{1}{Z_t} \right)^{\frac{\gamma}{1 + \gamma}}
+\end{equation}
+
+where
+
+\begin{align}
+    Z_t =& \left( \int_{0}^{1}\! \left( \frac{1}{Z_t(i)} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \mathrm{d}i \right)^{-\frac{\eta + \gamma}{\gamma(\eta - 1)}}\\
+        =& e^{-\frac{1}{2} \frac{\eta(1 + \gamma)}{\gamma + \eta}\sigma^2 }.
+\end{align}
+
+The last line follows from the specification that the idiosyncratic shocks $Z_t(i)$ are distributed lognoramlly.
+
+For the rigid case, $\lambda > 0$, we need to keep track of which subset of individuals are constrained.
+They can be broken into three groups.
+
+The first group is those $(1 - \lambda)$ who are not constrained in the downward direction.
+
+The second group is those who are not allowed to lower their wage, but draw an idiosyncratic shock such that they'd like to increase their wage anyway.
+
+Finally, the third group is those who would like to lower their wage, but are not allowed to.
+
+We can write the distribution of wages recursively:
+
+\begin{equation}
+    \label{eq:wage_distribution}
+    G_t(w) = (1 - \lambda) F(z_t(w)) + \lambda G_{t-1}\left(w[1 + \pi_t]\right)F(z_t(w))
+\end{equation}
+
+Using the distribution of wages, we can solve for the output level with rigid wages:
+
+\begin{equation}
+    \label{eq:output_rigid}
+    Y_t = L_t = \left(\frac{\eta - 1}{\eta} \right)^{\frac{\gamma}{1 + \gamma}}\left( \frac{1}{Z_t^*} \right)^{\frac{\gamma}{1 + \gamma}}
+\end{equation}
+
+where
+
+\begin{equation}
+    \label{eq:z_star}
+    \begin{split}
+    Z_t^* &= \Big\{(1 - \lambda) \int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left( \frac{\hat{w}_t(Z)}{w_t(Z)} \right)^{\eta - 1}\ \mathrm{d}F(Z) \\
+          &+            \lambda  \int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left( \frac{\hat{w}_t(Z)}{w_t(Z)} \right)^{\eta - 1} G_{t-1}\left( w_t(Z)[1 + \pi_t] \right)                                                     \ \mathrm{d}F(Z)\\
+          &+            \lambda  \int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left[ \int_{w_t(Z)}^{\infty} (1 + \pi_t)g_{t-1}\left( w[1 + \pi_t] \right) \left( \frac{\hat{w}_t(Z)}{w} \right)^{\eta - 1}\ \mathrm{d}w \right] \ \mathrm{d}F(Z)
+            \Big\}^{-\frac{\eta + \gamma}{\gamma(\eta - 1)}}
+    \end{split}
 \end{equation}
 
 
-\begin{equation*}
-    E_{t_0} \sum_{t=t_0}^{\infty} \beta^t \left\{\ln{C_t} - \frac{\eta}{\eta + 1} \int_{0}^{1} Z_t(i) N_t(i)^{\frac{\eta + 1}{\eta}} di \right\}
-\end{equation*}
-where $C_t$ is the household's consumption, $N_t(i)$ is individual $i$'s labor contribution, $\eta > 1$ is the Frisch labor supply elasticity, and $Z_t(i)$ is a stochastic preference shock to labor of type $i$.\footnote{I don't want to commit to a specification too early---tractability will likely put huge importance on the exact forms I choose---but the shock Z will probably be log-normally distributed with independence across time.}
-This will be maximized subject to the period budget constraint:
 
-\begin{equation*}
-    C_t + \frac{S_t}{P_t} \leq \int_{0}^{1} \left( N_t(i) \frac{W_t(i)}{P_t}\right) di + S_{t-1}\frac{R_{t-1}}{P_t} + T_t
-\end{equation*}
-Here, $S_t$ is the stock of one-period bonds carried over to tomorrow, $R_t$ is the gross nominal interest rate, $P_t$ is the price of the final good, $W_t(i)$ is the nominal wage paid to individual $i$, and $T_t$ is a real transfer of profits from the firms to the household.
-
-Like in \cite{erceg_henderson_levin_1999} individuals of the household can share consumption risk but make wage decisions individually.
-Given this wage, each individual supplies labor as demanded.  Additionally, we will construct a labor aggregator who chooses the labor types in the same proportion as the individual firms described below.  It demands a labor index $N_t$ defined as:
-
-\begin{equation*}
-    N_t = \left[ \int_{0}^{1} N_t(h)^{ \frac{\eta - 1}{\eta} } dh \right]^{ \frac{\eta}{\eta - 1} }
-\end{equation*}
-where the integration is over the labor types. The aggregator's total demand for each type of labor equals the sum of the intermediate firms' demand for that type.
-In the usual manner, this aggregator minimizes the input costs required to produce a given level of output by choosing inputs $N_t(h)$ given wages $W_t(h)$.  This leads to the aggregate wage index $W_t$:
-
-\begin{equation*}
-    W_t \equiv \left[ \int_{0}^{1} W_t(h)^{ 1 - \eta }  \right]^{ \frac{1}{1 - \eta} }
-\end{equation*}
-Finally, this implies that the total demand for labor services from individual $h$ is:
-
-\begin{equation*}
-    N_t(h) = \left[ \frac{W_t}{W_t(h)}  \right]^{\eta}N_t
-\end{equation*}
-
-
-The production side of the economy will be characterized by a continuum of monopolistically competitive  intermediate goods producers and a perfectly competitive final good producer.
-The intermediate producers are also indexed on $[0, 1]$.
-As before, we'll construct an aggregator who combines the intermediate products $Y_t(f)$ into an aggregate index $Y_t$.
-The aggregator's choices reflect those of the household:
-\begin{equation*}
-    Y_t = \left[\int_{0}^{1} Y_t(f)^{ \frac{\theta - 1}{\theta}} df \right]^{ \frac{\theta}{\theta - 1} }
-\end{equation*}
-where $\theta > 1$ is the elasticity of substitution among types of intermediate goods.
-This yields the aggregate price index:
-
-\begin{equation*}
-    P_t \equiv \left[\int_{0}^{1} P_t(f)^{1 - \theta} df \right]^{\frac{1}{1 - \theta}}
-\end{equation*}
-where $P_t(f)$ is the price for intermediate product $f$.
-We can also get the total demand for that firm's product:
-
-\begin{equation*}
-    Y_t(f) = \left[ \frac{P_t}{P_t(f)}  \right]^{\theta} Y_t
-\end{equation*}
-
-Meanwhile each intermediate good $f$ is produced according to:
-
-\begin{equation*}
-    Y_t(f) = A_t N_t(f)
-\end{equation*}
-where $A_t$ is the (stochastic) aggregate technology level and $N_t(f)$ is the quantity of the aggregate labor index $N_t$ chosen by that firm.
-The intermediate goods producers will likely face some sort of pricing friction as in \cite{calvo_1983}.
+\section{Steady State}
+\label{sec:steady_state}
 
 
 \bibliographystyle{apa}
