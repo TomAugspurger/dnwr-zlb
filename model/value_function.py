@@ -200,7 +200,7 @@ def get_rigid_output(ws, params, flex_ws, gp, kind='lognorm', size=1000):
                                      params['eta'][0], params['gamma'][0],
                                      params['pi'][0])
     shocks = np.sort(truncated_draw(params, lower=.05, upper=.95,
-                                    kind=kind, size=size))
+                                    kind=kind, size=size), axis=0)
     lambda_ = params['lambda_'][0]
     sub_w = lambda z: w_grid[w_grid > ws(z)]  # TODO: check on > vs >=
     dg = pchip(gp.X, gp.Y).derivative
