@@ -6,14 +6,17 @@ Try to keep a log of runs here.
 Date       | Method
 --------------------------
 2013-08-11 | fixup_bad_gps
+2013-08-15 | fixup_bad_outputs
 """
 import datetime
+import pickle
 import shutil
 
 import analyze_run as ar
-import pickle
-from helpers import load_params
+from gen_interp import Interp
+from helpers import load_params, ss_wage_flexible
 from run_value_function import get_wage_distribution
+from value_function import get_rigid_output
 
 
 def fixup_bad_gps():
@@ -51,7 +54,6 @@ def fixup_bad_gps():
             f.write("Fixed {}".format(key))
 
 
-
 def _replace(key, out_name, all_files, params):
     wses = ar.read_output(all_files, kind='ws')
     ws = wses[key]
@@ -59,5 +61,53 @@ def _replace(key, out_name, all_files, params):
     with open(out_name, 'w') as f:
         pickle.dump(gp, f)
 
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+
+
+def fixup_bad_outputs():
+    """
+    I wasn't handling the integrals correctly.  Before I was just
+    summing, but that ignored the probability distribution for each
+    shock.
+
+    That's fixed now (hopefully).  Fortunately, the calculation
+    of all the equilibrium stuff (vf, ws) is independent of the output
+    calculation.  So we can pick up from there.
+    """
+    with open('results/fixup_notice.txt', 'a') as f:
+        t = str(datetime.datetime.now())
+        f.write("FIXED outputs AT {}\n".format(t))
+
+    params = load_params()
+    params['results_path/'] = 'results/', 'a'
+    all_files = ar.get_all_files(params)
+
+    gps = ar.read_output(all_files, kind='gp')
+    wses = ar.read_output(all_files, kind='ws')
+    z_grid = params['z_grid'][0]
+    flex = ss_wage_flexible(params, shock=z_grid)
+    flex_ws = Interp(z_grid, flex)
+
+    for key in wses:
+        ws = wses[key]
+        gp = gps[key]
+        params['pi'] = key[0], 'a'
+        params['lambda_'] = key[1], 'b'
+
+        piname, lambda_ = [str(x).replace('.', '') for x in key]
+        out_name = 'results/rigid_output_' + piname + '_' + lambda_ + '_.txt'
+        shutil.copy2(out_name, 'results/replaced_results/')
+
+        new_out = get_rigid_output(ws, params, flex_ws, gp)
+
+        with open(out_name, 'w') as f:
+            f.write(str(new_out))
+
+        with open('results/fixup_notice.txt', 'a') as f:
+            f.write('Fixed output for {}.'.format(key))
+            print("Fixed {}".format(key))
+
 if __name__ == '__main__':
-    fixup_bad_gps()
+    # fixup_bad_gps()
+    fixup_bad_outputs()
