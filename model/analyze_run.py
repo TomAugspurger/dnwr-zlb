@@ -2,6 +2,7 @@
 
 from collections import defaultdict, Iterable
 import itertools as it
+import json
 import os
 import pickle
 import re
@@ -82,8 +83,13 @@ def _read_rigid_output(fnames, prepend=''):
             lambda_ = float(match.groups()[1].replace('0', '.', 1))
         except AttributeError:
             continue
-        with open(prepend + fname, 'rb') as f:
-            pi_out_dict[(pi, lambda_)] = float(f.read())
+        with open(prepend + fname, 'r') as f:
+            try:
+                pi_out_dict[(pi, lambda_)] = float(f.read())
+            except ValueError:
+                f.seek(0)
+                val = json.load(f)
+                pi_out_dict[(pi, lambda_)] = float(val[0])
     return pi_out_dict
 
 
