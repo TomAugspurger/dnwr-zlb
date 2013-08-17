@@ -167,16 +167,32 @@ def ss_wage_flexible(params, shock=None, nperiods=30, nseries=1):
 #
 
 
-def sample_path(ws, params, lambda_=None, w0=.9, nseries=1, nperiods=1000):
+def sample_path(ws, params, lambda_=None, w0=.9, nseries=1, nperiods=1000,
+                seed=None):
     """
     Given a wage schedule, simulate the sample path of length nseries.
 
     w0 is the initial wage now (a float) not the initial wage schedule.
 
     Added lambda_ as an arg for easy override of the dict lambda.
+
+    seed allows for setting a seed by passing an int.
+
+    Returns
+    -------
+
+    vals : array of wages chosen with shape nperiods x nseries
+    shocks: shocks that generated those choices.  Same shape.
     """
     # TODO: Change to idio shock rather than same for everyone
+    if seed:
+        if isinstance(seed, int):
+            np.random.seed(seed)
+        else:  # Say a bool, defaults to 42.
+            np.random.seed(42)
+
     shocks = truncated_draw(params, size=nperiods, samples=nseries)
+    cannot_change_arr = np.random.uniform(0, 1, [nperiods, nseries]) < lambda_
     lambda_ = lambda_ or params['lambda_'][0]
 
     # initialize as empty.  Fill first row with values from w, the initial wage
@@ -189,7 +205,7 @@ def sample_path(ws, params, lambda_=None, w0=.9, nseries=1, nperiods=1000):
     # ws(shock), i.e. they are free to choose whatever.
 
     for i, shock in enumerate(shocks):
-        cannot_change = np.random.uniform(0, 1, nseries) < lambda_
+        cannot_change = cannot_change_arr[i]
         p1 = ws(shock)
         p2 = cannot_change * np.amax([w, ws(shock)], axis=0)
         vals[i] = np.amax([p1, p2], axis=0)

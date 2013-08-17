@@ -6,9 +6,11 @@ import unittest
 
 import nose
 import numpy as np
+from numpy.testing import assert_equal, assert_allclose
 
 from ..analyze_run import read_output
 from ..gen_interp import Interp
+from ..helpers import sample_path
 
 np.random.seed(42)
 
@@ -56,7 +58,54 @@ class TestAnalysis(unittest.TestCase):
         [assert_interp_equal(vf, result[x]) for x in result]
         self.assertEquals(sorted(expected.keys()), sorted(result.keys()))
 
+    def test_sample_path(self):
+        X = np.array([0.70541378, 0.73997213, 0.77453049, 0.80908884, 0.84364719,
+                      0.87820555, 0.9127639, 0.94732226, 0.98188061, 1.01643896,
+                      1.05099732, 1.08555567, 1.12011402, 1.15467238, 1.18923073,
+                      1.22378908, 1.25834744, 1.29290579, 1.32746414, 1.3620225])
 
+        Y = np.array([0.94741585, 0.95498567, 0.96226472, 0.96926453, 0.97600736,
+                      0.98250305, 0.98877408, 0.99483511, 1.00069849, 1.0063769,
+                      1.01188147, 1.01722231, 1.02240867, 1.02744901, 1.03235118,
+                      1.03712205, 1.04177051, 1.046307, 1.05074639, 1.05508846])
+        ws = Interp(X, Y, kind='cubic')
+        key = (0.005, 0.05)
+        seed = 42
+        params = {'mu': (-0.020000000000000004, 'mean.'),
+                  'sigma': [0.2, u'standard dev.'],
+                  'lambda_': [key[1], 'a']}
+        exp_pths = np.array([[0.99713702],
+                             [1.00947703],
+                             [1.00472714],
+                             [1.00188703],
+                             [0.99245093]])
+
+        exp_shocks = np.array([[0.96075536],
+                               [1.03577164],
+                               [1.006286],
+                               [0.98902403],
+                               [0.93358932]])
+
+        pths, shocks = sample_path(ws, params, lambda_=key[1], nperiods=5,
+                                   seed=seed)
+        assert_allclose(pths, exp_pths)
+        assert_allclose(shocks, exp_shocks)
+
+    def test_utils(self):
+        X = np.array([0.70541378, 0.73997213, 0.77453049, 0.80908884, 0.84364719,
+                      0.87820555, 0.9127639, 0.94732226, 0.98188061, 1.01643896,
+                      1.05099732, 1.08555567, 1.12011402, 1.15467238, 1.18923073,
+                      1.22378908, 1.25834744, 1.29290579, 1.32746414, 1.3620225])
+
+        Y = np.array([0.94741585, 0.95498567, 0.96226472, 0.96926453, 0.97600736,
+                      0.98250305, 0.98877408, 0.99483511, 1.00069849, 1.0063769,
+                      1.01188147, 1.01722231, 1.02240867, 1.02744901, 1.03235118,
+                      1.03712205, 1.04177051, 1.046307, 1.05074639, 1.05508846])
+        ws = Interp(X, Y, kind='cubic')
+        key = (0.005, 0.05)
+
+
+        
 if __name__ == '__main__':
     nose.runmodule(argv=[__file__, '-vvs', '-x', '--pdb', '--pdb-failure'],
                    exit=False)
