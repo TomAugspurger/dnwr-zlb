@@ -15,7 +15,7 @@ from pathlib import Path
 from scipy import interpolate
 
 from helpers import load_params, sample_path
-
+from value_function import u_
 
 def bin_results(res_dir):
     """
@@ -258,13 +258,16 @@ def get_outs_df(out_dict):
     return df
 
 
-def make_panel(wses, params, pairs=None, log=False, nseries=100, nperiods=50):
+def make_panel(wses, params, pairs=None, log=False, nseries=100, nperiods=50,
+               seed=42):
     """
     Panel of wage choices where
 
         items : (pi, lambda)
         major : periods
         minor : series
+
+    seed is an int given to np.random.set_seed().
     """
     if pairs is None:
         pairs = wses.iterkeys()
@@ -274,7 +277,8 @@ def make_panel(wses, params, pairs=None, log=False, nseries=100, nperiods=50):
     for key in pairs:
         ws = wses[key]
         pths, shocks = sample_path(ws, params, w0=.9, lambda_=key[1],
-                                   nseries=nseries, nperiods=nperiods)
+                                   nseries=nseries, nperiods=nperiods,
+                                   seed=seed)
         df = pd.DataFrame(pths)
         shocks = pd.DataFrame(shocks)
         if log:
@@ -343,3 +347,25 @@ def plot_sub(df, pi=None, lambda_=None, **kwargs):
     dic = df.to_dict()
     subdf = type(df)(filter_(dic, pi, lambda_))
     pis, lambdas_ = zip(*subdf.index)  # Python win
+
+
+def get_utils(wpan, span, out_ser, by_lam=False):
+    keys = wpan.items
+    dfu = {}
+    for key in keys:
+        dfw = wpan[key]
+        dfs = span[key]
+        dfu[key] = up(dfw.values.ravel(), dfs.values.ravel(),
+                      out_ser.ix[key].values).mean()
+
+    dfu = tuple_constructor(dfu)
+    if by_lam:
+        dfu = dfu.swaplevel(0, 1)
+    dfu = dfu.sort_index()
+    return dfu
+
+
+def up(hrs, shock, output, eta=2.5, gamma=.5):
+    p1 = np.log(output)
+    p2 = (gamma / (gamma + 1)) * shock * hrs ** ((gamma + 1) / gamma)
+    return p1 - p2
