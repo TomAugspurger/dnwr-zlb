@@ -114,15 +114,18 @@ class TestValueFunction(unittest.TestCase):
                   'pi': (.01, 'pi'),
                   'gamma': (0.5, "frisch elas. of labor supply"),
                   'sigma': (0.2, "standard dev. of underlying normal dist"),
-                  'wn': (40, u'wage grid point')}
+                  'wn': (40, u'wage grid point'),
+                  "wl": [0.4, "wage lower bound"],
+                  "wu": [3.5, "wage upper bound"],
+                  "w_grid": (w_grid, 'a')}
         np.random.seed(42)
         sigma = params['sigma'][0]
         ln_dist = lognorm(sigma, scale=np.exp(-(sigma) ** 2 / 2))
         params['full_ln_dist'] = ln_dist, "Frozen lognormal distribution."
         actual = g_p(g, ws, params)
 
-        expected_X_mean = 1.9500000000000004
-        expected_Y_mean = 0.1568843469134085
+        expected_X_mean = 1.9674999999999998
+        expected_Y_mean = 0.1534990161757282
 
         self.assertEquals(expected_X_mean, actual.X.mean())
         self.assertEquals(expected_Y_mean, actual.Y.mean())

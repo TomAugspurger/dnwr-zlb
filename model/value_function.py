@@ -120,6 +120,17 @@ def g_p(g, ws, params, tol=1e-3, full_output=False):
     f_dist = params['full_ln_dist'][0]
     pi = params['pi'][0]
 
+    # Was getting nans since pi went outside of known domain of gp
+    # Going to extend gp's doman, but will only evaluate om
+    # the regual w_grid.
+    wn = params['wn'][0]
+    w_grid = params['w_grid'][0]
+    w_gridB = np.linspace(w_grid[0], w_grid[-1] * (1 + pi), wn)
+
+    if g.X[-1] == w_grid[-1]:
+        print("Adjusting g's domain to accomodate inflation.")
+        g = Interp(w_gridB, w_gridB/w_gridB[-1], kind='pchip')
+
     def _handle_solo_grid(zs, grid, good_grid):
         """
         Sometimes only one value isn't nan.
@@ -162,8 +173,8 @@ def g_p(g, ws, params, tol=1e-3, full_output=False):
     e = 1
     vals = []
     while e > tol:
-        gp = Interp(grid, ((1 - lambda_) * f_dist.cdf(zs(new_grid)) +
-                    lambda_ * f_dist.cdf(zs(new_grid)) * g.Y * (1 + pi)),
+        gp = Interp(w_gridB, ((1 - lambda_) * f_dist.cdf(zs(new_grid)) +
+                    lambda_ * f_dist.cdf(zs(new_grid)) * g(w_grid * (1 + pi))),
                     kind='pchip')
         e = np.max(np.abs(gp.Y - g.Y))
         print("The error is {}".format(e))
