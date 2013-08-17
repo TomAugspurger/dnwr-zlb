@@ -3,10 +3,13 @@ Cleaning up the inevible bugs without rerunning uncesscessary parts.
 
 Try to keep a log of runs here.
 
-Date       | Method
---------------------------
-2013-08-11 | fixup_bad_gps
-2013-08-15 | fixup_bad_outputs
+Date       | Method                 | Reason
+#-----------------------------------|-----------------------------------------
+2013-08-11 | fixup_bad_gps          | Solo valid grid points
+2013-08-15 | fixup_bad_outputs      | Messed up integration
+2013-08-16 | fixup_bad_gps (part 2) | Freshman's dream on gp(X * (1 + pi))
+2013-08-16 | fixup_bad_out (part 2) | Follup to last error
+#-----------------------------------------------------------------------------
 """
 import datetime
 import pickle
@@ -34,17 +37,17 @@ def fixup_bad_gps():
     all_files = ar.get_all_files(params)
     gps = ar.read_output(all_files, kind='gp')
 
-    def _get_bad_gps(gp, cutoff=.5):
-        """Ones whose max - min is less than, say, .5"""
-        if gps[gp].Y[-1] - gps[gp].Y[0] < cutoff:
-            return True
-        else:
-            return False
+    # def _get_bad_gps(gp, cutoff=.5):
+    #     """Ones whose max - min is less than, say, .5"""
+    #     if gps[gp].Y[-1] - gps[gp].Y[0] < cutoff:
+    #         return True
+    #     else:
+    #         return False
 
-    bad_gps_keys = filter(_get_bad_gps, gps)
-    bad_gps = {key: gps[key] for key in bad_gps_keys}
+    # bad_gps_keys = filter(_get_bad_gps, gps)
+    # bad_gps = {key: gps[key] for key in bad_gps_keys}
 
-    for key in bad_gps:
+    for key in gps:
         piname, lambda_ = [str(x).replace('.', '') for x in key]
         out_name = 'results/gp_' + piname + '_' + lambda_ + '.pkl'
         shutil.copy2(out_name, 'results/replaced_results/')
@@ -109,5 +112,7 @@ def fixup_bad_outputs():
             print("Fixed {}".format(key))
 
 if __name__ == '__main__':
+    # fixup_bad_gps()
+    # fixup_bad_outputs()
     # fixup_bad_gps()
     fixup_bad_outputs()
