@@ -167,7 +167,7 @@ escapeinside={\%*}{*)}                                     % If you want to add 
 %----------------------------------------------------------------------------------------
 
 \begin{abstract}
-I use a simplified New Keynesian model to explore how Downward Nominal Wage Rigidities affect welfare.
+I use a simplified New Keynesian model to explore how downward nominal wage rigidities affect welfare and optimal monetary policy.
 
 \end{abstract}
 
@@ -204,20 +204,21 @@ It is not immediately clear if these beneficial effects of downward-nominal-wage
 \section{The Model}
 \label{sec:the_model}
 
-I follow \cite{daly_hobijn_2013} almost exactly.
+I follow \cite{daly_hobijn_2013} almost exactly.  We'll set up a model with a continuum of individuals who sell their labor services to a perfectly competitive final goods producers.  Individuals receive idiosyncratic shocks to their labor preference. The interaction of these shocks with an exogenous impediment to \emph{lowering} wages is the area of research.
 
-\subsection{Production} % (fold)
+\subsection{Production}
 \label{sub:production}
 
-% subsection production (end)
 
-Aggregate output is produced according to the technology
+Aggregate output is linear in labor $L_t$.
 
 \begin{equation} \label{eq:agg_output}
     f(L_t) = L_t = Y_t.
 \end{equation}
 
-Aggregate labor \(L_t\) is defined to be the integral of each individual's labor \(L_t(i)\):
+A simplistic specification to be sure.  \textcolor{red}{My results are sensitive to different assumptions about productivity growth...}
+
+Aggregate labor \(L_t\) is defined to be the integral over each individual's labor \(L_t(i)\):
 
 \begin{equation} \label{eq:agg_labor}
     L_t = \left[ \int_0^1 L_t(i)^{\frac{\eta - 1}{\eta}} \mathrm{d}i \right]^{\frac{\eta}{\eta - 1}}.
@@ -225,7 +226,7 @@ Aggregate labor \(L_t\) is defined to be the integral of each individual's labor
 
 where $\eta$ is the usual elasticity of substitution.
 
-To simplify the aggregation process, I assume that there is a single final producer / final good who operates in a perfectly competitive market.
+To simplify the aggregation process, I assume that there is a single final \textcolor{red}{producer / final good} who operates in a perfectly competitive market.
 This final good producer's problem is to maximize profits (which will be zero in equilibrium):
 
 \begin{equation} \label{eq:firms_problem}
@@ -233,25 +234,28 @@ This final good producer's problem is to maximize profits (which will be zero in
 \end{equation}
 
 taking individual wages $W_t(i)$ and the aggregate price level $P_t$ as given.
-In equilibrium, the demand for each type of labor can be written as
 
-We can also define the aggregate wage index $W_t$ as
+We can write the aggregate wage index $W_t$ as
 
 \begin{equation} \label{eq:wage_index}
-    W_t = \left[\int_{0}^{1}\frac{1}{W_t(i)}^{\eta - 1} \mathrm{d}i \right]^{-\frac{1}{\eta - 1}}
+    W_t = \left[\int_{0}^{1}\frac{1}{W_t(i)}^{\eta - 1} \mathrm{d}i \right]^{-\frac{1}{\eta - 1}}.
 \end{equation}
 
 Thanks to the assumption of perfect competition, we know that the aggregate price level must equal the aggregate wage index, $P_t = W_t$.  This implies that the real aggregate wage index is equal to one and so
 
 \begin{equation} \label{eq:real_wage}
-    1 = \frac{W_t}{P_t} = \left[\int_{0}^{1} \left( \frac{P_t}{W_t(i)} \right)^{\eta - 1} \mathrm{d}i \right]^{-\frac{1}{\eta - 1} } = \left[\int_{0}^{1}w_{it}^{1 - \eta} \mathrm{d}i \right]^{ \frac{1}{1 - \eta} }
+    1 = \frac{W_t}{P_t} = \left[\int_{0}^{1} \left( \frac{P_t}{W_t(i)} \right)^{\eta - 1} \mathrm{d}i \right]^{-\frac{1}{\eta - 1} } = \left[\int_{0}^{1} \! w_{it}^{1 - \eta} \mathrm{d}i \right]^{ \frac{1}{1 - \eta} }
 \end{equation}
 
-\subsection{Households}
-\label{sub:households}
+where $w_{it}$ is the real wage charged by individual $i$.
+
+The interesting choices in the model are made by the individuals, to whom we turn next.
+
+\subsection{The Household}
+\label{sub:The Household}
 
 There is a representative household made up of a continuum of individuals.
-Individuals can share consumption risk perfectly, but make wage setting decisions on their own.
+As in \cite{erceg_henderson_levin_1999} individuals can share consumption risk perfectly, but make wage setting decisions on their own.
 Once an individual has chosen a wage, he then supplies as much labor as is demanded by the firm.
 
 The household's utility function is
@@ -271,7 +275,7 @@ The utility function is maximized subject to the budget constraint, common acros
 \end{equation}
 
 where $A_t$ is the level of nominal assets held by the household at time $t$ and $i$ is the nominal interest rate.
-As mention earlier each individual sets his own wage and, given that wage, works what is demanded by the firm according to the labor demand curve
+As mentioned earlier each individual sets his own wage and, given that wage, works what is demanded by the firm according to the labor demand curve
 
 \begin{equation}
     \label{eq:labor_demand}
