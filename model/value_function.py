@@ -213,16 +213,15 @@ def get_rigid_output(ws, params, flex_ws, gp, kind='lognorm', size=1000):
     shocks = np.sort(truncated_draw(params, lower=.05, upper=.95,
                                     kind=kind, size=size), axis=0)
     lambda_ = params['lambda_'][0]
-    ln_dist = params['full_ln_dist'][0]
     sub_w = lambda z: w_grid[w_grid > ws(z)]  # TODO: check on > vs >=
     dg = pchip(gp.X, gp.Y).derivative
 
     p1 = ((1 / shocks) ** (gamma * (eta - 1) / (gamma + eta)) *
-          (flex_ws(shocks) / ws(shocks)) ** (eta - 1) * ln_dist.pdf(shocks)).sum() / size
+          (flex_ws(shocks) / ws(shocks)) ** (eta - 1)).mean()
 
     p2 = ((1 / shocks) ** (gamma * (eta - 1) / (gamma + eta)) *
           gp(ws(shocks) * (1 + pi)) *
-          (flex_ws(shocks) / ws(shocks)) ** (eta - 1) * ln_dist.pdf(shocks)).sum() / size
+          (flex_ws(shocks) / ws(shocks)) ** (eta - 1)).mean()
 
     inner_f = lambda w, z: ((1 + pi) * dg(w * (1 + pi)) *
                             (flex_ws(z) / w)**(eta - 1))
@@ -231,7 +230,7 @@ def get_rigid_output(ws, params, flex_ws, gp, kind='lognorm', size=1000):
     for z in shocks:
         inner_range = sub_w(z)
         inner_vals = inner_f(inner_range, z).mean()
-        p3 += (1 / z)**(gamma * (eta - 1) / (eta + gamma)) * inner_vals * ln_dist.pdf(z)
+        p3 += (1 / z)**(gamma * (eta - 1) / (eta + gamma)) * inner_vals
 
     p3 = p3 / len(shocks)
 
