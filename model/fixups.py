@@ -9,6 +9,7 @@ Date       | Method                 | Reason
 2013-08-15 | fixup_bad_outputs      | Messed up integration
 2013-08-16 | fixup_bad_gps (part 2) | Freshman's dream on gp(X * (1 + pi))
 2013-08-16 | fixup_bad_out (part 2) | Follup to last error
+2013-08-19 | fix bad gps > out      | undoing previous dumbness
 #-----------------------------------------------------------------------------
 """
 import datetime
@@ -54,7 +55,7 @@ def fixup_bad_gps():
         _replace(key, out_name, all_files, params)
         print("Fixed {}".format(key))
         with open('results/fixup_notice.txt', 'a') as f:
-            f.write("Fixed {}".format(key))
+            f.write("Fixed {}\n".format(key))
 
 
 def _replace(key, out_name, all_files, params):
@@ -108,11 +109,12 @@ def fixup_bad_outputs():
             f.write(str(new_out))
 
         with open('results/fixup_notice.txt', 'a') as f:
-            f.write('Fixed output for {}.'.format(key))
+            f.write('Fixed output for {}.\n'.format(key))
             print("Fixed {}".format(key))
 
 if __name__ == '__main__':
     # fixup_bad_gps()
     # fixup_bad_outputs()
     # fixup_bad_gps()
+    fixup_bad_gps()
     fixup_bad_outputs()
