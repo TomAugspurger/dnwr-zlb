@@ -93,10 +93,12 @@ class Interp(PchipInterpolator, object):
     def plot(self, **kwargs):
         return plt.plot(self.X, self.Y, **kwargs)
 
-    def inverse(self):
+    def inverse(self, kind=None):
+        if kind is None:
+            kind = self.kind
         if (np.diff(self.Y) < 0).all():
-            return Interp(self.Y, self.X, kind=self.kind)
+            return Interp(self.Y, self.X, kind=kind)
         elif (np.diff(self.Y) > -.001).all():
-            return Interp(np.sort(self.Y), self.X, kind=self.kind)
+            return Interp(np.sort(self.Y), self.X, kind=kind)
         else:
             raise ValueError("Cannot resort Y to invert.")
