@@ -14,8 +14,8 @@
     "tol"          : [10e-6, "error tolerance for iteration"],
     "sigma"        : [0.2, "standard dev. of underlying normal dist"],
     "pi_low"       : [0.005, "lowest inflation"],
-    "pi_high"      : [0.05, "highest inflation"],
-    "pi_n"         : [10, "number of points in pi grid"],
+    "pi_high"      : [0.1, "highest inflation"],
+    "pi_n"         : [15, "number of points in pi grid"],
     "results_path" : ["results/", "path to results directory"],
-    "zn"           : [20, "number of points in shock grid"]
+    "zn"           : [22, "number of points in shock grid"]
 }
