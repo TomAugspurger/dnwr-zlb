@@ -172,22 +172,11 @@ def g_p(g, ws, params, tol=1e-3, full_output=False):
 
     e = 1
     vals = []
-    # import ipdb; ipdb.set_trace()
     while e > tol:
-        newY = ((1 - lambda_) * f_dist.cdf(zs(new_grid)) +
-                lambda_ * f_dist.cdf(zs(new_grid)) * g(w_grid * (1 + pi)))
-        # newY[-1] = 1
-        gp = Interp(w_gridB, newY, kind='pchip')
-        gp.extend(np.array([[4.0]]), np.array([[1.0]]))
-        gp.Y = np.ravel([x[0] for x in gp.yi if x[0] != 1.])
-        try:
-            e = np.max(np.abs(gp.Y - g.Y))
-        except ValueError:  # thrown on the first since g0 is (40,)
-            xnew = g.X[-1] + .0001
-            ynew = g.Y[-1] + .0001
-            g.extend(np.array([[xnew]]), np.array([[ynew]]))
-            g.Y = np.ravel([x[0] for x in g.yi])
-            e = np.max(np.abs(gp.Y - g.Y))
+        gp = Interp(w_gridB, ((1 - lambda_) * f_dist.cdf(zs(new_grid)) +
+                    lambda_ * f_dist.cdf(zs(new_grid)) * g(w_grid * (1 + pi))),
+                    kind='pchip')
+        e = np.max(np.abs(gp.Y - g.Y))
         print("The error is {}".format(e))
         g = gp
         if full_output:
