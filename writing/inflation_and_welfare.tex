@@ -125,43 +125,6 @@ escapeinside={\%*}{*)}                                     % If you want to add 
 \subtitle{Research Proposal for Second-Year Paper}
 \author{Tom Augspurger}                               % via Seth Miers
 
-% \vspace*{\fill}                                            % Center title page vertically
-
-% \newcommand{\HRule}{\rule{\linewidth}{0.3mm}}              % Defines horizontal lines
-
-% \center                                                    % Center everything on the page
-
-% \textsc{\LARGE Research Proposal}\[1.5cm]                % First heading
-
-% \HRule \[0.4cm]
-% { \huge \bfseries Title}\[0.4cm]                     % Title of document
-% \HRule \[1.5cm]
-
-%\begin{minipage}{0.4\textwidth}
-%\begin{flushleft} \large
-%\emph{Author:}\
-%Tom \textsc{Augspurger}                                    % Name
-%\end{flushleft}
-%\end{minipage}
-%~
-%\begin{minipage}{0.4\textwidth}
-%\begin{flushright} \large
-%\emph{Professor:} \
-%Dr. James \textsc{Smith}                                   % Professor's Name
-%\end{flushright}
-%\end{minipage}\[4cm]
-\maketitle
-% \center{{\today}}                                                  % Date, change the \today to be precise
-
-%\includegraphics{Logo}\[1cm]                             % Include a departmentw/university logo
-
-% \vspace*{\fill}                                            % Fill the rest of the page with whitespace
-
-% \end{titlepage}
-
-% \phantomsection
-
-
 %----------------------------------------------------------------------------------------
 %    CONTENT
 %----------------------------------------------------------------------------------------
@@ -201,37 +164,38 @@ It is not immediately clear if these beneficial effects of downward-nominal-wage
 %----------------------------------------------------------------------------------------
 \section{Literature Review}
 \label{sec:literature_review}
+Reviews of the literature almost invariably start with a ``ritual piety'' \citep{tobin_1972} to Keynes's \emph{General Theory} and his discussion of downward nominal wage rigidity, before moving on the Tobin himself.
+\cite{tobin_1972} argued that inflation could ``grease the wheels'' of the labor market.
+For whatever reason, nominal wages appear to be especially rigid in the downward direction.
+Positive inflation helps to erode this rigidity;
+over time, a worker whose wage is ``too high'' will have his wage brought back in line by inflation.
 
-Almost invariably starts with ``ritual piety \citep{tobin_1972}'' to Keynes's \emph{General Theory} and his discussion of downward nominal wage rigidity.
-Somewhat more recently, \cite{akerlof_dickens_perry_1996}.
+Numerous studies have found evidence for wage rigidity across various countries.
+While the specific details of wage rigidity vary across countries, a few common themes emerge:
+wage changes are clustered at the median and have many extreme value relative to the normal distribution.  Also, the distribution of wage changes is asymmetric.  There are fewer wage cuts than raises \citep{dickens_et_al_2006}.
 
-
-Thanks to the assumption of price stickiness New Keynesian models typically recommend an optimal inflation rate of zero.\footnote{
-    See \cite{schmitt-grohe_uribe_2010} for a survey.
-}
-It's a somewhat awkward fact for these models, then that most central banks aim for an inflation rate of about 2\%.
-In \cite{coibon_gorodnichenko_wieland_2012} the authors model optimal monetary policy and come up with a positive inflation rate.
-
-However, they find
-
-\section{Model}
+The apparent tradeoff between inflation and unemployment, the Phillips Curve, has been thoroughly discussed in prior research.
+Thanks to the assumption of price stickiness New Keynesian models typically recommend an optimal inflation rate of zero \citep{schmitt-grohe_uribe_2010}.
+In practice, most central banks explicitly or implicitly target an inflation rate of about 2\%.
+Economists have taken various tacks to reconcile the model's recommendations with reality.
+\cite{benigno_ricci_2011} developed a model that recommends non-zero inflation by including \emph{idiosyncratic} shocks and \emph{downward nominal wage rigidity.}
 
 \section{The Model}
 \label{sec:the_model}
 
-I follow \cite{daly_hobijn_2013} almost exactly.  We'll set up a model with a continuum of individuals who sell their labor services to a perfectly competitive final goods producers.  Individuals receive idiosyncratic shocks to their labor preference. The interaction of these shocks with an exogenous impediment to \emph{lowering} wages is the area of research.
+I follow \cite{daly_hobijn_2013} who presented a simplified version of \cite{benigno_ricci_2011}.
+We'll set up a model with a continuum of individuals, making up the representative household, who sell their labor services to a perfectly competitive final goods producers.
+Individuals receive idiosyncratic shocks to their labor preference.
+The effect of these shocks with an exogenous impediment to \emph{lowering} wages is the area of research.
 
 \subsection{Production}
 \label{sub:production}
 
-
-Aggregate output is linear in labor $L_t$.
+There is a single producer who hires labor from the representative household and (linearly) transforms it into output, $Y_t$.
 
 \begin{equation} \label{eq:agg_output}
     f(L_t) = L_t = Y_t.
 \end{equation}
-
-A simplistic specification to be sure.  \textcolor{red}{My results are sensitive to different assumptions about productivity growth...}
 
 Aggregate labor \(L_t\) is defined to be the integral over each individual's labor \(L_t(i)\):
 
@@ -239,9 +203,9 @@ Aggregate labor \(L_t\) is defined to be the integral over each individual's lab
     L_t = \left[ \int_0^1 L_t(i)^{\frac{\eta - 1}{\eta}} \mathrm{d}i \right]^{\frac{\eta}{\eta - 1}}.
 \end{equation}
 
-where $\eta$ is the usual elasticity of substitution.
+where $\eta$ is the usual elasticity of substitution among the different types of labor.
 
-To simplify the aggregation process, I assume that there is a single final \textcolor{red}{producer / final good} who operates in a perfectly competitive market.
+To simplify the aggregation process, I assume that there is a single final good producer who operates in a perfectly competitive market.
 This final good producer's problem is to maximize profits (which will be zero in equilibrium):
 
 \begin{equation} \label{eq:firms_problem}
@@ -250,13 +214,20 @@ This final good producer's problem is to maximize profits (which will be zero in
 
 taking individual wages $W_t(i)$ and the aggregate price level $P_t$ as given.
 
-We can write the aggregate wage index $W_t$ as
+As shown in the appendix, solving this problem yields labor demand curves for each individual's labor:
+
+\begin{equation}
+    \label{eq:labor_demand}
+    L_t(i) = \left( \frac{W_t(i)}{W_t} \right)^{-\eta}L_t = (w_{it})^{-eta}L_t.
+\end{equation}
+
+In \ref{eq:labor_demand}, $W_t$ is the aggregate wage index, defined to be
 
 \begin{equation} \label{eq:wage_index}
     W_t = \left[\int_{0}^{1}\frac{1}{W_t(i)}^{\eta - 1} \mathrm{d}i \right]^{-\frac{1}{\eta - 1}}.
 \end{equation}
 
-Thanks to the assumption of perfect competition, we know that the aggregate price level must equal the aggregate wage index, $P_t = W_t$.  This implies that the real aggregate wage index is equal to one and so
+Due to perfect competition we know that the aggregate price level must equal the aggregate wage index, $P_t = W_t$.  This implies that the real aggregate wage index is always equal to one and so
 
 \begin{equation} \label{eq:real_wage}
     1 = \frac{W_t}{P_t} = \left[\int_{0}^{1} \left( \frac{P_t}{W_t(i)} \right)^{\eta - 1} \mathrm{d}i \right]^{-\frac{1}{\eta - 1} } = \left[\int_{0}^{1} \! w_{it}^{1 - \eta} \mathrm{d}i \right]^{ \frac{1}{1 - \eta} }
@@ -281,8 +252,10 @@ The household's utility function is
 
 where $\gamma > 0$ is the elasticity of labor supply and $\beta \in (0, 1)$ is the discount factor.
 The import bit of this utility function is that the labor preference shocks, $Z_t(i)$ are specific to each individual.
+Note that I've already substituted in the market clearing condition that consumption equal output.
+There's no capital or government spending in this model.
 
-The utility function is maximized subject to the budget constraint, common across households,
+The utility function is maximized subject to the household budget constraint:
 
 \begin{equation}
     \label{eq:budget}
@@ -290,16 +263,10 @@ The utility function is maximized subject to the budget constraint, common acros
 \end{equation}
 
 where $A_t$ is the level of nominal assets held by the household at time $t$ and $i$ is the nominal interest rate.
-As mentioned earlier each individual sets his own wage and, given that wage, works what is demanded by the firm according to the labor demand curve
-
-\begin{equation}
-    \label{eq:labor_demand}
-    L_t(i) = \left( \frac{W_t(i)}{W_t} \right)^{-\eta}L_t = (w_{it})^{-eta}L_t
-\end{equation}
-
+Individuals also take their labor demand curve \ref{eq:labor_demand} as given.
 So, all else equal, individuals will work more the lower their own real wage or the higher aggregate output.
 
-The household takes the paths of aggregate wages, output, and final goods price $\left\{W_t, L_t, P_t \right\}_{t=0}^{\infty}$ as given.
+The household also takes the paths of aggregate wages, output, and the final good's price $\left\{W_t, L_t, P_t \right\}_{t=0}^{\infty}$ as given.
 
 I'll assume that the idiosyncratic shocks to labor preference come from a lognormal distribution, i.i.d. across individuals and time:
 
@@ -317,7 +284,7 @@ The other $(1 - \lambda)$ individuals are free to choose whatever wage they plea
 \subsection{Wage Setting}
 \label{sub:wage_setting}
 
-We'll consider the flexible case ($\lambda = 0$) first.
+To gain some appreciation for the rigid case, we'll start with perfect wage flexibility $(\lambda = 0)$.
 
 Letting
 \begin{equation}
@@ -332,18 +299,20 @@ be the labor-related terms of the household's problem, the optimal wage in the f
     \mathbb{E}_t\left[\sum_{t=0}^{\infty}\beta^t \Omega( w_t(i); Z_t(i), L_t ) \right].
 \end{equation}
 
-Solving this gives the optimal real wage schedule
+Solving this gives the optimal real wage schedule as a function of your idiosyncratic shock and aggregate output:
 
 \begin{equation}
     \label{eq:flex}
-    \hat{w}(Z_t(i); L_t) = \hat{w}_{it} = \left( \frac{\eta}{\eta - 1} \right)^{\frac{\gamma}{\eta + \gamma}}\left( Z_t(i) \right)^{\frac{\gamma}{\eta + \gamma}} L_t^{\frac{\gamma + 1}{\gamma + \eta}}
+    \hat{w}(Z_t(i); L_t) = \hat{w}_{it} = \left( \frac{\eta}{\eta - 1} \right)^{\frac{\gamma}{\eta + \gamma}}\left( Z_t(i) \right)^{\frac{\gamma}{\eta + \gamma}} L_t^{\frac{\gamma + 1}{\gamma + \eta}}.
 \end{equation}
 
-For the rigid case, $\lambda > 0$, our approach is slightly different
+We will use this schedule when solving for the optimal wage with rigidity.
+
+For the rigid case, $\lambda > 0$, our approach is slightly different (though mathematically equivalent).
 Each day, our individuals wake up with their wage from yesterday.
-They receive a labor preference shock, $Z_t(i)$, and find out whether they are allowed to choose any nominal wage, or just a wage greater than yesterday's.
-They then choose the wage for today to optimize today's utility plus the future value of holding that wage.
-As a value function, holding a real wage $w$:
+They receive a labor preference shock, $Z_t(i)$, and find out whether they are allowed to choose any nominal wage, or just a wage greater than or equal to yesterday's.
+They then choose a wage to optimize today's utility plus the discounted future value of holding that wage.
+This can be written as a value function where the state variable is the real wage $w$:
 
 \begin{multline}
     \label{eq:value_function}
@@ -351,11 +320,13 @@ As a value function, holding a real wage $w$:
                 + \lambda  \int_{0}^{\infty} \max_{w_{it} \geq w} \left\{ \Omega( w_t(i); Z_t(i), L_t ) + \beta V_{t+1}\left( \frac{w_{it}}{(1 + \pi_{t+1})} \right) \right\} \mathrm{d}F(Z_t(i))
 \end{multline}
 
-$F(Z_t(i))$ is the distribution of idiosyncratic shocks across individuals and $\pi_{t+1}$ is the inflation rate from time $t$ to $t+1$.
+$F(\cdot)$ is the distribution of idiosyncratic shocks across individuals and $\pi_{t+1}$ is the inflation rate from time $t$ to $t+1$.
 
 One thing to note: downward nominal wage rigidities clearly affect workers who fall into the second line of \ref{eq:value_function}, those who can't lower their wage below $w$.
-But the effect of downward nominal wage rigidities actually goes beyond that by lowering the future value of choosing too high a wage today, via the probability of now being able to lower it later.
-This effect tends to compress the wages chosen by the $(1 - \lambda)$ unrestricted workers.
+But the workers on the first line are also affected.
+If a worker received a high shock and followed the flexible wage schedule $\hat{w}(Z_t(i))$ they would choose a high wage.
+While that might be a good thing for today, it would ignore the possibility of receiving a low shock tomorrow, but not being able to lower the wage due to wage rigidity.
+This effect tends to dampen the wage increases chosen by the $(1 - \lambda)$ unrestricted workers.
 
 \section{Monetary Policy}
 \label{sec:monetary_policy}
@@ -367,7 +338,7 @@ Not really implemented yet, but the central bank follows a normal Taylor Rule:
     i_t = \frac{1 + \bar{pi}}{\beta} \left( \frac{Y_t}{\bar{Y}} \right)^{\varphi_Y} \left( \frac{1 + \pi_t}{1 + \bar{\pi}} \right)^{1 + \varphi_{\pi}} - 1
 \end{equation}
 
-where $\phi_Y, \phi_{\pi} > 0$ govern the strength of the central bank's reaction to deviations from its target level of inflation, $\bar{\pi}$ and the steady-state output level $\bar{Y}$.
+where $\phi_Y, \phi_{\pi} > 0$ govern the strength of the central bank's reaction to deviations from its target level of inflation, $\bar{\pi}$, and the steady-state output level $\bar{Y}$.
 
 \section{Equilibrium}
 \label{sec:equilibrium}
