@@ -150,9 +150,9 @@ def g_p(g, ws, params, tol=1e-3, full_output=False):
     e = 1
     vals = []
     while e > tol:
-        gp = Interp(w_gridB, ((1 - lambda_) * f_dist.cdf(zs(new_grid)) +
-                    lambda_ * f_dist.cdf(zs(new_grid)) * g(w_grid * (1 + pi))),
-                    kind='pchip')
+        nextY = ((1 - lambda_) * f_dist.cdf(zs(new_grid)) +
+                 lambda_ * f_dist.cdf(zs(new_grid)) * g(w_grid * (1 + pi)))
+        gp = Interp(w_gridB, nextY, kind='pchip')
         e = np.max(np.abs(gp.Y - g.Y))
         print("The error is {}".format(e))
         g = gp
