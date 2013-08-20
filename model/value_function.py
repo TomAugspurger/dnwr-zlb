@@ -131,29 +131,6 @@ def g_p(g, ws, params, tol=1e-3, full_output=False):
         print("Adjusting g's domain to accomodate inflation.")
         g = Interp(w_gridB, w_gridB/w_gridB[-1], kind='pchip')
 
-    def _handle_solo_grid(zs, grid, good_grid):
-        """
-        Sometimes only one value isn't nan.
-        """
-        good_pos = np.where(grid == good_grid)[0]
-        good_val = grid[good_pos]
-        if good_pos in [0, len(grid) - 1]:
-            raise IndexError("Cannot deal with endpoints.")
-
-        nlp, nhp = good_pos - 1, good_pos + 1
-        DEC = .95
-        nlv = DEC * grid[nlp] + (1 - DEC) * good_val
-        nhv = DEC * grid[nhp] + (1 - DEC) * good_val
-        ok = False
-        while not ok:
-            if np.isnan(zs(nlv)):
-                nlv = DEC * nlv + (1 - DEC) * good_val
-            if np.isnan(zs(nhv)):
-                nhv = DEC * nhv + (1 - DEC) * good_val
-            if not np.isnan([zs(nlv), zs(nhp)]).all():
-                ok = True
-
-        return nlv, nhv
     # z_t(w) in the paper; zs :: wage -> shock
     # Was having trouble with them choosing wages only on a subset of grid.
     # Then when I invert I try to map z :: w -> shock I got a bunch of NaNs
@@ -185,6 +162,31 @@ def g_p(g, ws, params, tol=1e-3, full_output=False):
         return gp, vals
     else:
         return gp
+
+
+def _handle_solo_grid(zs, grid, good_grid):
+    """
+    Sometimes only one value isn't nan.
+    """
+    good_pos = np.where(grid == good_grid)[0]
+    good_val = grid[good_pos]
+    if good_pos in [0, len(grid) - 1]:
+        raise IndexError("Cannot deal with endpoints.")
+
+    nlp, nhp = good_pos - 1, good_pos + 1
+    DEC = .95
+    nlv = DEC * grid[nlp] + (1 - DEC) * good_val
+    nhv = DEC * grid[nhp] + (1 - DEC) * good_val
+    ok = False
+    while not ok:
+        if np.isnan(zs(nlv)):
+            nlv = DEC * nlv + (1 - DEC) * good_val
+        if np.isnan(zs(nhv)):
+            nhv = DEC * nhv + (1 - DEC) * good_val
+        if not np.isnan([zs(nlv), zs(nhp)]).all():
+            ok = True
+
+    return nlv, nhv
 
 
 def get_rigid_output(ws, params, flex_ws, gp, kind='lognorm', size=1000):
