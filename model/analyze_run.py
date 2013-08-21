@@ -355,8 +355,7 @@ def get_utils(wpan, span, out_ser, by_lam=False):
     for key in keys:
         dfw = wpan[key]
         dfs = span[key]
-        dfu[key] = up(dfw.values.ravel(), dfs.values.ravel(),
-                      out_ser.ix[key].values).mean()
+        dfu[key] = u_(dfw, shock=dfs, aggL=out_ser.ix[key]).mean()
 
     dfu = tuple_constructor(dfu)
     if by_lam:
