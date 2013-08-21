@@ -10,10 +10,13 @@ from __future__ import division
 import numpy as np
 import pandas as pd
 from scipy.interpolate import pchip
+from scipy.integrate import quad
+import statsmodels.api as sm
 
 from gen_interp import Interp
-from helpers import maximizer, truncated_draw
+from helpers import maximizer, truncated_draw, sample_path
 from cfminbound import opt_loop
+from ecdf import ecdf
 #-----------------------------------------------------------------------------
 np.random.seed(42)
 
@@ -41,7 +44,7 @@ def bellman(w, params, u_fn=u_, lambda_=None, z_grid=None, pi=None,
     ----------
 
     w : callable value function (probably instance of LinInterp from last iter)
-    u_fn : The period utility function to be maximized. Omega in DH2013
+    u_fn : The period utility function to be maximized. Omega in DH`2013
     grid : Domain of w.  This is the real wage today at start of today.
     lambda : float. Degree of wage rigidity. 0 = flexible, 1 = fully rigid
     shock : array. Draws from a lognormal distribution.
@@ -98,72 +101,6 @@ def bellman(w, params, u_fn=u_, lambda_=None, z_grid=None, pi=None,
     return Tv, wage_schedule, vals
 
 
-def g_p(g, ws, params, tol=1e-3, full_output=False):
-    """
-    Once you have the wage/shock schedule, use this to get the distribution
-    of wages.
-
-    Parameters
-    ----------
-
-    g : instance of pchip.  e.g. pchip(grid, grid/4) with Y
-        going from [0, 1].
-    tol : tolerance for convergence.
-
-    Returns
-    -------
-
-    gp : instance of pchip.  Approximation to wage distribution.
-    """
-    lambda_ = params['lambda_'][0]
-    grid = g.X
-    f_dist = params['full_ln_dist'][0]
-    pi = params['pi'][0]
-
-    # Was getting nans since pi went outside of known domain of gp
-    # Going to extend gp's doman, but will only evaluate om
-    # the regual w_grid.
-    wn = params['wn'][0]
-    w_grid = params['w_grid'][0]
-    w_gridB = np.linspace(w_grid[0], w_grid[-1] * (1 + pi), wn)
-
-    if g.X[-1] == w_grid[-1]:
-        print("Adjusting g's domain to accomodate inflation.")
-        g = Interp(w_gridB, w_gridB/w_gridB[-1], kind='pchip')
-
-    # z_t(w) in the paper; zs :: wage -> shock
-    # Was having trouble with them choosing wages only on a subset of grid.
-    # Then when I invert I try to map z :: w -> shock I got a bunch of NaNs
-    # since most of the grid was *NOT* covered by the range of ws = z^-1.
-    # I'm renormalizing the grid to cover *just* the area chosen by our
-    # guys.  Need to be careful at the edgees... here and in cfminbound.
-    zs = ws.inverse()
-    good_grid = grid[~np.isnan(zs(grid))]
-    if len(good_grid) == 1:
-        new_low, new_high = _handle_solo_grid(zs, grid, good_grid)
-        new_grid = np.linspace(new_low, new_high, params['wn'][0])
-        # g = Interp(new_grid, new_grid/new_grid[-1], kind='pchip')
-    else:
-        new_low, new_high = good_grid[0], good_grid[-1]
-        new_grid = np.linspace(new_low, new_high, params['wn'][0])
-
-    e = 1
-    vals = []
-    while e > tol:
-        nextY = ((1 - lambda_) * f_dist.cdf(zs(new_grid)) +
-                 lambda_ * f_dist.cdf(zs(new_grid)) * g(w_grid * (1 + pi)))
-        gp = Interp(w_gridB, nextY, kind='pchip')
-        e = np.max(np.abs(gp.Y - g.Y))
-        print("The error is {}".format(e))
-        g = gp
-        if full_output:
-            vals.append(g)
-    if full_output:
-        return gp, vals
-    else:
-        return gp
-
-
 def _handle_solo_grid(zs, grid, good_grid):
     """
     Sometimes only one value isn't nan.
@@ -189,49 +126,53 @@ def _handle_solo_grid(zs, grid, good_grid):
     return nlv, nhv
 
 
-def get_rigid_output(ws, params, flex_ws, gp, kind='lognorm', size=1000):
+def get_rigid_output(ws, params, flex_ws, g, shocks):
     """
-    This will need to change when using grid.
 
     Eq 18 in DH.
 
     Parameters
     ----------
 
+    ws : rigid wage schedule.  Callable e.g. instance of Interp.
     params : dict of parameters
-    ws : rigid wage schedule.  Callable e.g. instance of LinInterp.
     flex_ws: flexible wage schedule.  Also callable.
-    gp: Probability densitity function for wage distribution.
-        Derived from g_p.
+    g: CDF of wages.  Probably instance of ecdf.
+    shocks : shocks that generated g.
 
     Returns
     -------
 
     output: float.  Also equal to labor in this model.
     """
-    sigma, w_grid, eta, gamma, pi = (params['sigma'][0], params['w_grid'][0],
-                                     params['eta'][0], params['gamma'][0],
-                                     params['pi'][0])
-    shocks = np.sort(truncated_draw(params, lower=.05, upper=.95,
-                                    kind=kind, size=size), axis=0)
+    sigma, eta, gamma, pi = (params['sigma'][0],
+                             params['eta'][0], params['gamma'][0],
+                             params['pi'][0])
+
+    shocks = np.sort(shocks)
+    dg = sm.nonparametric.KDEUnivariate(g.observations)
+    dg.fit()
+
     lambda_ = params['lambda_'][0]
+    w_grid = np.sort(ws(shocks))  # check on this.  It is in a way
+    wmax = w_grid[-1]
     sub_w = lambda z: w_grid[w_grid > ws(z)]  # TODO: check on > vs >=
-    dg = pchip(gp.X, gp.Y).derivative
 
     p1 = ((1 / shocks) ** (gamma * (eta - 1) / (gamma + eta)) *
           (flex_ws(shocks) / ws(shocks)) ** (eta - 1)).mean()
 
     p2 = ((1 / shocks) ** (gamma * (eta - 1) / (gamma + eta)) *
-          gp(ws(shocks) * (1 + pi)) *
+          g(ws(shocks) * (1 + pi)) *
           (flex_ws(shocks) / ws(shocks)) ** (eta - 1)).mean()
 
-    inner_f = lambda w, z: ((1 + pi) * dg(w * (1 + pi)) *
+    inner_f = lambda w, z: ((1 + pi) * dg.evaluate(w * (1 + pi)) *
                             (flex_ws(z) / w)**(eta - 1))
 
     p3 = 0.0
-    for z in shocks:
+    for z in shocks[:-1]:  # integrate over empty range for very last shock
         inner_range = sub_w(z)
-        inner_vals = inner_f(inner_range, z).mean()
+        a = inner_range[0]
+        inner_vals = quad(inner_f, a, wmax, args=z)[0]
         p3 += (1 / z)**(gamma * (eta - 1) / (eta + gamma)) * inner_vals
 
     p3 = p3 / len(shocks)

@@ -6,12 +6,13 @@ import json
 import os
 import pickle
 
-from helpers import load_params, ss_wage_flexible
+from helpers import load_params, ss_wage_flexible, sample_path
 from joblib import Parallel, delayed
 import numpy as np
 
+from ecdf import ecdf
 from gen_interp import Interp
-from value_function import get_rigid_output, g_p, iter_bellman
+from value_function import get_rigid_output, iter_bellman
 
 
 def iter_bellman_wrapper(hyperparams):
@@ -57,32 +58,16 @@ def iter_bellman_wrapper(hyperparams):
     #-------------------------------------------------------------------------
     flex_ws = Interp(z_grid, ss_wage_flexible(params, shock=z_grid))
     #-------------------------------------------------------------------------
-    gp = get_wage_distribution(ws, params)
-    res_dict['gp'] = gp
+    pths, shks = sample_path(ws, params, nseries=1000, nperiods=30)
+    pth, shocks = pths[28], shks[28]  # a period in steady state
+    g = ecdf(np.sort(pth))
+    shocks = np.sort(shocks)
     #-------------------------------------------------------------------------
-    rigid_out = get_rigid_output(ws, params, flex_ws, gp)
+    rigid_out = get_rigid_output(ws, params, flex_ws, g, shocks)
     res_dict['rigid_out'] = rigid_out
     #-------------------------------------------------------------------------
     write_results(res_dict, pi, lambda_)
     pass
-
-
-def get_wage_distribution(ws, params):
-    w_grid = params['w_grid'][0]
-    # fine_grid = params['fine_grid'][0]
-    w_max = w_grid[-1]
-    g0 = Interp(w_grid, w_grid/w_max, kind='pchip')
-    try:
-        gp = g_p(g0, ws, params)
-    except IndexError as e:
-        # Got an endpoint for the solo good value.
-        print(e)
-        pi = params['pi']
-        lambda_ = params['lambda_']
-        with open('notices.txt', 'a') as f:
-            f.write("FAILED wage_distribution on {}, {}".format(pi, lambda_))
-        raise
-    return gp
 
 
 def write_results(res_dict, pi, lambda_):

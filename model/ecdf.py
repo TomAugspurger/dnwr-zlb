@@ -10,6 +10,7 @@ from __future__ import division
 
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 
 
 class ecdf:
@@ -42,6 +43,15 @@ class ecdf:
 
     def get_range(self):
         return self.observations.min(), self.observations.max()
+
+    def hist(self, **kwargs):
+        try:
+            ax = kwargs.pop('ax')
+        except KeyError:
+            fig, ax = plt.subplots()
+        df = pd.DataFrame(self.observations)
+        ax = df.hist(ax=ax, **kwargs)
+        return ax
 
 
 def is_mono(x):
