@@ -49,6 +49,8 @@ def wage_dist_ecdf_refactor():
         out_name = 'results/gp_' + piname + '_' + lambda_ + '.pkl'
         shutil.copy2(out_name, 'results/replaced_results/')
         ws = wses[key]
+        params['pi'] = key[0], 'you'
+        params['lambda_'] = key[1], 'idiot'
         new_g, shocks = get_new_g(ws, params)
 
         with open(out_name, 'w') as f:
