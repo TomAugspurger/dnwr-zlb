@@ -9,14 +9,12 @@ from __future__ import division
 
 import numpy as np
 import pandas as pd
-from scipy.interpolate import pchip
 from scipy.integrate import quad
 import statsmodels.api as sm
 
 from gen_interp import Interp
-from helpers import maximizer, truncated_draw, sample_path
+from helpers import maximizer
 from cfminbound import opt_loop
-from ecdf import ecdf
 #-----------------------------------------------------------------------------
 np.random.seed(42)
 
@@ -148,12 +146,12 @@ def get_rigid_output(ws, params, flex_ws, g, shocks):
     sigma, eta, gamma, pi = (params['sigma'][0],
                              params['eta'][0], params['gamma'][0],
                              params['pi'][0])
+    lambda_ = params['lambda_'][0]
 
     shocks = np.sort(shocks)
     dg = sm.nonparametric.KDEUnivariate(g.observations)
     dg.fit()
 
-    lambda_ = params['lambda_'][0]
     w_grid = np.sort(ws(shocks))  # check on this.  It is in a way
     wmax = w_grid[-1]
     sub_w = lambda z: w_grid[w_grid > ws(z)]  # TODO: check on > vs >=
