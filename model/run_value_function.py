@@ -133,6 +133,31 @@ def write_metadeta(params, outname='metadata.json'):
         json.dump(out_dict, f)
 
 
+def get_g(pi, lambda_, period=28):
+    """
+    Helper function to get to a wage distribution.
+
+    Warning: Will not touch the params in your global state.
+    If you go on the to more things make sure to adjust those params.
+    """
+    import analyze_run as ar
+    params = load_params()
+    params['pi'] = pi, 'a'
+    params['lambda_'] = lambda_, 'b'
+
+    all_files = ar.get_all_files(params)
+    wses = ar.read_output(all_files, kind='ws')
+    ws = wses[(pi, lambda_)]
+    pths, shks = sample_path(ws, params, nseries=1000, nperiods=30, seed=42)
+
+    pth, shocks = pths[28], shks[28]
+    shocks = np.sort(shocks)
+    g = ecdf(np.sort(pth))
+    return g, shocks
+
+# When is rigid output higher / lower than rigid
+# all comes to p1 vs. (p2 + p3)
+
 if __name__ == '__main__':
     import sys
     params_path = sys.argv[1]
