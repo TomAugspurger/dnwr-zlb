@@ -84,7 +84,7 @@ def run_one(params, res_dict=None):
                                 params=params, pi=pi, aggL=out, kind='linear')
     Tvc = Interp(Tv.X, Tv.Y, kind='cubic')
     Tv, ws, rest = iter_bellman(Tvc, tol=0.005, strict=False, log=False,
-                                params=params, pi=pi)
+                                params=params, pi=pi, aggL=out)
     res_dict = {'Tv': Tv, 'ws': ws, 'rest': rest}
     flex_ws = Interp(z_grid, ss_wage_flexible(params, shock=z_grid))
     #-------------------------------------------------------------------------

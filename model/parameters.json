@@ -2,7 +2,7 @@
     "lambda_"      : [0.8, "degree of rigidity"],
     "lambda_l"     : [0.05, "lower bound on rigidity"],
     "lambda_u"     : [0.9, "upper bound on rigidity"],
-    "lambda_n"     : [20, "number of grid points for lambda"],
+    "lambda_n"     : [17, "number of grid points for lambda"],
     "pi"           : [0.02, "target inflation"],
     "eta"          : [2.5, "elas. of subs among labor types"],
     "gamma"        : [0.5, "frisch elas. of labor supply"],
@@ -13,9 +13,9 @@
     "beta"         : [0.97, "disount factor. check this"],
     "tol"          : [10e-6, "error tolerance for iteration"],
     "sigma"        : [0.2, "standard dev. of underlying normal dist"],
-    "pi_low"       : [0.005, "lowest inflation"],
-    "pi_high"      : [0.1, "highest inflation"],
-    "pi_n"         : [15, "number of points in pi grid"],
+    "pi_low"       : [0.01, "lowest inflation"],
+    "pi_high"      : [0.095, "highest inflation"],
+    "pi_n"         : [18, "number of points in pi grid"],
     "results_path" : ["results/", "path to results directory"],
-    "zn"           : [22, "number of points in shock grid"]
+    "zn"           : [15, "number of points in shock grid"]
 }
