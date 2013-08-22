@@ -15,9 +15,15 @@ import pandas as pd
 
 class ecdf:
 
-    def __init__(self, observations):
+    def __init__(self, observations, metadata=None):
+        """
+        Optionally pass a dictionary of metadata,
+        say the parameters used to generate the ecdf.
+        """
         if not is_mono(observations):
             observations = np.sort(observations)
+        if metadata:
+            self.meta = metadata
         self.observations = np.asarray(observations).reshape(-1, 1)
         self.n = len(self.observations)
 
