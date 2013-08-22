@@ -12,7 +12,7 @@ cimport cython
 cimport numpy as np
 
 cdef inline double ch_(double x, double shock, object w,
-                    double pi, double beta=.97, double eta=2.5, double gamma=0.5, double aggL=0.85049063822172699):
+                    double pi, double aggL, double beta=.97, double eta=2.5, double gamma=0.5):
     """
     x: wage for tomorrow
     shock:
@@ -24,8 +24,8 @@ cdef inline double ch_(double x, double shock, object w,
     return res
 
 cdef inline double cfminbound(double x1, double x2, w,
-                 double shock, double pi, double eta=2.5, double gamma=0.5, double beta=.97,
-                 int maxfun=500, double xtol=.00001, double aggL=0.85049063822172699):
+                 double shock, double pi, double aggL, double eta=2.5, double gamma=0.5, double beta=.97,
+                 int maxfun=500, double xtol=.00001):
     """
     Minimize the negative of the value function.
 
@@ -55,7 +55,7 @@ cdef inline double cfminbound(double x1, double x2, w,
         double rat = 0.0
         double e = 0.0
         double x = xf
-        double fx = ch_(x, shock, w, pi, beta)
+        double fx = ch_(x, shock, w, pi, aggL, beta)
         int num = 1
         # fmin_data = (1, xf, fx) # array
 
@@ -107,7 +107,7 @@ cdef inline double cfminbound(double x1, double x2, w,
 
         si = copysign(1, rat) + (rat == 0)
         x = xf + si * fmaxf(fabs(rat), tol1)
-        fu = ch_(x, shock, w, pi, beta)
+        fu = ch_(x, shock, w, pi, aggL, beta)
         num += 1
         # fmin_data = (num, x, fu)
 
@@ -151,8 +151,9 @@ ctypedef np.double_t DTYPE_t
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cpdef opt_loop(np.ndarray[DTYPE_t, ndim=3] vals, np.ndarray[DTYPE_t, ndim=1] w_grid, np.ndarray[DTYPE_t, ndim=1] z_grid,
-             object w, double pi, double lambda_):
+cpdef opt_loop(np.ndarray[DTYPE_t, ndim=3] vals, np.ndarray[DTYPE_t, ndim=1] w_grid,
+               np.ndarray[DTYPE_t, ndim=1] z_grid, object w, double pi,
+               double lambda_, double aggL):
     """
     This is the double loop at the heart of the optimization problem.
 
@@ -184,11 +185,11 @@ cpdef opt_loop(np.ndarray[DTYPE_t, ndim=3] vals, np.ndarray[DTYPE_t, ndim=1] w_g
             z = z_grid[j]
 
             if i == 0:
-                m1 = cfminbound(0, w_max, w, z, pi)
+                m1 = cfminbound(0, w_max, w, z, pi, aggL)
             else:
                 m1 = vals[0, j, 3]
-            m2 = cfminbound(y, w_max, w, z, pi)
-            value = -1 * ((1 - lambda_) * ch_(m1, z, w, pi) + lambda_ * ch_(m2, z, w, pi))
+            m2 = cfminbound(y, w_max, w, z, pi, aggL)
+            value = -1 * ((1 - lambda_) * ch_(m1, z, w, pi, aggL) + lambda_ * ch_(m2, z, w, pi, aggL))
             if np.isnan(value):
                 raise ValueError
             vals[i, j, 0] = y

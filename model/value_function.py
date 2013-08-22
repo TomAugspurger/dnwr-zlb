@@ -29,7 +29,7 @@ def u_(wage, shock=1, eta=2.5, gamma=0.5, aggL=0.85049063822172699):
 
 
 def bellman(w, params, u_fn=u_, lambda_=None, z_grid=None, pi=None,
-            kind=None, w_grid=None):
+            kind=None, w_grid=None, aggL=.85049063822172699):
     """
     Differs from bellman by optimizing for *each* shock, rather than
     for the mean.  I think this is right since the agent observes Z_{it}
@@ -80,14 +80,13 @@ def bellman(w, params, u_fn=u_, lambda_=None, z_grid=None, pi=None,
     kind = kind or w.kind
     #--------------------------------------------------------------------------
     vals = np.zeros((len(w_grid), len(z_grid), 5))
-    vals = opt_loop(vals, w_grid, z_grid, w, pi, lambda_)
+    vals = opt_loop(vals, w_grid, z_grid, w, pi, lambda_, aggL)
 
     vals = pd.Panel(vals, items=w_grid, major_axis=z_grid,
                     minor_axis=['wage', 'z_grid', 'value', 'm1', 'm2'])
 
     vals.items.name = 'w_grid'
     vals.major_axis.name = 'z_grid'
-
     weights = pd.Series(ln_dist.pdf(vals.major_axis.values.astype('float64')),
                         index=vals.major_axis)
     weights /= weights.sum()
@@ -241,16 +240,16 @@ def taylor_rule(y, pi, ybar, pibar, gy, gpi, beta):
 #-----------------------------------------------------------------------------
 
 
-def py_opt_loop(w_grid, z_grid, w, vals, params):
+def py_opt_loop(w_grid, z_grid, w, vals, params, aggL=None):
     """Python dropin for cfminbound.opt_loop"""
     lambda_ = params['lambda_'][0]
     beta = params['beta'][0]
     pi = params['pi'][0]
     vals = np.zeros((len(w_grid), len(z_grid), 5))
     w_max = w_grid[-1]
-
+    aggL = aggL or 0.85049063822172699
     # See equatioon 13 in DH
-    h_ = lambda x, ashock: -1 * ((u_(x, shock=ashock)) +
+    h_ = lambda x, ashock: -1 * ((u_(x, shock=ashock, aggL=aggL)) +
                                  beta * w((x / (1 + pi))))
 
     for i, y in enumerate(w_grid):
