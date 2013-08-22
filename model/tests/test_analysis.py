@@ -137,7 +137,7 @@ class TestAnalysis(unittest.TestCase):
         out_ser = pd.DataFrame({0: 2.02410628}, index=idx)
 
         actual = get_utils(wpan, span, out_ser=out_ser)
-        expected = np.array([[0.37540230271201075]])
+        expected = np.array([[-1.7002755086677428]])
         assert_equal(expected, actual)
 
 if __name__ == '__main__':
