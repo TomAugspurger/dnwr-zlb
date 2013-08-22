@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 class LinInterp(object):
     "Provides linear interpolation in one dimension."
 
-    def __init__(self, X, Y):
+    def __init__(self, X, Y, metadata=None):
         """Parameters: X and Y are sequences or arrays
         containing the (x,y) interpolation points.
 
@@ -22,6 +22,8 @@ class LinInterp(object):
         """
         self.X = X
         self.Y = Y
+        if metadata:
+            self.metadata = metadata
 
     def __call__(self, z):
         """Parameters: z is a number, sequence or array.

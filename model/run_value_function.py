@@ -1,3 +1,5 @@
+#!/Users/tom/python2.7/bin/python
+
 from __future__ import division
 
 from datetime import datetime
@@ -43,19 +45,47 @@ def iter_bellman_wrapper(hyperparams):
         print("Skipping pi:{}, lambda:{}.".format(pi, lambda_))
         return None
 
+    res_dict = run_one(params)
+    output_e = 1
+    output_tol = .005
+    while output_e > output_tol:
+        out_now = res_dict['rigid_out']
+        res_dict = run_one(params, res_dict)
+        out_next = res_dict['rigid_out']
+        output_e = np.abs(out_now - out_next)
+        print("The change in output was {}.".format(output_e))
+    #-------------------------------------------------------------------------
+    write_results(res_dict, pi, lambda_)
+    pass
+
+
+def run_one(params, res_dict=None):
+    """
+    Once you have the parameters, this function completes one loop to get
+    a dictionary of results.
+
+    For the first loop leave res_dict as None.
+    """
+    pi = params['pi'][0]
+    # lambda_ = params['lambda_'][0]
+
     np.random.seed(42)
     w_grid = params['w_grid'][0]
     z_grid = params['z_grid'][0]
 
-    v = Interp(w_grid, -w_grid + 29, kind='linear')
+    if res_dict:
+        v = res_dict['Tv']
+        out = res_dict['rigid_out']
+    else:
+        v = Interp(w_grid, -w_grid + 29, kind='linear')
+        out = 0.85049063822172699  # ss output w/ flexible wages
     # Get close with linear first.  Then do a few cubic to finish up
     Tv, ws, rest = iter_bellman(v, tol=0.005, strict=False, log=False,
-                                params=params, pi=pi)
+                                params=params, pi=pi, aggL=out, kind='linear')
     Tvc = Interp(Tv.X, Tv.Y, kind='cubic')
     Tv, ws, rest = iter_bellman(Tvc, tol=0.005, strict=False, log=False,
                                 params=params, pi=pi)
     res_dict = {'Tv': Tv, 'ws': ws, 'rest': rest}
-    #-------------------------------------------------------------------------
     flex_ws = Interp(z_grid, ss_wage_flexible(params, shock=z_grid))
     #-------------------------------------------------------------------------
     pths, shks = sample_path(ws, params, nseries=1000, nperiods=30)
@@ -64,10 +94,9 @@ def iter_bellman_wrapper(hyperparams):
     shocks = np.sort(shocks)
     #-------------------------------------------------------------------------
     rigid_out = get_rigid_output(ws, params, flex_ws, g, shocks)
+    res_dict['gp'] = g
     res_dict['rigid_out'] = rigid_out
-    #-------------------------------------------------------------------------
-    write_results(res_dict, pi, lambda_)
-    pass
+    return res_dict
 
 
 def write_results(res_dict, pi, lambda_):
