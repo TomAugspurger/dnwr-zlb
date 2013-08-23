@@ -98,31 +98,6 @@ def bellman(w, params, u_fn=u_, lambda_=None, z_grid=None, pi=None,
     return Tv, wage_schedule, vals
 
 
-def _handle_solo_grid(zs, grid, good_grid):
-    """
-    Sometimes only one value isn't nan.
-    """
-    good_pos = np.where(grid == good_grid)[0]
-    good_val = grid[good_pos]
-    if good_pos in [0, len(grid) - 1]:
-        raise IndexError("Cannot deal with endpoints.")
-
-    nlp, nhp = good_pos - 1, good_pos + 1
-    DEC = .95
-    nlv = DEC * grid[nlp] + (1 - DEC) * good_val
-    nhv = DEC * grid[nhp] + (1 - DEC) * good_val
-    ok = False
-    while not ok:
-        if np.isnan(zs(nlv)):
-            nlv = DEC * nlv + (1 - DEC) * good_val
-        if np.isnan(zs(nhv)):
-            nhv = DEC * nhv + (1 - DEC) * good_val
-        if not np.isnan([zs(nlv), zs(nhp)]).all():
-            ok = True
-
-    return nlv, nhv
-
-
 def get_rigid_output(ws, params, flex_ws, g, shocks):
     """
 
