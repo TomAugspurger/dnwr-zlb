@@ -40,12 +40,16 @@ def iter_bellman_wrapper(hyperparams):
 
     # check for pre-computed values.
     params['call_dir'] = os.getcwd(), 'Path from which the script was called.'
-    if os.path.exists(
-            params['call_dir'][0] + '/results/' + 'vf_' + out_name + '.pkl'):
-        print("Skipping pi:{}, lambda:{}.".format(pi, lambda_))
-        return None
+    vf_name = 'vf_' + out_name + '.pkl'
+    pth = os.path.join(params['call_dir'][0], 'results', vf_name)
+    if os.path.exists(pth):
+        print("Reusing pi: {}, lambda: {}.".format(pi, lambda_))
+        res_dict = reloader(os.path.join(params['call_dir'][0], 'results'),
+                            out_name)
+    else:
+        res_dict = None
 
-    res_dict = run_one(params)
+    res_dict = run_one(params, res_dict=res_dict)
     output_e = 1
     output_tol = .005
     while output_e > output_tol:
@@ -81,7 +85,7 @@ def run_one(params, res_dict=None):
         out = 0.85049063822172699  # ss output w/ flexible wages
     # Get close with linear first.  Then do a few cubic to finish up
     Tv, ws, rest = iter_bellman(v, tol=0.005, strict=False, log=False,
-                                params=params, pi=pi, aggL=out, kind='linear')
+                                params=params, pi=pi, aggL=out)
     Tvc = Interp(Tv.X, Tv.Y, kind='cubic')
     Tv, ws, rest = iter_bellman(Tvc, tol=0.005, strict=False, log=False,
                                 params=params, pi=pi, aggL=out)
@@ -160,6 +164,24 @@ def write_metadeta(params, outname='metadata.json'):
     out_dict = {k: v for k, v in params.iteritems() if k in writeable}
     with open('results/' + outname, 'w') as f:
         json.dump(out_dict, f)
+
+
+def reloader(pth, out_name):
+    """
+    If you have a run that you want to iterate again,
+    but you want to start from the existing vf, ws, etc.
+    """
+    vf_path = os.path.join(pth, 'vf_' + out_name + '.pkl')
+    with open(vf_path, 'r') as f:
+        Tv = (pickle.load(f))
+
+    output_path = os.path.join(pth, 'rigid_output_' + out_name + '_.txt')
+    with open(output_path, 'r') as f:
+        rigid_out = float(f.read())
+
+    res_dict = {'Tv': Tv, 'rigid_out': rigid_out}
+
+    return res_dict
 
 
 def get_g(pi, lambda_, period=28):
