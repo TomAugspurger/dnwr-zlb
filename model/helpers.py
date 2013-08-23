@@ -54,10 +54,10 @@ def load_params(pth='parameters.json'):
 
     ln_dist = stats.lognorm(sigma, scale=np.exp(-(sigma) ** 2 / 2))
     params['full_ln_dist'] = ln_dist, "Frozen lognormal distribution."
-    ln_dist_lb = .2
-    ln_dist_ub = 1.3620224972427708
-    # ln_dist_lb = ln_dist.ppf(.05)
-    # ln_dist_ub = ln_dist.ppf(.95)
+    # ln_dist_lb = .2
+    # ln_dist_ub = 1.3620224972427708
+    ln_dist_lb = ln_dist.ppf(.05)
+    ln_dist_ub = ln_dist.ppf(.95)
     params['ln_dist_lb'] = ln_dist_lb, "lower bound of lognorm dist."
     params['ln_dist_ub'] = ln_dist_ub, "upper bound of lognorm dist."
 
