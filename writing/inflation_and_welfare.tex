@@ -400,9 +400,28 @@ To derive \ref{eq:output_rigid} we've used the assumption of perfect competition
 \section{Steady State}
 \label{sec:steady_state}
 
-
+\newpage
 \bibliographystyle{apa}
 \bibliography{citations}
 
+\newpage
+\appendix
 
+\section{Numerical Method}
+
+Parts of my numerical method follows \cite{daly_hobijn_2013}.
+I iteratate upon the value function in \ref{eq:value_function} for a given level of output.
+This yields the value function $V_t(w)$, wage schedule $w_(Z)$ and shock schedule, $Z_t(w)$.
+
+I use a mixture of linear and cubic polynomials to approximate the value function $V_t(w)$, wage schedule $w_(Z)$ and shock schedule, $Z_t(w)$.
+
+
+\section{Reproducability}
+
+All source files are available at this paper's \href{https://github.com/tomAugspurger/dnwr-zlb}{Github Page}.
+It is compatiable with \href{http://python.org/download/releases/2.7.5/}{Python 2.7}, and requires the following packages:
+
+
+The results in this paper are mainly under the model directory.
+The file to start at is `run_value_function'.
 \end{document}
