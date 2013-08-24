@@ -8,7 +8,7 @@ import json
 import os
 import pickle
 
-from helpers import load_params, ss_wage_flexible, sample_path
+from helpers import load_params, ss_wage_flexible, sample_path, ss_output_flexible
 from joblib import Parallel, delayed
 import numpy as np
 
@@ -83,7 +83,7 @@ def run_one(params, res_dict=None):
         out = res_dict['rigid_out']
     else:
         v = Interp(w_grid, -w_grid + 27.3, kind='linear')
-        out = 0.85049063822172699  # ss output w/ flexible wages
+        out = ss_output_flexible(params)  # ss output w/ flexible wages
     # Get close with linear first.  Then do a few cubic to finish up
     Tv, ws, rest = iter_bellman(v, tol=0.005, strict=False, log=False,
                                 params=params, pi=pi, aggL=out, kind='linear')

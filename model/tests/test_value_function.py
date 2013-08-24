@@ -101,45 +101,35 @@ class TestValueFunction(unittest.TestCase):
 
     @slow
     def test_ss_wage_flexible(self):
-        X = np.array([ 0.70541378, 0.73668086, 0.76794794, 0.79921503, 0.83048211,
-        0.86174919, 0.89301627, 0.92428335, 0.95555043, 0.98681752,
-        1.0180846 , 1.04935168, 1.08061876, 1.11188584, 1.14315293,
-        1.17442001, 1.20568709, 1.23695417, 1.26822125, 1.29948833,
-        1.33075542, 1.3620225 ])
-
-        Y = np.array([ 0.94743673, 0.95430996, 0.96094425, 0.96735712, 0.97356423,
-        0.97957954, 0.98541565, 0.99108389, 0.99659452, 1.00195689,
-        1.00717949, 1.01227009, 1.01723582, 1.02208323, 1.02681834,
-        1.03144672, 1.03597354, 1.04040356, 1.04474122, 1.04899067,
-        1.05315574, 1.05724005])
-
-        expected = Interp(X, Y)
-
-        z_grid = np.linspace(0.70541378068079674, 1.3620224972427708, 22)
         w_grid = np.linspace(0.40000000000000002, 3.5, 40)
 
-        sigma = .2
+        sigma = .4
         mu = -(sigma ** 2) / 2
         ln_dist = lognorm(sigma, scale=np.exp(-(sigma) ** 2 / 2))
+        zl, zh = ln_dist.ppf(.05), ln_dist.ppf(.95)
+        z_grid = np.linspace(zl, zh, 22)
 
         params = {
             "lambda_": [0.0, "degree of rigidity"],
             "pi": [0.02, "target inflation"],
             "eta": [2.5, "elas. of subs among labor types"],
             "gamma": [0.5, "frisch elas. of labor supply"],
-            "wl": [0.3, "wage lower bound"],
-            "wu": [2.0, "wage upper bound"],
-            "wn": [400, "wage grid point"],
+            "wl": [0.4, "wage lower bound"],
+            "wu": [3.5, "wage upper bound"],
+            "wn": [40, "wage grid point"],
             "beta": [0.97, "disount factor. check this"],
             "tol": [10e-6, "error tolerance for iteration"],
-            "sigma": [0.2, "standard dev. of underlying normal dist"],
+            "sigma": [sigma, "standard dev. of underlying normal dist"],
             'z_grid': (z_grid, 'a'),
             'w_grid': (w_grid, 'a'),
             'full_ln_dist': (ln_dist, 'a'),
             'mu': (mu, 'mean of underlying nomral distribution.')}
 
         res_dict = run_one(params)
+        expected = Interp(z_grid, ss_wage_flexible(params, shock=z_grid))
         actual = res_dict['ws']
+        print(expected.Y)
+        print(actual.Y)
         np.testing.assert_almost_equal(actual.Y, expected.Y, 5)
     # @slow
     # def test_ss_output_flex_close(self):

@@ -13,7 +13,7 @@ from scipy.integrate import quad
 import statsmodels.api as sm
 
 from gen_interp import Interp
-from helpers import maximizer, truncated_draw
+from helpers import maximizer, truncated_draw, ss_output_flexible
 from cfminbound import opt_loop
 #-----------------------------------------------------------------------------
 np.random.seed(42)
@@ -29,7 +29,7 @@ def u_(wage, shock=1, eta=2.5, gamma=0.5, aggL=0.85049063822172699):
 
 
 def bellman(w, params, u_fn=u_, lambda_=None, z_grid=None, pi=None,
-            kind=None, w_grid=None, aggL=.85049063822172699):
+            kind=None, w_grid=None, aggL=None):
     """
     Differs from bellman by optimizing for *each* shock, rather than
     for the mean.  I think this is right since the agent observes Z_{it}
@@ -70,6 +70,8 @@ def bellman(w, params, u_fn=u_, lambda_=None, z_grid=None, pi=None,
     pi = pi or params['pi'][0]
     ln_dist = params['full_ln_dist'][0]
 
+    if aggL is None:
+        aggL = ss_output_flexible(params)
     # Need if since it's checking using or checks truth of array so any/all
     if w_grid is None:
         w_grid = params['w_grid'][0]
