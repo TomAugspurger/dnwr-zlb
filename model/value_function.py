@@ -13,7 +13,7 @@ from scipy.integrate import quad
 import statsmodels.api as sm
 
 from gen_interp import Interp
-from helpers import maximizer
+from helpers import maximizer, truncated_draw
 from cfminbound import opt_loop
 #-----------------------------------------------------------------------------
 np.random.seed(42)
@@ -98,7 +98,7 @@ def bellman(w, params, u_fn=u_, lambda_=None, z_grid=None, pi=None,
     return Tv, wage_schedule, vals
 
 
-def get_rigid_output(ws, params, flex_ws, g, shocks):
+def get_rigid_output(ws, params, flex_ws, g, generating_shocks):
     """
 
     Eq 18 in DH.
@@ -121,14 +121,16 @@ def get_rigid_output(ws, params, flex_ws, g, shocks):
                              params['eta'][0], params['gamma'][0],
                              params['pi'][0])
     lambda_ = params['lambda_'][0]
-
-    shocks = np.sort(shocks)
+    # z_grid = params['z_grid'][0]
+    # ln_dist = params['full_ln_dist'][0]
+    # shocks = np.sort(shocks)
     dg = sm.nonparametric.KDEUnivariate(g.observations)
     dg.fit()
+    shocks = np.sort(truncated_draw(params, lower=.05, upper=.95,
+                                    kind='lognorm', size=1000), axis=0)
 
-    w_grid = np.sort(ws(shocks))  # check on this.  It is in a way
+    w_grid = params['w_grid'][0]
     wmax = w_grid[-1]
-    sub_w = lambda z: w_grid[w_grid > ws(z)]  # TODO: check on > vs >=
 
     p1 = ((1 / shocks) ** (gamma * (eta - 1) / (gamma + eta)) *
           (flex_ws(shocks) / ws(shocks)) ** (eta - 1)).mean()
@@ -137,17 +139,19 @@ def get_rigid_output(ws, params, flex_ws, g, shocks):
           g(ws(shocks) * (1 + pi)) *
           (flex_ws(shocks) / ws(shocks)) ** (eta - 1)).mean()
 
-    inner_f = lambda w, z: ((1 + pi) * dg.evaluate(w * (1 + pi)) *
+    inner_f = lambda w, z: ((1 + pi) * dg.evaluate(w * (1 + pi))[0] *
                             (flex_ws(z) / w)**(eta - 1))
 
+    w_range = np.sort(ws(generating_shocks))
+    sub_w = lambda z: w_range[w_range > ws(z)]  # TODO: check on > vs >=
     p3 = 0.0
-    for z in shocks[:-1]:  # integrate over empty range for very last shock
+    for z in shocks[:-1].ravel():  # integrate over empty range for very last shock
         inner_range = sub_w(z)
         a = inner_range[0]
         inner_vals = quad(inner_f, a, wmax, args=z)[0]
         p3 += (1 / z)**(gamma * (eta - 1) / (eta + gamma)) * inner_vals
 
-    p3 = p3 / len(shocks)
+    p3 = p3 / len(shocks)  # Also way too small methinks.
 
     # z_part is \tilde{Z} in my notes.
     z_part = ((1 - lambda_) * p1 +
