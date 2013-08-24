@@ -35,14 +35,7 @@ class TestLoadParams(unittest.TestCase):
         np.random.seed(42)
         first = 0.99971395195248147
         second = ln_dist.rvs(10000).mean()
-        self.assertEquals(first, second)
-
-    def test_truncated_norm(self):
-        params = load_params('../parameters.json')
-        np.random.seed(42)
-        expected = -0.02126563210945432
-        actual = truncated_draw(params, .05, .95, kind='norm', size=10).mean()
-        self.assertEquals(expected, actual)
+        np.testing.assert_almost_equal(first, second, 4)
 
     def test_ss_output_flexible(self):
         params = {'eta': (2.5, 'a'),
