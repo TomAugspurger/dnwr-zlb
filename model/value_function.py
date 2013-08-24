@@ -164,12 +164,15 @@ def iter_bellman(v, tol=1e-3, maxiter=100, strict=True, log=True, **kwargs):
     """
     """
     params = kwargs.pop('params')
+    pi = params['pi'][0]
+    lambda_ = params['lambda_'][0]
     e = 1
     vfs, wss, rests, es = [], [], [], []
     for i in range(maxiter):
         Tv, ws, rest = bellman(v, params, **kwargs)
         e = np.max(np.abs(Tv.Y - v.Y))
-        print("At iteration {} the error is {}".format(i, e))
+        print("At iteration {} the error is {} for pi={}, lambda={}.".format(i,
+            e, pi, lambda_))
         if e < tol:
             if log:
                 return Tv, ws, rest, vfs, wss, rests, ws

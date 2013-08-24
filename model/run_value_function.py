@@ -78,6 +78,7 @@ def run_one(params, res_dict=None):
     z_grid = params['z_grid'][0]
 
     if res_dict:
+        print("Reusing res_dict.")
         v = res_dict['Tv']
         out = res_dict['rigid_out']
     else:
@@ -85,7 +86,7 @@ def run_one(params, res_dict=None):
         out = 0.85049063822172699  # ss output w/ flexible wages
     # Get close with linear first.  Then do a few cubic to finish up
     Tv, ws, rest = iter_bellman(v, tol=0.005, strict=False, log=False,
-                                params=params, pi=pi, aggL=out)
+                                params=params, pi=pi, aggL=out, kind='linear')
     Tvc = Interp(Tv.X, Tv.Y, kind='cubic')
     Tv, ws, rest = iter_bellman(Tvc, tol=0.005, strict=False, log=False,
                                 params=params, pi=pi, aggL=out)
