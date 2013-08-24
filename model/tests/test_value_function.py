@@ -1,5 +1,7 @@
 from __future__ import division
 
+import cPickle
+import os
 import unittest
 
 import nose
@@ -9,7 +11,8 @@ from scipy.optimize import fminbound
 from scipy.stats import lognorm
 
 from ..gen_interp import Interp
-from ..value_function import bellman, u_
+from ...model import gen_interp
+from ..value_function import bellman, u_, get_rigid_output
 
 from ..helpers import ss_output_flexible, ss_wage_flexible
 
@@ -94,6 +97,36 @@ class TestValueFunction(unittest.TestCase):
         expected_y = np.array([3.76732473, 3.66307253, 2.56966702,
                                1.70810273, 0.91432274])
         np.testing.assert_almost_equal(expected_y, Tv.Y)
+
+    # @slow
+    # def test_ss_output_flex_close(self):
+    #     expected = 0.85049063822172699
+    #     with open('tests/files/flex_ws.pkl', 'r') as f:
+    #         os.chdir('..')
+    #         flex_ws = cPickle.load(f)
+    #         os.chdir('tests')
+
+    #     with open('tests/files/flex_g.pkl', 'r') as f:
+    #         os.chdir('..')
+    #         gf = cPickle.load(f)
+    #         os.chdir('tests')
+
+    #     sigma = 0.2
+    #     z_grid = np.linspace(0.70541378068079674, 1.3620224972427708, 22)
+    #     w_grid = np.linspace(0.40000000000000002, 3.5, 40)
+
+    #     ln_dist = lognorm(sigma, scale=np.exp(-(sigma) ** 2 / 2))
+
+    #     params = {'eta': (2.5, 'a'),
+    #               'sigma': (sigma, 'a'),
+    #               'gamma': (0.5, 'a'),
+    #               'lambda_': (0, 'a'),
+    #               'z_grid': (z_grid, 'a'),
+    #               'w_grid': (w_grid, 'a'),
+    #               'full_ln_dist': (ln_dist, 'a')
+    #               }
+    #     actual = get_rigid_output(flex_ws, params, flex_ws, gf)
+    #     self.assertAlmostEquals(actual, expected)
 
 if __name__ == '__main__':
     nose.runmodule(argv=[__file__, '-vvs', '-x', '--pdb', '--pdb-failure'],
