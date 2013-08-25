@@ -162,7 +162,7 @@ def get_rigid_output(ws, params, flex_ws, g, generating_shocks):
     return ((eta - 1) / eta)**(gamma / (1 + gamma)) * (1 / z_part)**(gamma / (1 + gamma))
 
 
-def iter_bellman(v, tol=1e-3, maxiter=100, strict=True, log=True, **kwargs):
+def iter_bellman(v, tol=1e-3, maxiter=1000, strict=True, log=True, **kwargs):
     """
     """
     params = kwargs.pop('params')
