@@ -214,3 +214,12 @@ def sample_path(ws, params, lambda_=None, w0=.9, nseries=1, nperiods=1000,
         w = vals[i]
 
     return np.array(vals), shocks
+
+
+def cln_shocks(params, shocks, lower=.05, upper=.95):
+    ln_dist = params['full_ln_dist'][0]
+    a, b = ln_dist.ppf(lower), ln_dist.ppf(upper)
+
+    clean = shocks[shocks > a]
+    clean = clean[clean < b]
+    return clean
