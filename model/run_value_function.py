@@ -2,6 +2,7 @@
 
 from __future__ import division
 
+from collections import defaultdict
 from datetime import datetime
 import itertools
 import json
@@ -17,6 +18,99 @@ from gen_interp import Interp
 from value_function import get_rigid_output, iter_bellman
 
 
+class BellmanRunner(object):
+
+    def __init__(self, hyperparams):
+
+        self.pi, self.lambda_ = hyperparams
+        self.piname = str(self.pi).replace('.', '')
+        self.lname = str(self.lambda_).replace('.', '')
+        self.out_name = '_'.join([self.piname, self.lname])
+        params = load_params()
+        params['pi'] = self.pi, 'inflation target'
+        params['lambda_'] = self.lambda_, 'rigidity'
+
+        params['call_dir'] = os.getcwd(), 'Path from which the script was called.'
+        self.params = params
+
+        self.res_by_run = []
+        self.res_by_cat = defaultdict(list)
+
+    def __call__(self):
+        res_dict = self.generate_res_input()
+        res_dict = run_one(self.params, res_dict=res_dict)
+        return res_dict
+
+    def generate_res_input(self):
+        """
+        Try to be smart about using past runs.
+
+        If alternating use that.  If monotonic use the last one. Could
+        *generalitze* filtering down to alternating and take the mean of that.
+        """
+        if len(self.res_by_run) == 0:
+            res_dict = None
+        elif len(self.res_by_run) == 1:
+            res_dict = self.res_by_run[0]
+        else:
+            outs = np.array(self.res_by_cat['rigid_out'])
+            Tvs = self.res_by_cat['Tv']
+            X = Tvs[0].X
+            if np.all(np.abs(np.diff(np.sign(np.diff(outs))))):
+                # alternating
+                out = np.mean(outs)
+                Y = np.mean([v.Y for v in Tvs])
+                v = Interp(X, Y, kind='linear')
+            else:
+                out = outs[-1]
+                v = Tvs[-1]
+            res_dict = {'Tv': v, 'rigid_out': out}
+
+        return res_dict
+
+    def from_dict(self):
+        """
+        Good for analysis.
+        """
+        raise NotImplemented
+
+    def update(self, res_dict):
+        """
+        Add the results to both instance dictionaries.
+
+        Returns None.
+        """
+        self.res_by_run.append(res_dict)
+        self.res_by_cat['gp'].append(res_dict['gp'])
+        self.res_by_cat['vf'].append(res_dict['Tv'])
+        self.res_by_cat['ws'].append(res_dict['ws'])
+        self.res_by_cat['rigid_out'].append(res_dict['rigid_out'])
+        self.last = res_dict
+
+    def iter_over_output(self, tol=.05):
+        e = 1
+        out_prior = ss_output_flexible(self.params)
+        while e > tol:
+            res_dict = self()
+            self.update(res_dict)
+            out = res_dict['rigid_out']
+            e = np.abs(out_prior - out)
+            print('The new error is {}'.format(e))
+            out_prior = out
+        else:
+            self.terminating_e = e
+
+    def write_results(self):
+        """
+        Writes last one to results/
+        and others to results/intermediate/
+        """
+        res_dict = self.last
+        write_results(res_dict, self.pi, self.lambda_)
+        for i, d in enumerate(self.res_by_run):
+            write_results(d, self.pi, self.lambda_, intermediate=True, i=i)
+
+
 def iter_bellman_wrapper(hyperparams):
     """
     Call this from a joblib Parallel like.
@@ -30,37 +124,10 @@ def iter_bellman_wrapper(hyperparams):
     -------
     None:  Does have side effects.
     """
-    pi, lambda_ = hyperparams
-    piname = str(pi).replace('.', '')
-    lname = str(lambda_).replace('.', '')
-    out_name = '_'.join([piname, lname])
-    params = load_params()
-    params['pi'] = pi, 'inflation target'
-    params['lambda_'] = lambda_, 'rigidity'
 
-    # check for pre-computed values.
-    params['call_dir'] = os.getcwd(), 'Path from which the script was called.'
-    vf_name = 'vf_' + out_name + '.pkl'
-    pth = os.path.join(params['call_dir'][0], 'results', vf_name)
-    if os.path.exists(pth):
-        print("Reusing pi: {}, lambda: {}.".format(pi, lambda_))
-        res_dict = reloader(os.path.join(params['call_dir'][0], 'results'),
-                            out_name)
-    else:
-        res_dict = None
-
-    res_dict = run_one(params, res_dict=res_dict)
-    output_e = 1
-    output_tol = .005
-    while output_e > output_tol:
-        out_now = res_dict['rigid_out']
-        res_dict = run_one(params, res_dict)
-        out_next = res_dict['rigid_out']
-        output_e = np.abs(out_now - out_next)
-        print("The change in output was {}.".format(output_e))
-    #-------------------------------------------------------------------------
-    write_results(res_dict, pi, lambda_)
-    pass
+    kls = BellmanRunner(hyperparams)
+    kls.iter_over_output()
+    kls.write_results()
 
 
 def run_one(params, res_dict=None):
@@ -104,7 +171,7 @@ def run_one(params, res_dict=None):
     return res_dict
 
 
-def write_results(res_dict, pi, lambda_):
+def write_results(res_dict, pi, lambda_, intermediate=False, i=''):
     """
     Handle the file writing of iter_bellman.
 
@@ -114,15 +181,23 @@ def write_results(res_dict, pi, lambda_):
     piname = str(pi).replace('.', '')
     lname = str(lambda_).replace('.', '')
     out_name = '_'.join([piname, lname])
-    with open('results/vf_' + out_name + '.pkl', 'w') as f:
+
+    if intermediate:
+        mid = 'intermediate/'
+        i = str(i)
+    else:
+        mid = ''
+        i = ''
+
+    with open('results/' + mid + 'vf_' + out_name + i + '.pkl', 'w') as f:
         pickle.dump(res_dict['Tv'], f)
-    with open('results/ws_' + out_name + '.pkl', 'w') as f:
+    with open('results/' + mid + 'ws_' + out_name + i + '.pkl', 'w') as f:
         pickle.dump(res_dict['ws'], f)
-    with open('results/gp_' + out_name + '.pkl', 'w') as f:
+    with open('results/' + mid + 'gp_' + out_name + i + '.pkl', 'w') as f:
         pickle.dump(res_dict['gp'], f)
-    with open('results/rigid_output_' + out_name + '_.txt', 'w') as f:
+    with open('results/' + mid + 'rigid_output_' + out_name + i + '_.txt', 'w') as f:
         f.write(str(res_dict['rigid_out']))
-    res_dict['rest'].to_hdf('results/results_' + out_name + '.h5',
+    res_dict['rest'].to_hdf('results/' + mid + 'results_' + out_name + i + '.h5',
                             'pi_' + out_name)
     print('Added results for {}'.format(out_name))
 
@@ -217,6 +292,7 @@ if __name__ == '__main__':
     np.random.seed(42)
     params = load_params(params_path)
 
+    os.makedirs('./results/intermediate')
     write_metadeta(params)
 
     pi_low = params['pi_low'][0]
