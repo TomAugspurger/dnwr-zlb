@@ -1,7 +1,5 @@
 from __future__ import division
 
-import cPickle
-import os
 import unittest
 
 import nose
@@ -11,11 +9,12 @@ from scipy.optimize import fminbound
 from scipy.stats import lognorm
 
 from ..gen_interp import Interp
-from ...model import gen_interp
-from ..value_function import bellman, u_, get_rigid_output
+from ..value_function import bellman, u_
 
-from ..helpers import ss_output_flexible, ss_wage_flexible
+from ..helpers import (ss_output_flexible, ss_wage_flexible, truncated_draw,
+                       cln_shocks)
 from ..run_value_function import run_one
+
 
 np.random.seed(42)
 
@@ -54,6 +53,31 @@ class testFunctions(unittest.TestCase):
 
 
 class TestValueFunction(unittest.TestCase):
+
+    def setUp(self):
+        w_grid = np.linspace(0.40000000000000002, 3.5, 40)
+
+        sigma = .4
+        mu = -(sigma ** 2) / 2
+        ln_dist = lognorm(sigma, scale=np.exp(-(sigma) ** 2 / 2))
+        zl, zh = ln_dist.ppf(.05), ln_dist.ppf(.95)
+        z_grid = np.linspace(zl, zh, 22)
+
+        self.params = {
+            "lambda_": [0.0, "degree of rigidity"],
+            "pi": [0.02, "target inflation"],
+            "eta": [2.5, "elas. of subs among labor types"],
+            "gamma": [0.5, "frisch elas. of labor supply"],
+            "wl": [0.4, "wage lower bound"],
+            "wu": [3.5, "wage upper bound"],
+            "wn": [40, "wage grid point"],
+            "beta": [0.97, "disount factor. check this"],
+            "tol": [10e-6, "error tolerance for iteration"],
+            "sigma": [sigma, "standard dev. of underlying normal dist"],
+            'z_grid': (z_grid, 'a'),
+            'w_grid': (w_grid, 'a'),
+            'full_ln_dist': (ln_dist, 'a'),
+            'mu': (mu, 'mean of underlying nomral distribution.')}
 
     def test_flexible(self):
         ss_w = 1.0041753592911187  # from ..vf_iteration.ss_wage_flexible
@@ -160,6 +184,22 @@ class TestValueFunction(unittest.TestCase):
     #               }
     #     actual = get_rigid_output(flex_ws, params, flex_ws, gf)
     #     self.assertAlmostEquals(actual, expected)
+
+    def test_ss_wage_sanity(self):
+        params = self.params
+        gamma = params['gamma'][0]
+        eta = params['eta'][0]
+
+        ln_dist = params['full_ln_dist'][0]
+        np.random.seed(5)
+        shocks = ln_dist.rvs(1000000)
+
+        p1 = ((1 / shocks) ** (gamma * (eta - 1) / (gamma + eta))).mean()
+        z_part = p1 ** (-(eta + gamma) / (gamma * (eta - 1)))
+        actual = (((eta - 1) / eta)**(gamma / (1 + gamma)) *
+                  (1 / z_part)**(gamma / (1 + gamma)))
+        expected = ss_output_flexible(params)
+        self.assertAlmostEquals(actual, expected, 4)
 
 if __name__ == '__main__':
     nose.runmodule(argv=[__file__, '-vvs', '-x', '--pdb', '--pdb-failure'],
