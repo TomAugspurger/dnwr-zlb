@@ -128,7 +128,7 @@ def get_rigid_output(ws, params, flex_ws, g, generating_shocks):
     # shocks = np.sort(shocks)
     dg = sm.nonparametric.KDEUnivariate(g.observations)
     dg.fit()
-    shocks = np.sort(truncated_draw(params, lower=.05, upper=.95,
+    shocks = np.sort(truncated_draw(params, lower=.005, upper=.995,
                                     kind='lognorm', size=1000), axis=0)
 
     w_grid = params['w_grid'][0]
