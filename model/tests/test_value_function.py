@@ -11,8 +11,7 @@ from scipy.stats import lognorm
 from ..gen_interp import Interp
 from ..value_function import bellman, u_
 
-from ..helpers import (ss_output_flexible, ss_wage_flexible, truncated_draw,
-                       cln_shocks)
+from ..helpers import (ss_output_flexible, ss_wage_flexible, truncated_draw)
 from ..run_value_function import run_one
 
 

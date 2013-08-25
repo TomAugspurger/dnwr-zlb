@@ -70,8 +70,8 @@ def load_params(pth='parameters.json'):
     return params
 
 
-def truncated_draw(params, lower=.05, upper=.95, kind='lognorm', size=1000,
-                   samples=1):
+def truncated_draw(params, lower=.005, upper=.995, kind='lognorm',
+                   size=1000, samples=1):
     """
     Return a new normal distribution that is truncated given a
     lower upper tail in probabilities.
@@ -106,7 +106,7 @@ def truncated_draw(params, lower=.05, upper=.95, kind='lognorm', size=1000,
     """
     mu, sigma = params['mu'][0], params['sigma'][0]
     n_dist = stats.norm(mu, sigma)
-    a, b = n_dist.ppf([.05, .95])
+    a, b = n_dist.ppf([lower, upper])
     truncated = stats.truncnorm(a, b, loc=mu, scale=sigma).rvs([size, samples])
     if kind == 'lognorm':
         return np.exp(truncated)
@@ -170,7 +170,7 @@ def ss_wage_flexible(params, shock=None, nperiods=30, nseries=1):
 
 
 def sample_path(ws, params, lambda_=None, w0=.9, nseries=1, nperiods=1000,
-                seed=None):
+                seed=42):
     """
     Given a wage schedule, simulate the sample path of length nseries.
 
@@ -216,9 +216,13 @@ def sample_path(ws, params, lambda_=None, w0=.9, nseries=1, nperiods=1000,
     return np.array(vals), shocks
 
 
-def cln_shocks(params, shocks, lower=.05, upper=.95):
+def cln_shocks(params, shocks=None, size=10000, lower=.005, upper=.995):
+    """Only supports 1d for now"""
     ln_dist = params['full_ln_dist'][0]
     a, b = ln_dist.ppf(lower), ln_dist.ppf(upper)
+
+    if shocks is None:
+        shocks = ln_dist.rvs(size)
 
     clean = shocks[shocks > a]
     clean = clean[clean < b]

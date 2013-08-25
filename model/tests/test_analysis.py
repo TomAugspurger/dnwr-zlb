@@ -79,22 +79,16 @@ class TestAnalysis(unittest.TestCase):
         params = {'mu': (-0.020000000000000004, 'mean.'),
                   'sigma': [0.2, u'standard dev.'],
                   'lambda_': [key[1], 'a']}
-        exp_pths = np.array([[0.99713702],
-                             [1.00947703],
-                             [1.00472714],
-                             [1.00188703],
-                             [0.99245093]])
+        exp_pths = np.array([0.99577797, 1.01492469, 1.00740903, 1.00303761,
+                             0.98850281])
 
-        exp_shocks = np.array([[0.96075536],
-                               [1.03577164],
-                               [1.006286],
-                               [0.98902403],
-                               [0.93358932]])
+        exp_shocks = np.array([0.95280361, 1.07056255, 1.02283844, 0.99598438,
+                               0.91124418])
 
         pths, shocks = sample_path(ws, params, lambda_=key[1], nperiods=5,
                                    seed=seed)
-        assert_allclose(pths, exp_pths)
-        assert_allclose(shocks, exp_shocks)
+        assert_allclose(pths.ravel(), exp_pths)
+        assert_allclose(shocks.ravel(), exp_shocks)
 
     def test_make_pan(self):
         X = np.array([0.70541378, 0.73997213, 0.77453049, 0.80908884, 0.84364719,
@@ -114,9 +108,10 @@ class TestAnalysis(unittest.TestCase):
         wpan, span = make_panel({key: ws}, params, pairs=[key], nseries=1,
                                 nperiods=5)
 
-        x = np.array([0.997137, 1.009477, 1.004727, 1.001887, 0.992451])
-        s = np.array([0.96075536, 1.03577164, 1.006286, 0.98902403,
-                      0.93358932])
+        x = np.array([0.99577797, 1.01492469, 1.00740903, 1.00303761,
+                      0.98850281])
+        s = np.array([0.95280361, 1.07056255, 1.02283844, 0.99598438,
+                      0.91124418])
 
         expceted_w = pd.Panel({key: pd.DataFrame({0: x})})
         expected_s = pd.Panel({key: pd.DataFrame({0: s})})
