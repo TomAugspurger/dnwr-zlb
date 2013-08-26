@@ -59,7 +59,7 @@ class BellmanRunner(object):
             if np.all(np.abs(np.diff(np.sign(np.diff(outs))))):
                 # alternating
                 out = np.mean(outs)
-                Y = np.mean([v.Y for v in Tvs])
+                Y = np.mean([v.Y for v in Tvs], axis=0)
                 v = Interp(X, Y, kind='linear')
             else:
                 out = outs[-1]
@@ -82,7 +82,7 @@ class BellmanRunner(object):
         """
         self.res_by_run.append(res_dict)
         self.res_by_cat['gp'].append(res_dict['gp'])
-        self.res_by_cat['vf'].append(res_dict['Tv'])
+        self.res_by_cat['Tv'].append(res_dict['Tv'])
         self.res_by_cat['ws'].append(res_dict['ws'])
         self.res_by_cat['rigid_out'].append(res_dict['rigid_out'])
         self.last = res_dict
@@ -165,7 +165,7 @@ def run_one(params, res_dict=None):
     g = ecdf(np.sort(pth))
     shocks = np.sort(shocks)
     #-------------------------------------------------------------------------
-    rigid_out = get_rigid_output(ws, params, flex_ws, g, shocks)
+    rigid_out = get_rigid_output(ws, params, flex_ws, g)
     res_dict['gp'] = g
     res_dict['rigid_out'] = rigid_out
     return res_dict
@@ -292,7 +292,10 @@ if __name__ == '__main__':
     np.random.seed(42)
     params = load_params(params_path)
 
-    os.makedirs('./results/intermediate')
+    try:
+        os.makedirs('./results/intermediate')
+    except OSError:
+        pass
     write_metadeta(params)
 
     pi_low = params['pi_low'][0]
