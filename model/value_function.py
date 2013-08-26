@@ -10,7 +10,7 @@ from __future__ import division
 import numpy as np
 import pandas as pd
 from scipy.integrate import quad
-import statsmodels.api as sm
+from scipy.stats import kde
 
 from gen_interp import Interp
 from helpers import maximizer, truncated_draw, ss_output_flexible
@@ -126,8 +126,7 @@ def get_rigid_output(ws, params, flex_ws, g):
     # z_grid = params['z_grid'][0]
     # ln_dist = params['full_ln_dist'][0]
     # shocks = np.sort(shocks)
-    dg = sm.nonparametric.KDEUnivariate(g.observations)
-    dg.fit()
+    dg = kde.gaussian_kde(g.observations.ravel())
     shocks = np.sort(truncated_draw(params, lower=.005, upper=.995,
                                     kind='lognorm', size=1000), axis=0)
 
@@ -156,6 +155,9 @@ def get_rigid_output(ws, params, flex_ws, g):
     p3 = p3 / len(shocks)  # Also way too small methinks.
 
     # z_part is \tilde{Z} in my notes.
+    # z_part is decreasing in p1 + p2
+    # output is *decreasing* in z_part (it goes in as 1 over)
+    # so output is increasing in p1 + p2
     z_part = ((1 - lambda_) * p1 +
               lambda_ * (p2 + p3))**(-(eta + gamma) / (gamma * (eta - 1)))
 
