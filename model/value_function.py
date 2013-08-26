@@ -145,23 +145,31 @@ def get_rigid_output(ws, params, flex_ws, g):
 
     w_range = np.sort(ws(shocks))
     sub_w = lambda z: w_range[w_range > ws(z)]  # TODO: check on > vs >=
-    p3 = 0.0
-    for z in shocks[:-1].ravel():  # integrate over empty range for very last shock
+    p3 = np.zeros(len(shocks))
+    for i, z in enumerate(shocks[:-1].ravel()):  # empty range for last one
         inner_range = sub_w(z)
         a = inner_range[0]
         inner_vals = quad(inner_f, a, wmax, args=z)[0]
-        p3 += (1 / z)**(gamma * (eta - 1) / (eta + gamma)) * inner_vals
+        p3[i] = (1 / z)**(gamma * (eta - 1) / (eta + gamma)) * inner_vals
 
-    p3 = p3 / len(shocks)  # Also way too small methinks.
+
+    p3 = p3.mean()
 
     # z_part is \tilde{Z} in my notes.
     # z_part is decreasing in p1 + p2
     # output is *decreasing* in z_part (it goes in as 1 over)
     # so output is increasing in p1 + p2
-    z_part = ((1 - lambda_) * p1 +
-              lambda_ * (p2 + p3))**(-(eta + gamma) / (gamma * (eta - 1)))
+    def z_part(p1, p2, p3):
+        z_t = ((1 - lambda_) * p1 +
+                lambda_ * (p2 + p3))**(-(eta + gamma) / (gamma * (eta - 1)))
+        return z_t
 
-    return ((eta - 1) / eta)**(gamma / (1 + gamma)) * (1 / z_part)**(gamma / (1 + gamma))
+    def output(z_t):
+        out = (((eta - 1) / eta)**(gamma / (1 + gamma)) *
+               (1 / z_t)**(gamma / (1 + gamma)))
+        return out
+
+    return output(z_part(p1, p2, p3))
 
 
 def iter_bellman(v, tol=1e-3, maxiter=1000, strict=True, log=True, **kwargs):
