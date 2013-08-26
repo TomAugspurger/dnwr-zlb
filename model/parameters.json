@@ -8,7 +8,7 @@
     "gamma"        : [0.5, "frisch elas. of labor supply"],
     "wl"           : [0.4, "wage lower bound"],
     "wu"           : [3.5, "wage upper bound"],
-    "wn"           : [40, "wage grid point"],
+    "wn"           : [20, "wage grid point"],
     "beta"         : [0.97, "disount factor. check this"],
     "tol"          : [10e-6, "error tolerance for iteration"],
     "sigma"        : [0.4, "standard dev. of underlying normal dist"],
@@ -16,5 +16,5 @@
     "pi_high"      : [0.1, "highest inflation"],
     "pi_n"         : [15, "number of points in pi grid"],
     "results_path" : ["results/", "path to results directory"],
-    "zn"           : [22, "number of points in shock grid"]
+    "zn"           : [10, "number of points in shock grid"]
 }
