@@ -8,6 +8,7 @@ import itertools
 import json
 import os
 import pickle
+import shutil
 
 from helpers import load_params, ss_wage_flexible, sample_path, ss_output_flexible
 from joblib import Parallel, delayed
@@ -285,6 +286,26 @@ def get_g(pi, lambda_, period=28):
 # When is rigid output higher / lower than rigid
 # all comes to p1 vs. (p2 + p3)
 
+
+def move_prior_runs():
+    """
+    Quick way to avoid overwriting prevoius runs.
+    """
+    old_contents = os.listdir('results')
+    old_dirs = filter(lambda x: x.startswith('previous'), old_contents)
+    old_files = (x for x in old_contents if not os.path.isdir(x))
+    try:
+        old_nums = [int(x[-1]) for x in old_dirs]
+        new_num = np.max(old_nums) + 1
+        new_dir = 'previous' + str(new_num)
+    except ValueError:
+        new_dir = 'previous0'
+
+    os.makedirs(os.path.join('results', new_dir))
+
+    for f in old_files:
+        shutil.copy2(os.path.join('.', f), os.path.join('.', new_dir, f))
+
 if __name__ == '__main__':
     import sys
     params_path = sys.argv[1]
@@ -296,6 +317,8 @@ if __name__ == '__main__':
         os.makedirs('./results/intermediate')
     except OSError:
         pass
+
+    move_prior_runs()
     write_metadeta(params)
 
     pi_low = params['pi_low'][0]
