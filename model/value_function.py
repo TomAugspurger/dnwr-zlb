@@ -100,7 +100,7 @@ def bellman(w, params, u_fn=u_, lambda_=None, z_grid=None, pi=None,
     return Tv, wage_schedule, vals
 
 
-def get_rigid_output(ws, params, flex_ws, g, generating_shocks):
+def get_rigid_output(ws, params, flex_ws, g):
     """
 
     Eq 18 in DH.
@@ -138,13 +138,13 @@ def get_rigid_output(ws, params, flex_ws, g, generating_shocks):
           (flex_ws(shocks) / ws(shocks)) ** (eta - 1)).mean()
 
     p2 = ((1 / shocks) ** (gamma * (eta - 1) / (gamma + eta)) *
-          g(ws(shocks) * (1 + pi)) *
+          g(ws(shocks).ravel() * (1 + pi)) *
           (flex_ws(shocks) / ws(shocks)) ** (eta - 1)).mean()
 
     inner_f = lambda w, z: ((1 + pi) * dg.evaluate(w * (1 + pi))[0] *
                             (flex_ws(z) / w)**(eta - 1))
 
-    w_range = np.sort(ws(generating_shocks))
+    w_range = np.sort(ws(shocks))
     sub_w = lambda z: w_range[w_range > ws(z)]  # TODO: check on > vs >=
     p3 = 0.0
     for z in shocks[:-1].ravel():  # integrate over empty range for very last shock
