@@ -194,7 +194,8 @@ def sample_path(ws, params, lambda_=None, w0=.9, nseries=1, nperiods=1000,
             np.random.seed(42)
 
     shocks = truncated_draw(params, size=nperiods, samples=nseries)
-    lambda_ = lambda_ or params['lambda_'][0]
+    if lambda_ is None:
+        lambda_ = params['lambda_'][0]
     cannot_change_arr = np.random.uniform(0, 1, [nperiods, nseries]) < lambda_
 
     # initialize as empty.  Fill first row with values from w, the initial wage

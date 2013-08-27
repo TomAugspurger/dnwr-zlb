@@ -66,8 +66,10 @@ def bellman(w, params, u_fn=u_, lambda_=None, z_grid=None, pi=None,
     to implement this alternative strategy.
     """
 
-    lambda_ = lambda_ or params['lambda_'][0]
-    pi = pi or params['pi'][0]
+    if lambda_ is None:
+        lambda_ = params['lambda_'][0]
+    if pi is None:
+        pi = params['pi'][0]
     ln_dist = params['full_ln_dist'][0]
 
     if aggL is None:
