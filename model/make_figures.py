@@ -65,7 +65,7 @@ def plot_wage_change_dist(df, pi, lambda_, nperiods=4, log=True, figkwargs=None,
     fig, ax = plt.subplots(**_figkwargs)
     cts, idx, other = hist(t.values, histtype='bar', bins=idx,
                            label=['lag={}'.format(i) for i in diffs],
-                           ax=ax, **_axkwargs)
+                           ax=ax, normed=True, **_axkwargs)
 
     ax.set_title('Across Periods{0} $\pi={1}$, $\lambda={2}$'.format(
         strlog, pi, lambda_))
