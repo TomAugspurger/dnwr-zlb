@@ -154,7 +154,6 @@ def get_rigid_output(ws, params, flex_ws, g):
         inner_vals = quad(inner_f, a, wmax, args=z)[0]
         p3[i] = (1 / z)**(gamma * (eta - 1) / (eta + gamma)) * inner_vals
 
-
     p3 = p3.mean()
 
     # z_part is \tilde{Z} in my notes.
