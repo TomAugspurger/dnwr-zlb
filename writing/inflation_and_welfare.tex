@@ -15,8 +15,8 @@
 \usepackage{siunitx}                                       % Scientific units and numbering
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}    % Set color of text/background
 \linespread{1}                                           % Default line spacing size
-\usepackage{microtype}                                     % Improves spacing in the document
-\usepackage{setspace}                                      % Set line spacing dynamically
+% \usepackage{microtype}                                     % Improves spacing in the document
+% \usepackage{setspace}                                      % Set line spacing dynamically
 \usepackage{tocloft}                                       % List adjustments including ToC
 \DeclareMathOperator*{\argmin}{arg\!\min}
 \definecolor{purple}{HTML}{7A68A6}
@@ -27,7 +27,7 @@
 %----------------------------------------------------------------------------------------
 
 \usepackage{graphicx}                                      % Required for the inclusion of images
-\graphicspath{{./Pictures/}}                               % Specifies picture directory
+\graphicspath{{./model/figures/}}                          % Specifies picture directory
 \usepackage{float}                                         % Allows putting an [H] in \begin{figure}
 \usepackage{wrapfig}                                       % Allows in-line images
 
@@ -63,15 +63,15 @@ escapeinside={\%*}{*)}                                     % If you want to add 
 }
 
 \usepackage[T1]{fontenc}
-\usepackage{inconsolata}
+% \usepackage{inconsolata}
 
 
 %----------------------------------------------------------------------------------------
 %    EXTRAS
 %----------------------------------------------------------------------------------------
 
-\usepackage{attachfile}                                    % Attach files to your document
-\usepackage{fancyhdr}                                      % Fancy Header
+% \usepackage{attachfile}                                    % Attach files to your document
+% \usepackage{fancyhdr}                                      % Fancy Header
 \usepackage{natbib}
 
 \begin{document}
@@ -80,26 +80,26 @@ escapeinside={\%*}{*)}                                     % If you want to add 
 %    COMMANDS
 %----------------------------------------------------------------------------------------
 
-\renewcommand*\thesection{\arabic{section}}                % Renew section numbers
-\renewcommand{\labelenumi}{\alph{enumi}.}                  % Section ordered numbering
-\let\oldvec\vec                                            % Save the old vector style
-\renewcommand{\vec}[1]{\oldvec{\mathbf{#1}}}               % Set vectors to look like vectors
+% \renewcommand*\thesection{\arabic{section}}                % Renew section numbers
+% \renewcommand{\labelenumi}{\alph{enumi}.}                  % Section ordered numbering
+% \let\oldvec\vec                                            % Save the old vector style
+% \renewcommand{\vec}[1]{\oldvec{\mathbf{#1}}}               % Set vectors to look like vectors
 
-\renewcommand{\contentsname}{Table of Contents}            % Make ToC actually say ToC
-\addtocontents{toc}{~\hfill\textbf{Page}\par}              % Add 'page' to top of ToC
-\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}      % Makes dots leading up to page number
-\setcounter{tocdepth}{3}                                   % Depth of ToC
-\setcounter{lofdepth}{3}                                   % Depth of LoF
+% \renewcommand{\contentsname}{Table of Contents}            % Make ToC actually say ToC
+% \addtocontents{toc}{~\hfill\textbf{Page}\par}              % Add 'page' to top of ToC
+% \renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}      % Makes dots leading up to page number
+% \setcounter{tocdepth}{3}                                   % Depth of ToC
+% \setcounter{lofdepth}{3}                                   % Depth of LoF
 
-\pagestyle{plain}                                          % Fancy page style for headers
+% \pagestyle{plain}                                          % Fancy page style for headers
 % \setlength{\headheight}{15pt}                              % Change header hieght
 % \fancyhead[L,LO]{\fontsize{8}{10} \selectfont \firstmark}  % Adds header to left with section name
 % \fancyhead[R,RO]{\fontsize{8}{10} \selectfont Right}       % Adds header to right
 \definecolor{grey}{HTML}{cccccc}                           % The next 4 lines modifies the header (color)
-\renewcommand{\headrulewidth}{1px}
-\renewcommand{\headrule}{{\color{grey}%
-\hrule width\headwidth height\headrulewidth%
-\vskip-\headrulewidth}}
+% \renewcommand{\headrulewidth}{1px}
+% \renewcommand{\headrule}{{\color{grey}%
+% \hrule width\headwidth height\headrulewidth%
+% \vskip-\headrulewidth}}
 
 \numberwithin{equation}{section}                           % Number equations within sections
 \numberwithin{figure}{section}                             % Number figures within sections
@@ -137,6 +137,8 @@ I use a simplified New Keynesian model to explore how downward nominal wage rigi
 
 \section{Introduction}
 \label{sec:introduction}
+
+Wage rigidities and their importance 
 
 One interesting result from prior research on wage rigidities is that idiosyncratic shocks to labor are important for generating aggregate effects on output or employment.\footnote{
 This is stressed in \cite{elsby_2009}, \cite{benigno_ricci_2011}, and \cite{daly_hobijn_2013}.}
@@ -186,11 +188,11 @@ There is a single producer who hires labor from the representative household and
 \end{equation}
 
 Aggregate labor \(L_t\) is defined to be the integral over each individual's labor \(L_t(i)\):
-
+%
 \begin{equation} \label{eq:agg_labor}
-    L_t = \left[ \int_0^1 L_t(i)^{\frac{\eta - 1}{\eta}} \mathrm{d}i \right]^{\frac{\eta}{\eta - 1}}.
+    L_t = \left[ \int_0^1 L_t(i)^{\frac{\eta - 1}{\eta}} \mathrm{d}i \right]^{\frac{\eta}{\eta - 1}}
 \end{equation}
-
+%
 where $\eta$ is the usual elasticity of substitution among the different types of labor.
 % Since the different types of labor are not perfect substitutes (for $\eta < \infty$), the workers will charge a markup over the perfect competition equilibrium wage.
 
@@ -200,7 +202,7 @@ This final good producer's problem is to maximize profits (which will be zero in
 \begin{equation} \label{eq:firms_problem}
     \max_{L_t(i)} P_t L_t - \int_0^1 W_t(i)L_t(i)
 \end{equation}
-
+% 
 taking individual wages $W_t(i)$ and the aggregate price level $P_t$ as given.
 % Having the final good producer hire labor rather than monopolisitcally-competitive intermediate producers, as is more common, is done for tractability. awkward
 
@@ -218,11 +220,11 @@ In \ref{eq:labor_demand}, $W_t$ is the aggregate wage index, defined to be
 \end{equation}
 
 Due to perfect competition we know that the aggregate price level must equal the aggregate wage index, $P_t = W_t$.  This implies that the real aggregate wage index is always equal to one and so
-
+%
 \begin{equation} \label{eq:real_wage}
     1 = \frac{W_t}{P_t} = \left[\int_{0}^{1} \left( \frac{P_t}{W_t(i)} \right)^{\eta - 1} \mathrm{d}i \right]^{-\frac{1}{\eta - 1} } = \left[\int_{0}^{1} \! w_{it}^{1 - \eta} \mathrm{d}i \right]^{ \frac{1}{1 - \eta} }
 \end{equation}
-
+%
 where $w_{it}$ is the real wage charged by individual $i$.  We'll use \ref{eq:real_wage} to close the model.
 
 Aside from the lack of monopolistically-competitive intermediate producers, the production side of the economy is standard.
@@ -361,19 +363,23 @@ For the rigid case, $\lambda > 0$, we need to keep track of which subset of indi
 They can be broken into three groups.
 
 The first group is those $(1 - \lambda)$ who are not constrained in the downward direction.
+Since the restriction on who is allowed to lower his wage is entirely independent of your current wage or how long you've had that wage, this group is dispersed equally over the range of wages.
 
 The second group is those who are not allowed to lower their wage, but draw an idiosyncratic shock such that they'd like to increase their wage anyway.
+Due to the ``wage compression'' effect discussed earlier, where workers choose lower wages than in the flexible case, the workers in groups one and two may end up working more than they would if wages were completely flexible.
+In this model, anticipation of not being able to lower your wage tomorrow induces a lower wage today, which leads to more hours worked today.
 
 Finally, the third group is those who would like to lower their wage, but are not allowed to.
+This group will work few hours than they would under the flexible case.
 
-We can write the distribution of wages recursively:
+Using $G_t(w)$ to denote the cumulative distribution function of wages at time $t$, we can write the distribution of wages recursively:
 
 \begin{equation}
     \label{eq:wage_distribution}
     G_t(w) = (1 - \lambda) F(z_t(w)) + \lambda G_{t-1}\left(w[1 + \pi_t]\right)F(z_t(w))
 \end{equation}
 
-Using the distribution of wages, we can solve for the output level with rigid wages:
+With the distribution of wages in hand, we can solve for the output level with wage rigidity:
 
 \begin{equation}
     \label{eq:output_rigid}
@@ -392,11 +398,32 @@ where
     \end{split}
 \end{equation}
 
-To derive \ref{eq:output_rigid} we've used the assumption of perfect competition in the final goods market, so that the real wage $\frac{W_t}{P_t}$ is one.
+Comparing to the flexible-wage case given in \ref{eq:output_flexible}, the difference is in $Z_t$ and $Z_t^*$.
+Let's consider two limiting cases.
+First, as the degree of wage rigidity $\lambda$ goes to zero, only the first line of $Z_t^*$ is relevant.
+When wages are flexible, the ratio $\frac{\hat{w}_t(Z)}{w_t(Z)}$ is one, since the wage schedule will be the flexible wage schedule $\hat{w}_t(Z)$.  % Holy batman awkward.
+This leaves us with the definition of $Z_t$, and we're in the flexible case.
 
+The other limiting case to consider is when inflation becomes large.
+This case illustrates how inflation undoes some of the downward nominal wage rigidity.
+With higher inflation fewer workers end up with a \emph{real} wage that is too high.
+Anything below the limiting case of $G_t(w (1 + pi)) = 1$ ends up lowering output.
+
+To derive \ref{eq:output_rigid} we've used the assumption of perfect competition in the final goods market, so that the real wage $\frac{W_t}{P_t}$ is one.
 
 \section{Steady State}
 \label{sec:steady_state}
+
+One comparison to be made between the flexible and rigid cases is the distribution of wage changes.
+Under the flexible case, log normality of the idiosyncratic shocks implies that log wage changes should be normally distributed with a mean equal to the quarterly inflation rate.
+With rigid wages, however, a different picture emerges.
+The most prominent change is a higher spike at zero, no wage change.
+This spike is taking mass from either side: there are fewer wage decreases \emph{and} fewer wage increases.
+But the two tails are not sliced from equally.
+The distribution is now asymmetric with fewer wage decreases than increases.
+% Insert comp to nomral here.
+If we look at the change over, say, four periods, the distribution of change looks more normal.
+
 
 \newpage
 \bibliographystyle{apa}
