@@ -108,6 +108,7 @@ escapeinside={\%*}{*)}                                     % If you want to add 
 
 % \renewcommand{\sfdefault}{phv}                             % Change default font
 % \renewcommand{\familydefault}{\sfdefault}                  % Use default font everywhere
+\newcommand{\Lagr}{\mathcal{L}}
 \newcommand{\tvect}[2]{%
   \ensuremath{\Bigl(\negthinspace\begin{smallmatrix}#1\\#2\end{smallmatrix}\Bigr)}}
 
@@ -151,7 +152,8 @@ At the very least I will be able to benchmark my model with idiosyncratic shocks
 %----------------------------------------------------------------------------------------
 \section{Literature Review}
 \label{sec:literature_review}
-Reviews of the literature almost invariably start with a ``ritual piety'' \citep{tobin_1972} to Keynes's \emph{General Theory} and his discussion of downward nominal wage rigidity, before moving on the Tobin himself.
+Reviews of the wage rigidity literature almost invariably start with a ``ritual piety'' \citep{tobin_1972} to Keynes's \emph{General Theory} and his discussion of downward nominal wage rigidity.
+I'll skip that and start with Tobin himself.
 \cite{tobin_1972} argued that inflation could ``grease the wheels'' of the labor market.
 For whatever reason, nominal wages appear to be especially rigid in the downward direction.
 Positive inflation helps to erode this rigidity;
@@ -172,8 +174,7 @@ Economists have taken various tacks to reconcile the model's recommendations wit
 
 I follow \cite{daly_hobijn_2013} who presented a simplified version of \cite{benigno_ricci_2011}.
 We'll set up a model with a continuum of individuals, making up the representative household, who sell their labor services to a perfectly competitive final goods producers.
-Individuals receive idiosyncratic shocks to their labor preference.
-The effect of these shocks with an exogenous impediment to \emph{lowering} wages is the area of research.
+Individuals receive idiosyncratic shocks to their labor preference and face an exogenous impediment to lowering nominal wages.
 
 \subsection{Production}
 \label{sub:production}
@@ -181,7 +182,7 @@ The effect of these shocks with an exogenous impediment to \emph{lowering} wages
 There is a single producer who hires labor from the representative household and (linearly) transforms it into output, $Y_t$.
 
 \begin{equation} \label{eq:agg_output}
-    f(L_t) = L_t = Y_t.
+    L_t = Y_t.
 \end{equation}
 
 Aggregate labor \(L_t\) is defined to be the integral over each individual's labor \(L_t(i)\):
@@ -191,6 +192,7 @@ Aggregate labor \(L_t\) is defined to be the integral over each individual's lab
 \end{equation}
 
 where $\eta$ is the usual elasticity of substitution among the different types of labor.
+% Since the different types of labor are not perfect substitutes (for $\eta < \infty$), the workers will charge a markup over the perfect competition equilibrium wage.
 
 To simplify the aggregation process, I assume that there is a single final good producer who operates in a perfectly competitive market.
 This final good producer's problem is to maximize profits (which will be zero in equilibrium):
@@ -200,18 +202,19 @@ This final good producer's problem is to maximize profits (which will be zero in
 \end{equation}
 
 taking individual wages $W_t(i)$ and the aggregate price level $P_t$ as given.
+% Having the final good producer hire labor rather than monopolisitcally-competitive intermediate producers, as is more common, is done for tractability. awkward
 
 As shown in the appendix, solving this problem yields labor demand curves for each individual's labor:
 
 \begin{equation}
     \label{eq:labor_demand}
-    L_t(i) = \left( \frac{W_t(i)}{W_t} \right)^{-\eta}L_t = (w_{it})^{-eta}L_t.
+    L_t(i) = \left( \frac{W_t(i)}{W_t} \right)^{-\eta}L_t = (w_{it})^{-\eta}L_t.
 \end{equation}
 
 In \ref{eq:labor_demand}, $W_t$ is the aggregate wage index, defined to be
 
 \begin{equation} \label{eq:wage_index}
-    W_t = \left[\int_{0}^{1}\frac{1}{W_t(i)}^{\eta - 1} \mathrm{d}i \right]^{-\frac{1}{\eta - 1}}.
+    W_t = \left[\int_{0}^{1}\left(\frac{1}{W_t(i)}\right)^{\eta - 1} \mathrm{d}i \right]^{-\frac{1}{\eta - 1}}.
 \end{equation}
 
 Due to perfect competition we know that the aggregate price level must equal the aggregate wage index, $P_t = W_t$.  This implies that the real aggregate wage index is always equal to one and so
@@ -220,8 +223,9 @@ Due to perfect competition we know that the aggregate price level must equal the
     1 = \frac{W_t}{P_t} = \left[\int_{0}^{1} \left( \frac{P_t}{W_t(i)} \right)^{\eta - 1} \mathrm{d}i \right]^{-\frac{1}{\eta - 1} } = \left[\int_{0}^{1} \! w_{it}^{1 - \eta} \mathrm{d}i \right]^{ \frac{1}{1 - \eta} }
 \end{equation}
 
-where $w_{it}$ is the real wage charged by individual $i$.
+where $w_{it}$ is the real wage charged by individual $i$.  We'll use \ref{eq:real_wage} to close the model.
 
+Aside from the lack of monopolistically-competitive intermediate producers, the production side of the economy is standard.
 The interesting choices in the model are made by the individuals, to whom we turn next.
 
 \subsection{The Household}
@@ -239,23 +243,24 @@ The household's utility function is
 
 where $\gamma > 0$ is the elasticity of labor supply and $\beta \in (0, 1)$ is the discount factor.
 The import bit of this utility function is that the labor preference shocks, $Z_t(i)$ are specific to each individual.
-Note that I've already substituted in the market clearing condition that consumption equal output.
+Note that I've already substituted in the market clearing condition that consumption equal output;
 There's no capital or government spending in this model.
 
 The utility function is maximized subject to the household budget constraint:
 
 \begin{equation}
     \label{eq:budget}
-    A_t = \left(1 + i_{t-1}\right)A_{t-1} + \int_{0}^{1} W_t(i)L_t(i)\mathrm{d}i
+    P_t Y_t + A_t = \left(1 + i_{t-1}\right)A_{t-1} + \int_{0}^{1}\! W_t(i)L_t(i)\mathrm{d}i
 \end{equation}
 
 where $A_t$ is the level of nominal assets held by the household at time $t$ and $i$ is the nominal interest rate.
+Since there is just the single household, $A_t$ will be zero in equilibrium.
 Individuals also take their labor demand curve \ref{eq:labor_demand} as given.
 So, all else equal, individuals will work more the lower their own real wage or the higher aggregate output.
 
 The household also takes the paths of aggregate wages, output, and the final good's price $\left\{W_t, L_t, P_t \right\}_{t=0}^{\infty}$ as given.
 
-I'll assume that the idiosyncratic shocks to labor preference come from a lognormal distribution, i.i.d. across individuals and time:
+I'll assume that the idiosyncratic shocks to labor preference come from a lognormal distribution, i.i.d.\ across individuals and time:
 
 \begin{equation}
     \label{eq:shock_dist}
@@ -264,6 +269,8 @@ I'll assume that the idiosyncratic shocks to labor preference come from a lognor
 
 so that $\mathbb{E}(Z) = 1$.
 This particular specification is chosen mainly out of convenience.
+% that said, \cite{daly_hobijn_2013} do manage a reasonable reproduction of reality with this simplified setup.
+
 
 Finally, to the purpose at hand, I assume that nominal wages are rigid in the downward direction.
 In the spirit of \cite{calvo_1983}, every period a randomly selected group of individuals of measure $\lambda$ are not allowed to \emph{lower} their nominal wages.
@@ -271,7 +278,7 @@ The other $(1 - \lambda)$ individuals are free to choose whatever wage they plea
 \subsection{Wage Setting}
 \label{sub:wage_setting}
 
-To gain some appreciation for the rigid case, we'll start with perfect wage flexibility $(\lambda = 0)$.
+As a point of comparison for the rigid case, we'll start with perfect wage flexibility $(\lambda = 0)$.
 
 Letting
 \begin{equation}
@@ -279,13 +286,14 @@ Letting
     \Omega( w_t(i); Z_t(i), L_t ) = w_{it}^{1 - \eta} - \frac{\gamma}{\gamma + 1}Z_t(i)\left[ w_{it}^{-\eta}L_t \right]^{\frac{\gamma}{1 + \gamma}}
 \end{equation}
 
-be the labor-related terms of the household's problem, the optimal wage in the flexible can can be attained by maximizing
+be the labor-related terms of an individual's problem, the optimal wage in the flexible case can can be attained by maximizing
 
 \begin{equation}
     \label{eq:labor_opt}
     \mathbb{E}_t\left[\sum_{t=0}^{\infty}\beta^t \Omega( w_t(i); Z_t(i), L_t ) \right].
 \end{equation}
 
+subject to the budget constraint and the firm's labor demand schedule \ref{eq:labor_demand}.
 Solving this gives the optimal real wage schedule as a function of your idiosyncratic shock and aggregate output:
 
 \begin{equation}
@@ -293,12 +301,13 @@ Solving this gives the optimal real wage schedule as a function of your idiosync
     \hat{w}(Z_t(i); L_t) = \hat{w}_{it} = \left( \frac{\eta}{\eta - 1} \right)^{\frac{\gamma}{\eta + \gamma}}\left( Z_t(i) \right)^{\frac{\gamma}{\eta + \gamma}} L_t^{\frac{\gamma + 1}{\gamma + \eta}}.
 \end{equation}
 
-We will use this schedule when solving for the optimal wage with rigidity.
+We will use this schedule when solving for the optimal wage with rigidity.  %TODO: I think you mean eqm output.
+% Consider going straight into equilibrium then looping back around to rigid case.
 
-For the rigid case, $\lambda > 0$, our approach is slightly different (though mathematically equivalent).
-Each day, our individuals wake up with their wage from yesterday.
-They receive a labor preference shock, $Z_t(i)$, and find out whether they are allowed to choose any nominal wage, or just a wage greater than or equal to yesterday's.
-They then choose a wage to optimize today's utility plus the discounted future value of holding that wage.
+For the rigid case, $\lambda > 0$, our approach is slightly different.
+Each day, our individual wakes up with his wage from yesterday.
+He receives a labor preference shock, $Z_t(i)$, and finds out whether he is allowed to choose any nominal wage, or just a wage greater than or equal to yesterday's.
+He then chooses a wage to optimize today's utility plus the discounted future value of holding that wage.
 This can be written as a value function where the state variable is the real wage $w$:
 
 \begin{multline}
@@ -311,21 +320,23 @@ $F(\cdot)$ is the distribution of idiosyncratic shocks across individuals and $\
 
 One thing to note: downward nominal wage rigidities clearly affect workers who fall into the second line of \ref{eq:value_function}, those who can't lower their wage below $w$.
 But the workers on the first line are also affected.
-If a worker received a high shock and followed the flexible wage schedule $\hat{w}(Z_t(i))$ they would choose a high wage.
+If a worker received a high shock and followed the flexible wage schedule $\hat{w}(Z_t(i))$ they would choose a relatively high wage.
 While that might be a good thing for today, it would ignore the possibility of receiving a low shock tomorrow, but not being able to lower the wage due to wage rigidity.
 This effect tends to dampen the wage increases chosen by the $(1 - \lambda)$ unrestricted workers.
+\cite{elsby_2009} investigates the importance of wage rigidity with an emphasis on this ``wage compression''.
 
 \section{Monetary Policy}
 \label{sec:monetary_policy}
 
-Not really implemented yet, but the central bank follows a normal Taylor Rule:
+To close the model up, the central bank follows a Taylor Rule to set the nominal interest rate $i_t$:
 
 \begin{equation}
     \label{eq:taylor_rule}
-    i_t = \frac{1 + \bar{pi}}{\beta} \left( \frac{Y_t}{\bar{Y}} \right)^{\varphi_Y} \left( \frac{1 + \pi_t}{1 + \bar{\pi}} \right)^{1 + \varphi_{\pi}} - 1
+    i_t = \frac{1 + \bar{\pi}}{\beta} \left( \frac{Y_t}{\bar{Y}} \right)^{\varphi_Y} \left( \frac{1 + \pi_t}{1 + \bar{\pi}} \right)^{1 + \varphi_{\pi}} - 1
 \end{equation}
 
 where $\phi_Y, \phi_{\pi} > 0$ govern the strength of the central bank's reaction to deviations from its target level of inflation, $\bar{\pi}$, and the steady-state output level $\bar{Y}$.
+It's assumed that the zero lower bound on nominal rates will never bind.
 
 \section{Equilibrium}
 \label{sec:equilibrium}
@@ -394,19 +405,84 @@ To derive \ref{eq:output_rigid} we've used the assumption of perfect competition
 \newpage
 \appendix
 
+\section{Derivations}
+
+Setup the Household's problem as a Lagrangian:
+
+\begin{equation}
+    \label{eqa:houehold}
+    \begin{split}
+        \Lagr : \sum_{t=0}^{\infty} \beta^t \Big\{ \ln Y_t & - \frac{\gamma}{\gamma + 1} \int_{0}^{1} \! Z_t(i)L_t(i) \frac{\gamma + 1}{\gamma} \mathrm{d}i \\
+                                                           & - \mu_t \left[ (1 + i_{t-1})A_{t-1} + \int_{0}^{1} \! W_t(i)L_t(i) \mathrm{d}i  - A_t - P_tY_t\right] \Big\}
+    \end{split}
+\end{equation}
+
+where $\mu_t$ is the Lagrangian multiplier on the budget constraint.
+From this we get the first order conditions:
+
+\begin{equation}
+\begin{aligned}
+    \label{eqa:focs}
+    \frac{\partial \Lagr}{\partial Y} & :   \ \ \ \ \ \ \ \ \  \frac{\beta^t}{Y_t} = \mu_t \beta^t P_t \Rightarrow \mu_t = \frac{1}{P_t Y_t} \\
+    \frac{\partial \Lagr}{\partial A_t} & : \ \ \ \ \ \ \ \ \  \mu_t = (1 + i_t) \mu_{t + 1} \beta \Rightarrow \frac{1}{Y_t} = \beta (1 + r_t) \frac{1}{Y_{t+1}}
+\end{aligned}
+\end{equation}
+
+where $r_t$ is the real wage, $\frac{1 + i_t}{1 + \pi_{t+1}} - 1$.
+
+The firm's problem is typical of the Dixit-Stiglitz framework:
+
+\begin{equation}
+    \label{eqa:firms_problem}
+    \begin{aligned}
+        & \min
+        & & \int_{0}^{1} \! W_t(i)L_t(i) \mathrm{d}i \\
+        & \text{subject to}
+        & & Y_t \geq Y
+    \end{aligned}
+\end{equation}
+
+where $Y$ is some minimum level of output.  The first order condition gives
+
+\begin{equation}
+    \label{eqa:firms_foc}
+    \begin{aligned}
+        W_t(i) &= \mu_t L_t(i)^{-1 / \eta} \left[ \int_{0}^{1} \! L_t(i)^{\frac{\eta - 1}{\eta}} \mathrm{d}i \right]^{\frac{\eta}{\eta - 1}}\\
+               &= \mu_t L_t(i)^{-1 / \eta} L_t^{1 / \eta}.
+    \end{aligned}
+\end{equation}
+
+Integrate over $i$ and raise to the $1 - \eta$:
+
+\begin{equation}
+    \label{eqa:firms_foc2}
+    \begin{aligned}
+        \int_{0}^{1} \! W_t(i)^{1 - \eta} \mathrm{d}i &= \mu_t^{1 - \eta} \int_{0}^{1} \! L_t(i)^{-\frac{1 + \eta}{\eta}} \mathrm{d}i L_t^{\frac{1 - \eta}{\eta}}\\
+                                                      &= \mu_t^{1 - \eta}
+    \end{aligned}
+\end{equation}
+
+If we let $W = \mu_t = \left[ \int_{0}^{1} \! W_t(i)^{1 - \eta} \mathrm{d}i \right]^{\frac{1}{1 - \eta}}$ be the wage index, we find that:
+
+\begin{equation}
+    \label{eqa:firms_foc3}
+    L_t(i) = \left(\frac{W_t(i)}{\mu_t L_t(i)}\right)^{-\eta} = L_t \left( \frac{W_t(i)}{W_t} \right)^{-\eta}
+\end{equation}
+
+which is the firm's labor demand schedule, \ref{eq:labor_demand}.
 \section{Numerical Method}
 
 Parts of my numerical method follows \cite{daly_hobijn_2013}.
-I iteratate upon the value function in \ref{eq:value_function} for a given level of output.
+I iterate upon the value function in \ref{eq:value_function} for a given level of output.
 This yields the value function $V_t(w)$, wage schedule $w_(Z)$ and shock schedule, $Z_t(w)$.
 
 I use a mixture of linear and cubic polynomials to approximate the value function $V_t(w)$, wage schedule $w_(Z)$ and shock schedule, $Z_t(w)$.
 
 
-\section{Reproducability}
+\section{Reproducibility}
 
 All source files are available at this paper's \href{https://github.com/tomAugspurger/dnwr-zlb}{Github Page}.
-It is compatiable with \href{http://python.org/download/releases/2.7.5/}{Python 2.7}, and requires the following packages:
+It is compatible with \href{http://python.org/download/releases/2.7.5/}{Python 2.7}, and requires the following packages:
 
 
 The results in this paper are mainly under the model directory.
