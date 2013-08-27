@@ -148,12 +148,15 @@ def get_rigid_output(ws, params, flex_ws, g):
     w_range = np.sort(ws(shocks))
     sub_w = lambda z: w_range[w_range > ws(z)]  # TODO: check on > vs >=
     p3 = np.zeros(len(shocks))
+
+    start_check = len(shocks) / 2
     for i, z in enumerate(shocks[:-1]):  # empty range for last one
         inner_range = sub_w(z)
         a = inner_range[0]
         inner_vals = quad(inner_f, a, wmax, args=z)[0]
         p3[i] = (1 / z)**(gamma * (eta - 1) / (eta + gamma)) * inner_vals
-
+        if i > start_check and (p3[i-30:i] < 1e-6).all():
+            break
     p3 = p3.mean()
 
     # z_part is \tilde{Z} in my notes.
