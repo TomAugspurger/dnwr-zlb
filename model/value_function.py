@@ -130,7 +130,7 @@ def get_rigid_output(ws, params, flex_ws, g):
     # shocks = np.sort(shocks)
     dg = kde.gaussian_kde(g.observations.ravel())
     shocks = np.sort(truncated_draw(params, lower=.005, upper=.995,
-                                    kind='lognorm', size=1000), axis=0)
+                                    kind='lognorm', size=1000), axis=0).ravel()
 
     w_grid = params['w_grid'][0]
     wmax = w_grid[-1]
@@ -148,7 +148,7 @@ def get_rigid_output(ws, params, flex_ws, g):
     w_range = np.sort(ws(shocks))
     sub_w = lambda z: w_range[w_range > ws(z)]  # TODO: check on > vs >=
     p3 = np.zeros(len(shocks))
-    for i, z in enumerate(shocks[:-1].ravel()):  # empty range for last one
+    for i, z in enumerate(shocks[:-1]):  # empty range for last one
         inner_range = sub_w(z)
         a = inner_range[0]
         inner_vals = quad(inner_f, a, wmax, args=z)[0]
