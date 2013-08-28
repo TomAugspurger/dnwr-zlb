@@ -92,8 +92,11 @@ class Interp(PchipInterpolator, object):
         """Elementwise Multiplication"""
         return Interp(self.X, other.Y * self.Y, kind=self.kind)
 
-    def plot(self, **kwargs):
-        return plt.plot(self.X, self.Y, **kwargs)
+    def plot(self, ax=None, **kwargs):
+        if ax is None:
+            fig, ax = plt.subplots()
+
+        return ax.plot(self.X, self.Y, **kwargs)
 
     def inverse(self, kind=None):
         if kind is None:
