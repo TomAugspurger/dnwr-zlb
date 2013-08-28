@@ -138,7 +138,7 @@ I use a simplified New Keynesian model to explore how downward nominal wage rigi
 \section{Introduction}
 \label{sec:introduction}
 
-Wage rigidities and their importance 
+Wage rigidities and their importance
 
 One interesting result from prior research on wage rigidities is that idiosyncratic shocks to labor are important for generating aggregate effects on output or employment.\footnote{
 This is stressed in \cite{elsby_2009}, \cite{benigno_ricci_2011}, and \cite{daly_hobijn_2013}.}
@@ -202,7 +202,7 @@ This final good producer's problem is to maximize profits (which will be zero in
 \begin{equation} \label{eq:firms_problem}
     \max_{L_t(i)} P_t L_t - \int_0^1 W_t(i)L_t(i)
 \end{equation}
-% 
+%
 taking individual wages $W_t(i)$ and the aggregate price level $P_t$ as given.
 % Having the final good producer hire labor rather than monopolisitcally-competitive intermediate producers, as is more common, is done for tractability. awkward
 
@@ -213,7 +213,7 @@ As shown in the appendix, solving this problem yields labor demand curves for ea
     L_t(i) = \left( \frac{W_t(i)}{W_t} \right)^{-\eta}L_t = (w_{it})^{-\eta}L_t.
 \end{equation}
 
-In \ref{eq:labor_demand}, $W_t$ is the aggregate wage index, defined to be
+In \eqref{eq:labor_demand}, $W_t$ is the aggregate wage index, defined to be
 
 \begin{equation} \label{eq:wage_index}
     W_t = \left[\int_{0}^{1}\left(\frac{1}{W_t(i)}\right)^{\eta - 1} \mathrm{d}i \right]^{-\frac{1}{\eta - 1}}.
@@ -225,39 +225,40 @@ Due to perfect competition we know that the aggregate price level must equal the
     1 = \frac{W_t}{P_t} = \left[\int_{0}^{1} \left( \frac{P_t}{W_t(i)} \right)^{\eta - 1} \mathrm{d}i \right]^{-\frac{1}{\eta - 1} } = \left[\int_{0}^{1} \! w_{it}^{1 - \eta} \mathrm{d}i \right]^{ \frac{1}{1 - \eta} }
 \end{equation}
 %
-where $w_{it}$ is the real wage charged by individual $i$.  We'll use \ref{eq:real_wage} to close the model.
+where $w_{it}$ is the real wage charged by individual $i$.
+We'll use \eqref{eq:real_wage} to close the model.
 
 Aside from the lack of monopolistically-competitive intermediate producers, the production side of the economy is standard.
 The interesting choices in the model are made by the individuals, to whom we turn next.
 
-\subsection{The Household}
-\label{sub:The Household}
+\subsection{The household}
+\label{sub:The household}
 
 There is a representative household made up of a continuum of individuals.
 As in \cite{erceg_henderson_levin_1999} individuals can share consumption risk perfectly, but make wage setting decisions on their own.
 Once an individual has chosen a wage, he then supplies as much labor as is demanded by the firm.
 
-The household's utility function is
+The household earns utility from consumption and disutility from work:
 
 \begin{equation} \label{eq:utility}
     \sum_{t=0}^{\infty} \beta^t \left\{\ln Y_t - \frac{\gamma}{\gamma + 1} \int_{0}^{1} Z_t(i)L_t(i)^{\frac{\gamma + 1}{\gamma}}\mathrm{d}i\right\}
 \end{equation}
-
+%
 where $\gamma > 0$ is the elasticity of labor supply and $\beta \in (0, 1)$ is the discount factor.
 The import bit of this utility function is that the labor preference shocks, $Z_t(i)$ are specific to each individual.
 Note that I've already substituted in the market clearing condition that consumption equal output;
-There's no capital or government spending in this model.
+there's no capital or government spending in this model.
 
-The utility function is maximized subject to the household budget constraint:
+The utility function is maximized subject to the household budget constraint
 
 \begin{equation}
     \label{eq:budget}
     P_t Y_t + A_t = \left(1 + i_{t-1}\right)A_{t-1} + \int_{0}^{1}\! W_t(i)L_t(i)\mathrm{d}i
 \end{equation}
-
+%
 where $A_t$ is the level of nominal assets held by the household at time $t$ and $i$ is the nominal interest rate.
 Since there is just the single household, $A_t$ will be zero in equilibrium.
-Individuals also take their labor demand curve \ref{eq:labor_demand} as given.
+Individuals also take their labor demand curve \eqref{eq:labor_demand} as given.
 So, all else equal, individuals will work more the lower their own real wage or the higher aggregate output.
 
 The household also takes the paths of aggregate wages, output, and the final good's price $\left\{W_t, L_t, P_t \right\}_{t=0}^{\infty}$ as given.
@@ -268,15 +269,15 @@ I'll assume that the idiosyncratic shocks to labor preference come from a lognor
     \label{eq:shock_dist}
     \ln(Z) \sim \mathcal{N}\left(-\frac{\sigma^2}{2}, \sigma\right)
 \end{equation}
-
+%
 so that $\mathbb{E}(Z) = 1$.
 This particular specification is chosen mainly out of convenience.
 % that said, \cite{daly_hobijn_2013} do manage a reasonable reproduction of reality with this simplified setup.
 
 
 Finally, to the purpose at hand, I assume that nominal wages are rigid in the downward direction.
-In the spirit of \cite{calvo_1983}, every period a randomly selected group of individuals of measure $\lambda$ are not allowed to \emph{lower} their nominal wages.
-The other $(1 - \lambda)$ individuals are free to choose whatever wage they please.
+In the spirit of \cite{calvo_1983}, every period a randomly selected group of individuals of measure $\lambda \in \left(0, 1\right)$ are not allowed to \emph{lower} their nominal wages.
+The other $\left(1 - \lambda \right)$ individuals are free to choose whatever wage they please.
 \subsection{Wage Setting}
 \label{sub:wage_setting}
 
@@ -287,23 +288,23 @@ Letting
     \label{eq:labor_part}
     \Omega( w_t(i); Z_t(i), L_t ) = w_{it}^{1 - \eta} - \frac{\gamma}{\gamma + 1}Z_t(i)\left[ w_{it}^{-\eta}L_t \right]^{\frac{\gamma}{1 + \gamma}}
 \end{equation}
-
+%
 be the labor-related terms of an individual's problem, the optimal wage in the flexible case can can be attained by maximizing
 
 \begin{equation}
     \label{eq:labor_opt}
     \mathbb{E}_t\left[\sum_{t=0}^{\infty}\beta^t \Omega( w_t(i); Z_t(i), L_t ) \right].
 \end{equation}
-
-subject to the budget constraint and the firm's labor demand schedule \ref{eq:labor_demand}.
+%
+subject to the budget constraint and the firm's labor demand schedule \eqref{eq:labor_demand}.
 Solving this gives the optimal real wage schedule as a function of your idiosyncratic shock and aggregate output:
 
 \begin{equation}
     \label{eq:flex}
     \hat{w}(Z_t(i); L_t) = \hat{w}_{it} = \left( \frac{\eta}{\eta - 1} \right)^{\frac{\gamma}{\eta + \gamma}}\left( Z_t(i) \right)^{\frac{\gamma}{\eta + \gamma}} L_t^{\frac{\gamma + 1}{\gamma + \eta}}.
 \end{equation}
-
-We will use this schedule when solving for the optimal wage with rigidity.  %TODO: I think you mean eqm output.
+%
+We will use this schedule when solving for equilibrium output.
 % Consider going straight into equilibrium then looping back around to rigid case.
 
 For the rigid case, $\lambda > 0$, our approach is slightly different.
@@ -319,8 +320,11 @@ This can be written as a value function where the state variable is the real wag
 \end{multline}
 
 $F(\cdot)$ is the distribution of idiosyncratic shocks across individuals and $\pi_{t+1}$ is the inflation rate from time $t$ to $t+1$.
+The value function gives use two useful functions: the (rigid) wage schedule $w_t(Z)$ and its inverse, the shock schedule $Z_t(w)$.
+The wage schedule tells us what wage an unconstrained worker chooses when his idiosyncratic shock is $Z_t$.
+We can show that $w_t(\cdot)$ is strictly increasing, and solve for its inverse $Z_t(w)$.
 
-One thing to note: downward nominal wage rigidities clearly affect workers who fall into the second line of \ref{eq:value_function}, those who can't lower their wage below $w$.
+One thing to note: downward nominal wage rigidities clearly affect workers who fall into the second line of \eqref{eq:value_function}, those who can't lower their wage below $w$.
 But the workers on the first line are also affected.
 If a worker received a high shock and followed the flexible wage schedule $\hat{w}(Z_t(i))$ they would choose a relatively high wage.
 While that might be a good thing for today, it would ignore the possibility of receiving a low shock tomorrow, but not being able to lower the wage due to wage rigidity.
@@ -336,7 +340,7 @@ To close the model up, the central bank follows a Taylor Rule to set the nominal
     \label{eq:taylor_rule}
     i_t = \frac{1 + \bar{\pi}}{\beta} \left( \frac{Y_t}{\bar{Y}} \right)^{\varphi_Y} \left( \frac{1 + \pi_t}{1 + \bar{\pi}} \right)^{1 + \varphi_{\pi}} - 1
 \end{equation}
-
+%
 where $\phi_Y, \phi_{\pi} > 0$ govern the strength of the central bank's reaction to deviations from its target level of inflation, $\bar{\pi}$, and the steady-state output level $\bar{Y}$.
 It's assumed that the zero lower bound on nominal rates will never bind.
 
@@ -349,14 +353,13 @@ With flexible wages, $\lambda = 0$, we can write the equilibrium level of output
     \label{eq:output_flexible}
     Y_t = L_t = \left( \frac{\eta - 1}{\eta} \right)^{\frac{\gamma}{1 + \gamma}} \left( \frac{1}{Z_t} \right)^{\frac{\gamma}{1 + \gamma}}
 \end{equation}
-
+%
 where
 
-\begin{align}
-    Z_t =& \left( \int_{0}^{1}\! \left( \frac{1}{Z_t(i)} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \mathrm{d}i \right)^{-\frac{\eta + \gamma}{\gamma(\eta - 1)}}\\
-        =& e^{-\frac{1}{2} \frac{\eta(1 + \gamma)}{\gamma + \eta}\sigma^2 }.
-\end{align}
-
+\begin{equation}
+    Z_t = \left( \int_{0}^{1}\! \left( \frac{1}{Z_t(i)} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \mathrm{d}i \right)^{-\frac{\eta + \gamma}{\gamma(\eta - 1)}} \!\!\! = e^{-\frac{1}{2} \frac{\eta(1 + \gamma)}{\gamma + \eta}\sigma^2 }.
+\end{equation}
+%
 The last line follows from the specification that the idiosyncratic shocks $Z_t(i)$ are distributed lognoramlly.
 
 For the rigid case, $\lambda > 0$, we need to keep track of which subset of individuals are constrained.
@@ -370,7 +373,7 @@ Due to the ``wage compression'' effect discussed earlier, where workers choose l
 In this model, anticipation of not being able to lower your wage tomorrow induces a lower wage today, which leads to more hours worked today.
 
 Finally, the third group is those who would like to lower their wage, but are not allowed to.
-This group will work few hours than they would under the flexible case.
+This group will work fewer hours than they would under the flexible case.
 
 Using $G_t(w)$ to denote the cumulative distribution function of wages at time $t$, we can write the distribution of wages recursively:
 
@@ -385,7 +388,7 @@ With the distribution of wages in hand, we can solve for the output level with w
     \label{eq:output_rigid}
     Y_t = L_t = \left(\frac{\eta - 1}{\eta} \right)^{\frac{\gamma}{1 + \gamma}}\left( \frac{1}{Z_t^*} \right)^{\frac{\gamma}{1 + \gamma}}
 \end{equation}
-
+%
 where
 
 \begin{equation}
@@ -393,12 +396,12 @@ where
     \begin{split}
     Z_t^* &= \Big\{(1 - \lambda) \int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left( \frac{\hat{w}_t(Z)}{w_t(Z)} \right)^{\eta - 1}\ \mathrm{d}F(Z) \\
           &+            \lambda  \int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left( \frac{\hat{w}_t(Z)}{w_t(Z)} \right)^{\eta - 1} G_{t-1}\left( w_t(Z)[1 + \pi_t] \right)                                                     \ \mathrm{d}F(Z)\\
-          &+            \lambda  \int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left[ \int_{w_t(Z)}^{\infty} (1 + \pi_t)g_{t-1}\left( w[1 + \pi_t] \right) \left( \frac{\hat{w}_t(Z)}{w} \right)^{\eta - 1}\ \mathrm{d}w \right] \ \mathrm{d}F(Z)
+          &+            \lambda  \int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left[ \int_{w_t(Z)}^{\infty} (1 + \pi_t)g_{t-1}\left( w[1 + \pi_t] \right) \left( \frac{\hat{w}_t(Z)}{w} \right)^{\eta - 1}\ \mathrm{d}w \right] \mathrm{d}F(Z)
             \Big\}^{-\frac{\eta + \gamma}{\gamma(\eta - 1)}}
     \end{split}
 \end{equation}
 
-Comparing to the flexible-wage case given in \ref{eq:output_flexible}, the difference is in $Z_t$ and $Z_t^*$.
+Comparing to the flexible-wage case given in \eqref{eq:output_flexible}, the difference is in $Z_t$ and $Z_t^*$.
 Let's consider two limiting cases.
 First, as the degree of wage rigidity $\lambda$ goes to zero, only the first line of $Z_t^*$ is relevant.
 When wages are flexible, the ratio $\frac{\hat{w}_t(Z)}{w_t(Z)}$ is one, since the wage schedule will be the flexible wage schedule $\hat{w}_t(Z)$.  % Holy batman awkward.
@@ -409,7 +412,7 @@ This case illustrates how inflation undoes some of the downward nominal wage rig
 With higher inflation fewer workers end up with a \emph{real} wage that is too high.
 Anything below the limiting case of $G_t(w (1 + pi)) = 1$ ends up lowering output.
 
-To derive \ref{eq:output_rigid} we've used the assumption of perfect competition in the final goods market, so that the real wage $\frac{W_t}{P_t}$ is one.
+To derive \eqref{eq:output_rigid} we've used the assumption of perfect competition in the final goods market, so that the real wage $\frac{W_t}{P_t}$ is one.
 
 \section{Steady State}
 \label{sec:steady_state}
@@ -496,11 +499,11 @@ If we let $W = \mu_t = \left[ \int_{0}^{1} \! W_t(i)^{1 - \eta} \mathrm{d}i \rig
     L_t(i) = \left(\frac{W_t(i)}{\mu_t L_t(i)}\right)^{-\eta} = L_t \left( \frac{W_t(i)}{W_t} \right)^{-\eta}
 \end{equation}
 
-which is the firm's labor demand schedule, \ref{eq:labor_demand}.
+which is the firm's labor demand schedule, \eqref{eq:labor_demand}.
 \section{Numerical Method}
 
 Parts of my numerical method follows \cite{daly_hobijn_2013}.
-I iterate upon the value function in \ref{eq:value_function} for a given level of output.
+I iterate upon the value function in \eqref{eq:value_function} for a given level of output.
 This yields the value function $V_t(w)$, wage schedule $w_(Z)$ and shock schedule, $Z_t(w)$.
 
 I use a mixture of linear and cubic polynomials to approximate the value function $V_t(w)$, wage schedule $w_(Z)$ and shock schedule, $Z_t(w)$.
