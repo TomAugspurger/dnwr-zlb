@@ -144,11 +144,38 @@ Inflation helps to reduce some of the distortion.
 
 \end{abstract}
 
+\section{Better Intro}
+\label{sec:better_intro}
+
+Wage rigidities and their importance have long been debated in economics.
+Reviews of the relevant literature often start with a ``ritual piety'' \citep{tobin_1972} to Keynes's \emph{General Theory} before moving on to Tobin himself.
+
+On the empirical front, evidence for wage rigidities continues to mount.
+\cite{mclaughlin_1994} and \cite{card_hyslop_1997} each uses panel datasets to estimate the degree of downward wage rigidity and find that 15\%-20\% of nominal-yearly wage changes are negative, with a ``spike'' at no change.
+\cite{akerlof_dickens_perry_1996} argue that the studies based on panel data tend to understate the degree of downward wage rigidity, due to errors in reporting wage levels.
+They augment the earlier panel studies with surveys and Census data on manufacturing wages, both of which point to more downward wage rigidity.
+\cite{bewley_1999} conducted surveys with employers and labor market leaders and found that wage cuts were rare, almost only occurring when the firm was facing bankruptcy.
+The most common reason cited for this resistance to nominal wage cuts was the negative effect wage cuts have on worker morale.
+More recently, \cite{dickens_et_al_2006} applied a common methodology to measure wage rigidities to a host of countries and datasets.
+While the variation across countries was substantial, a few common themes emerged.
+Wage changes are clustered at the median and have many extreme value relative to the normal distribution.
+Also, the distribution of wage changes is asymmetric; there are fewer wage cuts than raises, which implies nominal wage rigidity.
+Finally, the wage changes tend to clump around the expected rate of inflation, which is interpreted as real wage rigidity.
+
+I will take the existence of downward nominal wage rigidity as given.
+And for the most part I will ignore the reasons for that wage rigidity.
+Instead, we focus on the consequences of wage downward rigidities.
+
+New Keynesian models typically recommend an optimal inflation rate of zero, or even deflation equal to the nominal rate of interest \citep{schmitt-grohe_uribe_2010}.
+Wage rigidities have been a common motivation for targeting a higher rate.\footnote{\cite{tobin_1972}, \cite{akerlof_dickens_perry_1996}, \cite{kim_ruge-murcia_2011}, \cite{coibon_gorodnichenko_wieland_2012}, among others.}
+If wages are rigid specifically in the downward direction, some of the distortion can be undone by inflation.
+A wage that is ``too high'' can be brought back in line even without a nominal wage cut.
+
 \section{Wage Rigidities}
 \label{sec:introduction}
 
 Economists have long debated the reasons for and importance of wage rigidities.
-\cite{bewley_2007} surveyed employers, workers, union leaders, and business leaders on nominal pay cuts, and came away with morale as a leading explanation for downward wage rigidities.
+\cite{bewley_1999} surveyed employers, workers, union leaders, and business leaders on nominal pay cuts, and came away with morale as a leading explanation for downward wage rigidities.
 The empirical evidence for downward wage rigidities has mounted over the years (see section~\ref{sec:literature_review}).
 With the \emph{existence} of downward wage rigidities well established, and the \emph{causes} of wage rigidities still somewhat mysterious, most disagreement lays in the \emph{consequences}.
 A possible consequence is an explanation for the wage Phillips curve (and the non-neutrality of money more generally), though of course this claim is not uncontested. %TODO ewwwwwwwwwwwwwwwwwww
@@ -169,7 +196,7 @@ Numerous studies have found evidence for wage rigidity across various countries.
 While the specific details of wage rigidity vary across countries, a few common themes emerge:
 wage changes are clustered at the median and have many extreme value relative to the normal distribution.
 Also, the distribution of wage changes is asymmetric: there are fewer wage cuts than raises \citep{dickens_et_al_2006}.
-As mentioned earlier, \cite{bewley_2007} found survey evidence in favor of downward nominal wage rigidity.
+As mentioned earlier, \cite{bewley_1999} found survey evidence in favor of downward nominal wage rigidity.
 
 The various studies have been based on various sources of data:
 surveys, firm-level employment records, panel datasets, ad-hoc attemps on CPS.
@@ -226,8 +253,8 @@ As shown in the appendix, solving this problem yields labor demand curves for ea
     \label{eq:labor_demand}
     L_t(i) = \left( \frac{W_t(i)}{W_t} \right)^{-\eta}L_t = (w_{it})^{-\eta}L_t.
 \end{equation}
-
-In \eqref{eq:labor_demand}, $W_t$ is the aggregate wage index, defined to be
+%
+where $W_t$ is the aggregate wage index, defined to be
 
 \begin{equation} \label{eq:wage_index}
     W_t = \left[\int_{0}^{1}\left(\frac{1}{W_t(i)}\right)^{\eta - 1} \mathrm{d}i \right]^{-\frac{1}{\eta - 1}}.
@@ -240,7 +267,7 @@ Due to perfect competition we know that the aggregate price level must equal the
 \end{equation}
 %
 where $w_{it}$ is the real wage charged by individual $i$.
-We'll use \eqref{eq:real_wage} to close the model.
+We'll use \eqref{eq:real_wage} when solving for steady-state output;  the assumption of perfect competition is important.
 
 Aside from the lack of monopolistically-competitive intermediate producers, the production side of the economy is standard for this type of model.
 The interesting choices in the model are made by the individuals, to whom we turn next.
@@ -286,6 +313,7 @@ I'll assume that the idiosyncratic shocks to labor preference come from a lognor
 %
 so that $\mathbb{E}(Z) = 1$.
 This particular specification is chosen mainly out of convenience.
+A shock specification that allows for persistence would not be unreasonable, but that path is not taken here.
 % that said, \cite{daly_hobijn_2013} do manage a reasonable reproduction of reality with this simplified setup.
 
 
@@ -323,7 +351,7 @@ We will use this schedule when solving for equilibrium output.
 For the rigid case, $\lambda > 0$, our approach is slightly different.
 Each day, our individual wakes up with his wage from yesterday.
 He receives a labor preference shock, $Z_t(i)$, and finds out whether he is allowed to choose any nominal wage, or just a wage greater than or equal to yesterday's.
-He then chooses a wage to optimize today's utility plus the discounted future value of holding that wage.
+He then chooses a wage to optimize today's utility plus the discounted expected future value of holding that wage.
 This can be written as a value function where the state variable is the real wage $w$:
 
 \begin{multline}
@@ -334,23 +362,25 @@ This can be written as a value function where the state variable is the real wag
 
 $F(\cdot)$ is the distribution of idiosyncratic shocks across individuals and $\pi_{t+1}$ is the inflation rate from time $t$ to $t+1$.
 The value function gives us two useful functions: the (rigid) wage schedule $w_t(Z)$ and its inverse, the shock schedule $Z_t(w)$.
-The wage schedule tells us what wage an unconstrained worker chooses when his idiosyncratic shock is $Z_t$.
+The wage schedule tells us what wage an unconstrained worker (one of the $(1 - \lambda)$) chooses when his idiosyncratic shock is $Z_t$.
 We can show that $w_t(\cdot)$ is strictly increasing, and solve for its inverse $Z_t(w)$.
 
 One thing to note: downward nominal wage rigidities clearly affect workers who fall into the second line of \eqref{eq:value_function}, those who can't lower their wage below $w$.
 But the workers on the first line are also affected.
-If a worker received a high shock and followed the flexible wage schedule $\hat{w}(Z_t(i))$ they would choose a relatively high wage.
+If a worker received a high shock and followed the \emph{flexible} wage schedule $\hat{w}(Z_t(i))$ they would choose a relatively high wage.
 While that might be a good thing for today, it would ignore the possibility of receiving a low shock tomorrow, but not being able to lower the wage due to wage rigidity.
 This effect tends to dampen the wage increases chosen by the $(1 - \lambda)$ unrestricted workers.
 \cite{elsby_2009} investigates the importance of wage rigidity with an emphasis on this ``wage compression''.
-Figure~\ref{fig:wage_schedules} gives an example of two wage schedules, one flexible and one rigid.
+Figure~\ref{fig:wage_schedules} gives an example of several wage schedules, the flexible wage schedule $\hat{w}_t(Z)$ and two rigid wage schedules for two levels of inflation.
 
 \begin{center}
-  \includegraphics[scale=.5]{wage_schedule_flex_rigid.png}  % TODO: Label your axes.
+  \noindent \includegraphics[width=\linewidth]{wage_schedule_flex_rigid.png}  % TODO: Label your axes.
   \label{fig:wage_schedules}
 \end{center}
 %
-Notice how the rigid wage schedule is always below the flexible wage schedule.
+Notice how the rigid wage schedules are always below the flexible wage schedule.
+Apprehension of being unable to choose a lower wage in the future cause a lower wage choice today.
+Also notice how higher inflation moves the wage schedule closer to the flexible case.
 
 
 \section{Monetary Policy}
@@ -387,7 +417,7 @@ The second equality follows from the specification that the idiosyncratic shocks
 For the rigid case, $\lambda > 0$, we need to keep track of which subset of individuals are constrained.
 While I didn't write it explicitly in~\eqref{eq:value_function}, aggregate labor $L_t$ is a state variable.
 The simplifying assumptions we've made let us write a recursive equation for the distribution of wages, which we will use to get aggregate output.
-They can be broken into three groups.
+Our workers can be broken into three groups.
 
 The first group is those $(1 - \lambda)$ who are not constrained in the downward direction.
 Since the restriction on who is allowed to lower his wage is entirely independent of your current wage or how long you've had that wage, this group is dispersed equally over the range of wages.
@@ -452,6 +482,8 @@ The distribution is now asymmetric with fewer wage decreases than increases.
 If we look at the change over, say, four periods, the distribution of change looks more normal.
 
 
+\subsection{Output}
+
 \section{Extensions}
 \label{sec:extensions}
 
@@ -461,6 +493,13 @@ It should be easy to measure the steady-state level of output for various combin
 I've not implemented this yet.
 
 Of course the distribution of wage changes I have via simulations can and should be compared to data on wage changes.
+
+Endogenize $\lambda$ or the process of wage rigidity.
+
+\section{Conclusion}
+
+We used a simplified New Keynesian model whose interesting feature was idiosyncratic shocks to labor preference.
+These shocks, combined with downward nominal wage rigidities, produced an asymmetrical distribution of wage changes.
 
 \newpage
 \bibliographystyle{apa}
@@ -537,18 +576,22 @@ which is the firm's labor demand schedule, \eqref{eq:labor_demand}.
 \section{Numerical Method}
 
 Parts of my numerical method follows \cite{daly_hobijn_2013}.
-I iterate upon the value function in \eqref{eq:value_function} for a given level of output.
-This yields the value function $V_t(w)$, wage schedule $w_(Z)$ and shock schedule, $Z_t(w)$.
+Since we are interested in the interaction of inflation and wage rigidities, I construct a grid of $\pi$, $\lambda$ pairs.
+Then, given a level of output, I iterate on the value function in \eqref{eq:value_function} until convergence.
+I use a mixture of linear and cubic splines to estimate the value function over the range of wages.
+From the value function we get the wage schedule $w_(Z)$ and shock schedule, $Z_t(w)$, which are also estimated via cubic splines.
 
-I use a mixture of linear and cubic polynomials to approximate the value function $V_t(w)$, wage schedule $w_(Z)$ and shock schedule, $Z_t(w)$.
+With the wage schedule in hand, I estimate an empirical cumulative distribution function for the wage distribution $G_t(w)$ by sampling from the steady state equations.
+We obtain the histograms for steady-state wage changes by sampling a large number of individuals.
+
+We can use the wage schedule and wage distribution to estimate \eqref{eq:output_rigid}.
+Finally, we ensure that the level of output implied by \eqref{eq:output_rigid} is consistent with the level of output we started with.
 
 
 \section{Reproducibility}
 
 All source files are available at this paper's \href{https://github.com/tomAugspurger/dnwr-zlb}{Github Page}.
-It is compatible with \href{http://python.org/download/releases/2.7.5/}{Python 2.7}, and requires the following packages:
+See \texttt{README.MD} for a summary and \texttt{REQUIREMENTS.TXT} for dependencies.
+The data files themselves are not hosted at that webpage, but scripts to download them are included.
 
-
-The results in this paper are mainly under the model directory.
-The file to start at is `run\_value\_function'.
 \end{document}
