@@ -18,3 +18,7 @@ git clone https://github.com/tomAugspurger/dnwr-zlb
 ```
 
 Unzip the file or cd into the repository and run `python setup.py install`.
+
+### Contact
+
+I can be reached at `thomas-augspurger@uiowa.edu` if you have any questions.
