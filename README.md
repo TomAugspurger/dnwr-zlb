@@ -11,7 +11,7 @@ The writing subdirectory also contains the `TeX` file used to set the paper, if 
 
 The easies way to reproduce the paper is the `setup.py` file.
 Either [download a zip](https://github.com/TomAugspurger/dnwr-zlb/archive/master.zip) file of the repo,
-or clone the repositor with
+or clone the repository with
 
 ```git
 git clone https://github.com/tomAugspurger/dnwr-zlb
