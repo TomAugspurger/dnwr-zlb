@@ -73,10 +73,10 @@ def plot_wage_change_dist(df, pi, lambda_, nperiods=4, log=True, figkwargs=None,
     return fig, ax
 
 
-def savefig_(fig, pi, lambda_, dpi=200):
-    outname = './figures/pi{}lambda{}.png'.format(str(pi).replace('.', 'x'),
+def savefig_(fig, pi, lambda_):
+    outname = './figures/pi{}lambda{}.pdf'.format(str(pi).replace('.', 'x'),
                                                   str(lambda_).replace('.', 'x'))
-    fig.savefig(outname, dpi=dpi)
+    fig.savefig(outname, format='pdf')
     plt.close()
 
 def main():
