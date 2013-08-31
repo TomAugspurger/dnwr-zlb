@@ -13,6 +13,7 @@ import pandas as pd
 import analyze_run as ar
 from helpers import load_params, sample_path
 
+
 def get_df(pi, lambda_, ws, params):
     """
     Give a pi, lambda pair, get the dataframe of wage choices
@@ -32,6 +33,7 @@ def get_index(df):
     cts, idx, ax = hist(df.diff(1).loc[30], bins='scott', alpha=.35,
                         width=.0005)
     return idx
+
 
 def plot_wage_change_dist(df, pi, lambda_, nperiods=4, log=True, figkwargs=None,
                           axkwargs=None):
@@ -53,14 +55,13 @@ def plot_wage_change_dist(df, pi, lambda_, nperiods=4, log=True, figkwargs=None,
 
     t = pd.concat([df.diff(x).iloc[SOME_SS] for x in diffs],
                   axis=1, keys=diffs)
-    _figkwargs = {'figsize':(13, 8)}  # Leading _ is internal.
+    _figkwargs = {'figsize': (13, 8)}  # Leading _ is internal.
     if figkwargs is not None:
-        figkwargs_.update(figkwargs)
+        _figkwargs.update(figkwargs)
 
     _axkwargs = {}
     if axkwargs is not None:
         _axkwargs.update(axkwargs)
-
 
     fig, ax = plt.subplots(**_figkwargs)
     cts, idx, other = hist(t.values, histtype='bar', bins=idx,
@@ -79,6 +80,27 @@ def savefig_(fig, pi, lambda_):
     fig.savefig(outname, format='pdf')
     plt.close()
 
+
+def make_and_save(pi, lambda_, wses=None, nperiods=4, log=True, figkwargs=None,
+                  axkwargs=None):
+    """
+    Wrapper for all the plotting funcitonality.
+
+    Returns an axes and does IO.
+    """
+    if wses is None:
+        params = load_params()
+        all_files = ar.get_all_files(params)
+        wses = ar.read_output(all_files, kind='ws')
+
+    df = get_df(pi, lambda_, wses[pi, lambda_], params)
+    fig, ax = plot_wage_change_dist(df, pi, lambda_, nperiods=nperiods,
+                                    log=log, figkwargs=figkwargs,
+                                    axkwargs=axkwargs)
+    savefig_(fig, pi, lambda_)
+    return fig, ax
+
+
 def main():
     params = load_params()
     all_files = ar.get_all_files(params)
@@ -88,12 +110,8 @@ def main():
     pis_u, lambdas_u = sorted(set(pis)), sorted(set(lambdas))  # unique
 
     for pi, lambda_ in keys:
-        df = get_df(pi, lambda_, wses[pi, lambda_], params)
-        fig, ax = plot_wage_change_dist(df, pi, lambda_)
-        savefig_(fig, pi, lambda_)
+        make_and_save(pi, lambda_)
         print('Saved {}, {}'.format(pi, lambda_))
 
 if __name__ == '__main__':
     main()
-
-
