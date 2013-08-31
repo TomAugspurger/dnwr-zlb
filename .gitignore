@@ -116,3 +116,4 @@ model/prependresults_001_0721052631579.h5
 results*/*
 model/results*/*
 vb_suite/*
+model/figures/*.eps

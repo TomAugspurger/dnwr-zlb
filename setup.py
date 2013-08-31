@@ -1,9 +1,13 @@
 from distutils.core import setup
+from distutils.extension import Extension
+from Cython.Distutils import build_ext
 
 import os
 import sys
 import shutil
 import warnings
+
+import numpy as np
 
 # may need to work around setuptools bug by providing a fake Pyrex
 try:
@@ -25,5 +29,8 @@ setup(name='dnwr-zlb',
                 'data_wrangling.greenbook_wrangling',
                 'data_wrangling.nipa_wrangling',
                 'writing',
-                'vb_suit'],
+                'vb_suite'],
+      cmdclass={'build_ext': build_ext},
+      ext_modules=[Extension("model/cfminbound", ["model/cfminbound.pyx"])],
+      include_dirs=[np.get_include()]
       )
