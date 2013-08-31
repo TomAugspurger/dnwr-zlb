@@ -80,3 +80,7 @@ I have various helper functions in `helpers.py` that are called throughout.
 `fixups.py` is what I've used when I needed to redo a calculation after finding
 a bug, but this let me reuse the parts that were (hopefully!) bug-free.
 
+### Results
+
+Perhaps the easiest intro is via the IPython notebook `post_simulation.ipynb`.
+It's where I do most of the analysis following the simulation.
