@@ -41,3 +41,7 @@ Line number 713:
 should read
     PEAFNOW      2     ARE YOU NOW IN THE ARMED FORCES      (135 - 136)
 
+
+As of this writing, the only version of the data dictionary for 2013 was in `.rtf` format.
+This isn't especially conducive to parsing, so I copy and pasted the plain text into a
+`txt` file and parsed that.  The `txt` file is included in the repo.
