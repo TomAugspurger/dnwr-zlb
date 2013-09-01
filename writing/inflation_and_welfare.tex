@@ -15,6 +15,7 @@
 \usepackage{siunitx}                                       % Scientific units and numbering
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}    % Set color of text/background
 \usepackage{titlesec}
+\usepackage{datetime}
 
 \titleformat{\section}
   {\Large\normalfont\scshape}{\thesection}{.5em}{}
@@ -122,6 +123,7 @@ escapeinside={\%*}{*)}                                     % If you want to add 
 \def\blfootnote{\xdef\@thefnmark{}\@footnotetext}
 \makeatother
 
+\newdateformat{monthYear}{\monthname[\THEMONTH] \THEYEAR}
 
 %----------------------------------------------------------------------------------------
 %    TITLE PAGE
@@ -130,6 +132,7 @@ escapeinside={\%*}{*)}                                     % If you want to add 
 % \begin{titlepage}
 \title{Wage Rigidities and Inflation}
 \author{Tom Augspurger}                               % via Seth Miers
+\date{\monthYear\today}
 \maketitle
 %----------------------------------------------------------------------------------------
 %    CONTENT
@@ -146,13 +149,21 @@ Inflation helps to reduce some of the distortion.
 \section{Better Intro}
 \label{sec:better_intro}
 
-What is the nature?
-
 Wage rigidities and their importance have long been debated in economics.
-One common argument is that wage rigidities offer monetary policy a way to affect macroeconomic outcomes.
-If workers are especially recalcitrant about nominal wage cuts, then some amount of inflation can help bring wages closer to what the would be in the absence of wage rigidities.
+One common argument is that wage rigidities force a tradeoff between output and price and wage stability.
+This position is taken by \cite{erceg_henderson_levin_1999} and derivatives.
+Others, like \cite{goodfriend_king_2001}, acknowledge the existence of rigid wages, but argue that in practice the rigidities will likely have little effect on macroeconomic outcomes.
+% since they ``expect firms and workers to \emph{neutralize} allocative consequences of sticky nominal wages in the context of long-term relationships that predominate the labor market.''
+I adopt a finding from recent research on wage rigidities: idiosyncratic shocks are important for generating aggregate effects on output or employment.\footnote{
+This is stressed in \cite{elsby_2009}, \cite{benigno_ricci_2011}, and \cite{daly_hobijn_2013}.}
+I follow \cite{daly_hobijn_2013} and find that wage rigidities do affect aggregate output and the distribution of wage changes in a model with idiosyncratic shocks to labor preference.
+Relative to the flexible wage benchmark, the distribution of wage changes with rigidities is asymmetric, with fewer wage cuts and more mass at no change.
 
 Reviews of the relevant literature often start with a ``ritual piety'' \citep{tobin_1972} to Keynes's \emph{General Theory} before moving on to Tobin himself.
+\cite{tobin_1972} opens by remarking on just how much the world changed in the forty some years between the 1930's, when he started as an economist, and his present day of the 1970's.
+Despite those differences, ``[u]nemployment and inflation still preoccupy and perplex economists, statesmen, journalists, housewives, and everyone else.''
+The intervening forty some years since Tobin's address has also seen remarkable change, but these same issues are still a preoccupation, though hopefully less perplexing.
+
 On the empirical front, evidence for wage rigidities continues to mount.
 \cite{mclaughlin_1994} and \cite{card_hyslop_1997} each uses panel datasets to estimate the degree of downward wage rigidity and find that 15\%-20\% of nominal-yearly wage changes are negative, with a ``spike'' at no change.
 \cite{akerlof_dickens_perry_1996} argue that the studies based on panel data tend to understate the degree of downward wage rigidity, due to errors in reporting wage levels.
@@ -162,27 +173,23 @@ The most common reason cited for this resistance to nominal wage cuts was the ne
 
 More recently, \cite{dickens_et_al_2006} applied a common methodology to measure wage rigidities to a host of countries and datasets.
 While the variation across countries was substantial, a few common themes emerged.
-Wage changes are clustered at the median and have many extreme value relative to the normal distribution.
+Wage changes are clustered at the median and have many extreme values relative to the normal distribution.
 Also, the distribution of wage changes is asymmetric; there are fewer wage cuts than raises, which implies nominal wage rigidity.
 Finally, the wage changes tend to clump around the expected rate of inflation, which is interpreted as real wage rigidity.
 
 I will take the existence of downward nominal wage rigidity as given.
 And for the most part I will ignore the reasons for that wage rigidity.
-Instead, we focus on the consequences of wage downward rigidities.
+Instead, we focus on the consequences of wage downward rigidities.\footnote{
+    I should note that the evidence, causes, and consequences of wage rigidities may not be as separate as I make them out to be.
+    For example, downward wage rigidities caused by fear of productivity loss following a wage cut might suggest a different modeling strategy than if the rigidities are caused by long-duration wage contracts.
+    A different model could easily lead to different conclusions about the consequences and policy recommendations.
+    Nevertheless I will take the narrower view here, and focus exclusively on the consequences.
+}
 
 New Keynesian models typically recommend an optimal inflation rate of zero, or even deflation equal to the nominal rate of interest \citep{schmitt-grohe_uribe_2010}.
 Wage rigidities have been a common motivation for targeting a higher rate.\footnote{\cite{tobin_1972}, \cite{akerlof_dickens_perry_1996}, \cite{kim_ruge-murcia_2011}, \cite{coibon_gorodnichenko_wieland_2012}, among others.}
 If wages are rigid specifically in the downward direction, some of the distortion can be undone by inflation.
 A wage that is ``too high'' can be brought back in line even without a nominal wage cut.
-
-\section{Wage Rigidities}
-\label{sec:introduction}
-
-Economists have long debated the reasons for and importance of wage rigidities.
-\cite{bewley_1999} surveyed employers, workers, union leaders, and business leaders on nominal pay cuts, and came away with morale as a leading explanation for downward wage rigidities.
-The empirical evidence for downward wage rigidities has mounted over the years (see section~\ref{sec:literature_review}).
-With the \emph{existence} of downward wage rigidities well established, and the \emph{causes} of wage rigidities still somewhat mysterious, most disagreement lays in the \emph{consequences}.
-A possible consequence is an explanation for the wage Phillips curve (and the non-neutrality of money more generally), though of course this claim is not uncontested. %TODO ewwwwwwwwwwwwwwwwwww
 
 I use a a relatively simple model closely following \cite{daly_hobijn_2013} to examine consequences of wage rigidities.
 I find the usual result that rigidities distort the distribution of wage changes, causing few wage cuts and a large spike of workers with no change in nominal wage.
@@ -499,7 +506,7 @@ If we look at the change over, say, four periods, the distribution of change loo
 \subsection{Output}
 
 Contrary to previous results (cf. nearly everything written on the Phillips curve), I find that wage rigidities end up increasing output.
-In figure \ref{fig:output} I've shown the steady-state level of output over the range of rigidities for a handful of inflation levels.
+In figure \ref{fig:output} I've shown the steady-state level of output over the range of rigidities simulated at a handful of inflation levels.
 
 \begin{center}
   \includegraphics[width=\linewidth]{output_subsection.pdf}
@@ -510,7 +517,11 @@ This is \ldots puzzling.
 The model does not expressly forbid higher rigidities leading to higher output;
 earlier we saw that those workers free to choose any wage chose one lower than they would have under the flexible case.
 This does lead to more hours worked by those workers.
-But the usual result is that this would \emph{offset} but not overcome the loss of output due workers being stuck at too high a wage.
+But the usual result (as in, say, \citep{daly_hobijn_2013}) is that this would offset but not overcome the loss of output due workers being stuck at too high a wage.
+The only output level we have a closed form solution for is the flexible case, when $\lambda = 0$, which is given in \eqref{eq:output_flexible}.
+In my simulations, as $\lambda \rightarrow 0$, the output levels do converge to the flexible output level, modulo estimation and floating-point error.
+But instead of the output level increases instead of decreases as the degree of wage rigidity increases.
+I am still brooding over why this is so.
 
 \section{Extensions}
 \label{sec:extensions}
