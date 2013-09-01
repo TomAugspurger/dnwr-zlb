@@ -30,8 +30,8 @@ def get_index(df):
     A bit of a wasteful, hackish way to get an index to use for the various
     lags.
     """
-    cts, idx, ax = hist(df.diff(1).loc[30], bins='scott', alpha=.35,
-                        width=.0005)
+    _, idx, _ = hist(df.diff(1).loc[30], bins='scott', alpha=.35,
+                     width=.0005)
     return idx
 
 
@@ -74,11 +74,13 @@ def plot_wage_change_dist(df, pi, lambda_, nperiods=4, log=True, figkwargs=None,
     return fig, ax
 
 
-def savefig_(fig, pi, lambda_):
-    outname = './figures/pi{}lambda{}.pdf'.format(str(pi).replace('.', 'x'),
-                                                  str(lambda_).replace('.', 'x'))
+def savefig_(fig, pi, lambda_, nperiods, log, close=True):
+    outname = './figures/pi{0}lambda{1}_{2}_{3}.pdf'.format(str(pi).replace('.', 'x'),
+                                                            str(lambda_).replace('.', 'x'),
+                                                            nperiods, log)
     fig.savefig(outname, format='pdf')
-    plt.close()
+    if close:
+        plt.close()
 
 
 def make_and_save(pi, lambda_, wses=None, nperiods=4, log=True, figkwargs=None,
@@ -97,7 +99,7 @@ def make_and_save(pi, lambda_, wses=None, nperiods=4, log=True, figkwargs=None,
     fig, ax = plot_wage_change_dist(df, pi, lambda_, nperiods=nperiods,
                                     log=log, figkwargs=figkwargs,
                                     axkwargs=axkwargs)
-    savefig_(fig, pi, lambda_)
+    savefig_(fig, pi, lambda_, nperiods=nperiods, log=log)
     return fig, ax
 
 
