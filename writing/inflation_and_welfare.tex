@@ -165,9 +165,9 @@ Despite those differences, ``[u]nemployment and inflation still preoccupy and pe
 The intervening forty some years since Tobin's address has also seen remarkable change, but these same issues are still a preoccupation, though hopefully less perplexing.
 
 On the empirical front, evidence for wage rigidities continues to mount.
-\cite{mclaughlin_1994} and \cite{card_hyslop_1997} each uses panel datasets to estimate the degree of downward wage rigidity and find that 15\%-20\% of nominal-yearly wage changes are negative, with a ``spike'' at no change.
-\cite{akerlof_dickens_perry_1996} argue that the studies based on panel data tend to understate the degree of downward wage rigidity, due to errors in reporting wage levels.
-They augment the earlier panel studies with surveys and Census data on manufacturing wages, both of which point to more downward wage rigidity.
+\cite{mclaughlin_1994} and \cite{card_hyslop_1997} each used panel datasets to estimate the degree of downward wage rigidity and found that 15\%-20\% of nominal-yearly wage changes are negative, with a ``spike'' at no change.
+\cite{akerlof_dickens_perry_1996} argued that the studies based on panel data understate the degree of downward wage rigidity, due to errors in reporting wage levels.
+They augmented the earlier panel studies with surveys and Census data on manufacturing wages, both of which indicated more downward wage rigidity.
 \cite{bewley_1999} conducted surveys with employers and labor market leaders and found that wage cuts were rare, almost only occurring when the firm was facing bankruptcy.
 The most common reason cited for this resistance to nominal wage cuts was the negative effect wage cuts have on worker morale.
 
@@ -179,7 +179,7 @@ Finally, the wage changes tend to clump around the expected rate of inflation, w
 
 I will take the existence of downward nominal wage rigidity as given.
 And for the most part I will ignore the reasons for that wage rigidity.
-Instead, we focus on the consequences of downward wage rigidities.\footnote{
+Instead, focus is placed on the consequences of downward wage rigidities.\footnote{
     I should note that the evidence, causes, and consequences of wage rigidities may not be as separate as I make them out to be.
     For example, downward wage rigidities caused by fear of productivity loss following a wage cut might suggest a different modeling strategy than if the rigidities are caused by long-duration wage contracts.
     A different model could easily lead to different conclusions about the consequences and policy recommendations.
@@ -205,7 +205,7 @@ This is stressed in \cite{elsby_2009}, \cite{benigno_ricci_2011}, and \cite{daly
 \label{sec:the_model}
 
 I follow \cite{daly_hobijn_2013} who presented a simplified version of \cite{benigno_ricci_2011}.
-We'll set up a model with a continuum of individuals, making up the representative household, who sell their labor services to a perfectly competitive final good producer.
+As a high-level overview, there is a continuum of individuals, making up the representative household, who sell their labor services to a perfectly competitive final good producer.
 Individuals receive idiosyncratic shocks to their labor preference and face an exogenous impediment to lowering nominal wages.
 
 \subsection{Production}
@@ -230,7 +230,7 @@ To simplify the aggregation process, I assume that there is a single final good 
 This final good producer's problem is to maximize profits (which will be zero in equilibrium) by choosing how much of each type of labor to hire:
 
 \begin{equation} \label{eq:firms_problem}
-    \max_{L_t(i)} P_t L_t - \int_0^1 W_t(i)L_t(i)
+    \max_{L_t(i)} P_t L_t - \int_0^1 W_t(i)L_t(i) \ \mathrm{d}i.
 \end{equation}
 %
 taking individual wages $W_t(i)$ and the aggregate price level $P_t$ as given.
@@ -239,7 +239,7 @@ As shown in the appendix, solving this problem yields labor demand curves for ea
 
 \begin{equation}
     \label{eq:labor_demand}
-    L_t(i) = \left( \frac{W_t(i)}{W_t} \right)^{-\eta}L_t = (w_{it})^{-\eta}L_t.
+    L_t(i) = \left( \frac{W_t(i)}{W_t} \right)^{-\eta}L_t = (w_{it})^{-\eta}L_t
 \end{equation}
 %
 where $W_t$ is the aggregate wage index, defined to be
@@ -322,7 +322,7 @@ be the labor-related terms of an individual's problem, the optimal wage in the f
 
 \begin{equation}
     \label{eq:labor_opt}
-    \mathbb{E}_t\left[\sum_{t=0}^{\infty}\beta^t \Omega( w_t(i); Z_t(i), L_t ) \right].
+    \mathbb{E}_t\left[\sum_{t=0}^{\infty}\beta^t \Omega( w_t(i); Z_t(i), L_t ) \right]
 \end{equation}
 %
 subject to the budget constraint and the firm's labor demand schedule \eqref{eq:labor_demand}.
@@ -343,7 +343,6 @@ He then chooses a wage to optimize today's utility plus the discounted expected 
 This can be written as a value function where the state variable is the real wage $w$:\footnote{
     See the appendix of \cite{daly_hobijn_2013} for properties of this type of value function.
 }
-
 \begin{multline}
     \label{eq:value_function}
     V_t(w) = (1 - \lambda) \int_{0}^{\infty} \max_{w_{it} \geq 0} \left\{ \Omega( w_t(i); Z_t(i), L_t ) + \beta V_{t+1}\left( \frac{w_{it}}{(1 + \pi_{t+1})} \right) \right\} \mathrm{d}F(Z_t(i)) \\
@@ -376,7 +375,7 @@ Also notice how higher inflation moves the wage schedule closer to the flexible 
 \section{Monetary Policy}
 \label{sec:monetary_policy}
 
-To close the model up, the central bank follows a Taylor Rule to set the nominal interest rate $i_t$:
+The central bank is assumed to follow a Taylor Rule to set the nominal interest rate $i_t$:
 
 \begin{equation}
     \label{eq:taylor_rule}
@@ -407,9 +406,9 @@ The second equality follows from the specification that the idiosyncratic shocks
 For the rigid case, $\lambda > 0$, we need to keep track of which subset of individuals are constrained.
 While I didn't write it explicitly in~\eqref{eq:value_function}, aggregate labor $L_t$ is a state variable.
 The simplifying assumptions we've made let us write a recursive equation for the distribution of wages, which we will use to get aggregate output.
-Our workers can be broken into three groups.
 
-The first group is those $(1 - \lambda)$ who are not constrained in the downward direction.
+Our workers can be broken into three groups:
+The first group is those $(1 - \lambda)$ individuals who are not constrained in the downward direction.
 Since the restriction on who is allowed to lower his wage is entirely independent of your current wage or how long you've had that wage, this group is dispersed equally over the range of wages.
 
 The second group is those who are not allowed to lower their wage, but draw an idiosyncratic shock such that they'd like to increase their wage anyway.
