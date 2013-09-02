@@ -68,7 +68,7 @@ def plot_wage_change_dist(df, pi, lambda_, nperiods=4, log=True, figkwargs=None,
                            label=['lag={}'.format(i) for i in diffs],
                            ax=ax, normed=True, **_axkwargs)
 
-    ax.set_title('Across Periods{0} $\pi={1}$, $\lambda={2}$'.format(
+    ax.set_title('Across Periods{0} $\pi={1:.3f}$, $\lambda={2:.3f}$'.format(
         strlog, pi, lambda_))
     ax.legend()
     return fig, ax
