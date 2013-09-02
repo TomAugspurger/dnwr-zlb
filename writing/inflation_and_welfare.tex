@@ -21,7 +21,7 @@
   {\Large\normalfont\scshape}{\thesection}{.5em}{}
 \titleformat{\subsection}
   {\normalfont\scshape}{\thesubsection}{.5em}{}
-\linespread{1}                                           % Default line spacing size
+\linespread{2}                                           % Default line spacing size
 % \usepackage{microtype}                                     % Improves spacing in the document
 % \usepackage{setspace}                                      % Set line spacing dynamically
 \usepackage{tocloft}                                       % List adjustments including ToC
@@ -38,7 +38,7 @@
 \usepackage{float}                                         % Allows putting an [H] in \begin{figure}
 \usepackage{wrapfig}                                       % Allows in-line images
 
-\usepackage[colorlinks=true, citecolor=blue]{hyperref}     % References
+\usepackage[ocgcolorlinks, colorlinks=true, citecolor=blue]{hyperref}     % References
 \usepackage{cleveref}                                      % Better References
 %\crefname{lstlisting}{listing}{listings}
 %\Crefname{lstlisting}{Listing}{Listings}
@@ -369,7 +369,7 @@ Figure~\ref{fig:wage_schedules} gives an example of several wage schedules, the 
 \end{center}
 %
 Notice how the rigid wage schedules are always below the flexible wage schedule.
-Apprehension of being unable to choose a lower wage in the future cause a lower wage choice today.
+Apprehension of being unable to choose a lower wage in the future causes a lower wage choice today.
 Also notice how higher inflation moves the wage schedule closer to the flexible case.
 
 
@@ -497,7 +497,7 @@ This is \ldots puzzling.
 The model does not expressly forbid higher rigidities leading to higher output;
 earlier we saw that those workers free to choose any wage chose one lower than they would have under the flexible case.
 This does lead to more hours worked by those workers.
-But the usual result (as in, say, \citep{daly_hobijn_2013}) is that this would offset but not overcome the loss of output due workers being stuck at too high a wage.
+But the usual result---as in, say, \cite{daly_hobijn_2013}---is that this would offset but not overcome the loss of output due workers being stuck at too high a wage.
 The only output level we have a closed form solution for is the flexible case, when $\lambda = 0$, which is given in \eqref{eq:output_flexible}.
 In my simulations, as $\lambda \rightarrow 0$, the output levels do converge to the flexible output level, modulo estimation and floating-point error.
 But the output level increases instead of decreases as the degree of wage rigidity increases.
@@ -505,9 +505,9 @@ I am still brooding over why this is so.
 
 \section{Conclusion}
 
-We used a simplified New Keynesian model whose interesting feature was idiosyncratic shocks to labor preference.
+I used a simplified New Keynesian model whose interesting feature was idiosyncratic shocks to labor preference.
 I found that output tended to be increasing in the degree of wage rigidity, though this ``claim'' rests on shaky ground.
-I also found that idiosyncratic shocks, combined with downward nominal wage rigidities, produced an asymmetrical distribution of wage changes.
+The combination of idiosyncratic shocks with downward nominal wage rigidities, produced an asymmetrical distribution of wage changes.
 
 
 \newpage
@@ -597,7 +597,7 @@ We obtain the histograms for steady-state wage changes by sampling a large numbe
 We can use the wage schedule and wage distribution to estimate \eqref{eq:output_rigid}.
 Finally, we ensure that the level of output implied by \eqref{eq:output_rigid} is consistent with the level of output we started with.
 
-See the documents described in \ref{sec:reproducability} for more information.
+See the documents described in Appendix \ref{sec:reproducability} for more information.
 
 \section{Reproducibility}
 \label{sec:reproducability}
