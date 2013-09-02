@@ -21,7 +21,7 @@
   {\Large\normalfont\scshape}{\thesection}{.5em}{}
 \titleformat{\subsection}
   {\normalfont\scshape}{\thesubsection}{.5em}{}
-\linespread{2}                                           % Default line spacing size
+% \linespread{1}                                           % Default line spacing size
 % \usepackage{microtype}                                     % Improves spacing in the document
 % \usepackage{setspace}                                      % Set line spacing dynamically
 \usepackage{tocloft}                                       % List adjustments including ToC
@@ -140,9 +140,10 @@ escapeinside={\%*}{*)}                                     % If you want to add 
 
 \begin{abstract}
 I use a simplified New Keynesian model to explore how downward nominal wage rigidities affect wage setting decisions.
-I find that wage rigidities distort the distribution of wage changes.
-Inflation helps to reduce some of the distortion.
-% Workers facing idiosyncratic shocks and wage rigidities .
+Like previous research I find that wage rigidities distort the distribution of wage changes:
+there are fewer wage cuts and more wage freezes than there would be if wages were flexible.
+I also find that inflation helps to reduce some of the distortion resulting from wage rigidity by realigning wages that are too high.
+Unlike previous research, I find that output is increasing in the degree of wage rigidity.
 
 \end{abstract}
 
@@ -194,10 +195,10 @@ However, if wages are rigid specifically in the downward direction, some of the 
 A wage that is ``too high'' can be brought back in line even without a nominal wage cut.
 
 I use a a relatively simple model closely following \cite{daly_hobijn_2013} to examine the consequences of downward nominal wage rigidities.
-I find the usual result that rigidities distort the distribution of wage changes, causing few wage cuts and a large spike of workers with no change in nominal wage.
-One interesting result from prior research on wage rigidities is that idiosyncratic shocks to labor are important for generating aggregate effects on output or employment.\footnote{
-This is stressed in \cite{elsby_2009}, \cite{benigno_ricci_2011}, and \cite{daly_hobijn_2013}.}
-\cite{daly_hobijn_2013} assert that ``models need to include heterogeneous shocks to the labor supply or productivity of workers. Such shocks are necessary to make nominal wage cuts desirable when the economy is in steady state.''
+Like them, I find the usual result that rigidities distort the distribution of wage changes, causing few wage cuts and a large spike of workers with no change in nominal wage.
+However, I am unable to reproduce their results on how downward nominal wage rigidities affect the steady-state level of output.
+They find what might be considered the more sensible result: that wage rigidities lower output, and inflation tends to offset some of that decline.
+I find that wage rigidities tend to increase output (though not necessarily monotonically).
 
 %----------------------------------------------------------------------------------------
 
@@ -388,7 +389,7 @@ It's assumed that the zero lower bound on nominal rates will never bind.
 \section{Equilibrium}
 \label{sec:equilibrium}
 
-With flexible wages, $\lambda = 0$, we can write the equilibrium level of output and employment in closed form.
+With flexible wages, $\lambda = 0$, the equilibrium level of output and employment can be written in closed form:
 
 \begin{equation}
     \label{eq:output_flexible}
@@ -403,13 +404,10 @@ where
 %
 The second equality follows from the specification that the idiosyncratic shocks $Z_t(i)$ are distributed lognoramlly.
 
-For the rigid case, $\lambda > 0$, we need to keep track of which subset of individuals are constrained.
-While I didn't write it explicitly in~\eqref{eq:value_function}, aggregate labor $L_t$ is a state variable.
-The simplifying assumptions we've made let us write a recursive equation for the distribution of wages, which we will use to get aggregate output.
-
-Our workers can be broken into three groups:
+For the rigid case, $\lambda > 0$, it matters which subset of individuals are constrained.
+The workers can be broken into three groups:
 The first group is those $(1 - \lambda)$ individuals who are not constrained in the downward direction.
-Since the restriction on who is allowed to lower his wage is entirely independent of your current wage or how long you've had that wage, this group is dispersed equally over the range of wages.
+Since the restriction on who is allowed to lower his wage is entirely independent of the individual's current wage or how long he's had that wage, this group is dispersed equally over the range of wages.
 
 The second group is those who are not allowed to lower their wage, but draw an idiosyncratic shock such that they'd like to increase their wage anyway.
 Due to the ``wage compression'' effect discussed earlier, where workers choose lower wages than in the flexible case, the workers in groups one and two may end up working more than they would if wages were completely flexible.
@@ -448,7 +446,7 @@ Comparing to the flexible-wage case given in \eqref{eq:output_flexible}, the dif
 Let's consider two limiting cases.
 First, as the degree of wage rigidity $\lambda$ goes to zero, only the first line of $Z_t^*$ is relevant.
 When wages are flexible, the ratio $\frac{\hat{w}_t(Z)}{w_t(Z)}$ is one, since the wage schedule will be the flexible wage schedule $\hat{w}_t(Z)$.  % Holy batman awkward.
-This leaves us with the definition of $Z_t$, and we're in the flexible case.
+This leaves us with the definition of $Z_t$, the flexible case.
 
 The other limiting case to consider is when inflation becomes large.
 This case illustrates how inflation undoes some of the downward nominal wage rigidity.
@@ -456,7 +454,7 @@ With higher inflation fewer workers end up with a \emph{real} wage that is too h
 As inflation becomes large, the cumulative distribution function $G_t(w (1 + \pi))$ becomes one very quickly;
 reflection on \eqref{eq:output_rigid} and \eqref{eq:z_star} shows how this leads to the flexible wage case.
 
-To derive \eqref{eq:output_rigid} we've used the assumption of perfect competition in the final good market, so that the real wage $\frac{W_t}{P_t}$ is one.
+The assumption of perfect competition in the final good market was used to derive \eqref{eq:output_rigid}.
 
 \subsection{Steady State}
 \label{sub:steady_state}
@@ -484,7 +482,7 @@ If we look at the change over, say, four periods, the distribution of change loo
 
 \subsection{Output}
 
-Contrary to previous results (cf. nearly everything written on the Phillips curve), I find that wage rigidities end up increasing output.
+Contrary to previous results, I find that wage rigidities are, for the most part, increasing in output.
 In figure \ref{fig:output} I've shown the steady-state level of output over the range of rigidities simulated at a handful of inflation levels.
 
 \begin{center}
@@ -492,15 +490,14 @@ In figure \ref{fig:output} I've shown the steady-state level of output over the 
   \label{fig:output}
 \end{center}
 
-This is \ldots puzzling.
+This is somewhat puzzling.
 The model does not expressly forbid higher rigidities leading to higher output;
-earlier we saw that those workers free to choose any wage chose one lower than they would have under the flexible case.
+earlier it was shown how those workers free to choose any wage chose one lower than they would have under the flexible case.
 This does lead to more hours worked by those workers.
 But the usual result---as in, say, \cite{daly_hobijn_2013}---is that this would offset but not overcome the loss of output due workers being stuck at too high a wage.
 The only output level we have a closed form solution for is the flexible case, when $\lambda = 0$, which is given in \eqref{eq:output_flexible}.
-In my simulations, as $\lambda \rightarrow 0$, the output levels do converge to the flexible output level, modulo estimation and floating-point error.
-But the output level increases instead of decreases as the degree of wage rigidity increases.
-I am still brooding over why this is so.
+In my simulations, as $\lambda$ converges to zero, the output levels do converge to the flexible output level, modulo estimation and floating-point error.
+But the output level is increasing instead of decreasing in the degree of wage rigidity.
 
 \section{Conclusion}
 
@@ -508,6 +505,11 @@ I used a simplified New Keynesian model whose interesting feature was idiosyncra
 I found that output tended to be increasing in the degree of wage rigidity, though this ``claim'' rests on shaky ground.
 The combination of idiosyncratic shocks with downward nominal wage rigidities, produced an asymmetrical distribution of wage changes.
 
+What I have shown thus far should have been an intermediate step to novel topics and results.
+It would, however, be unwise to continue down that path before understanding my contrarian results on output.
+
+An especially glaring omission is how the simulated distribution of wage changes compares to the actual distribution.
+That work has been started, but the analysis was not finished for this paper.
 
 \newpage
 \bibliographystyle{apa}
