@@ -30,8 +30,7 @@ def get_index(df):
     A bit of a wasteful, hackish way to get an index to use for the various
     lags.
     """
-    _, idx, _ = hist(df.diff(1).loc[30], bins='scott', alpha=.35,
-                     width=.0005)
+    _, idx, _ = hist(df.diff(1).loc[30], bins='scott', alpha=.35)
     return idx
 
 
