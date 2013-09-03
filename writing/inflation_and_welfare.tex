@@ -140,9 +140,9 @@ escapeinside={\%*}{*)}                                     % If you want to add 
 %----------------------------------------------------------------------------------------
 
 \begin{abstract}
-I use a simplified New Keynesian model to explore how downward nominal wage rigidities affect wage setting decisions.
+I use a simplified New Keynesian model to explore how downward nominal wage rigidities affect the economy.
 Like previous research I find that wage rigidities distort the distribution of wage changes:
-there are fewer wage cuts and more wage freezes than there would be if wages were flexible.
+there are fewer wage cuts and more wage freezes than if wages were flexible.
 I also find that inflation helps to reduce some of the distortion resulting from wage rigidity by realigning wages that are too high.
 Unlike previous research, I find that output is increasing in the degree of wage rigidity.
 
@@ -192,7 +192,7 @@ Finally, the wage changes tend to clump around the expected rate of inflation, w
 
 I will take the existence of downward nominal wage rigidity as given.
 And for the most part I will ignore the reasons for that wage rigidity.
-Instead, focus is placed on the consequences of downward wage rigidities.\footnote{
+Instead, focus is placed on the consequences of downward nominal wage rigidities.\footnote{
     I should note that the evidence, causes, and consequences of wage rigidities may not be as separate as I make them out to be.
     For example, downward wage rigidities caused by fear of productivity loss following a wage cut might suggest a different modeling strategy than if the rigidities are caused by long-duration wage contracts.
     A different model could easily lead to different conclusions about the consequences and policy recommendations.
@@ -251,7 +251,7 @@ and where $w_{it}$ is the real wage charged by individual $i$.
 Perfect competition implies that the aggregate price level must equal the aggregate wage index, $P_t = W_t$.  This implies that the real aggregate wage index is always equal to one and so
 %
 \begin{equation} \label{eq:real_wage}
-    1 = \frac{W_t}{P_t} = \left[\int_{0}^{1} \left( \frac{P_t}{W_t(i)} \right)^{\eta - 1} \mathrm{d}i \right]^{-\frac{1}{\eta - 1} }\!\!\!\! = \ \left[\int_{0}^{1} \! w_{it}^{1 - \eta} \mathrm{d}i \right]^{ \frac{1}{1 - \eta} }.
+    1 = \frac{W_t}{P_t} = \left[\int_{0}^{1} \left( \frac{W_t(i)}{P_t} \right)^{1 - \eta} \mathrm{d}i \right]^{\frac{1}{1 - \eta} }\!\!\!\! = \ \left[\int_{0}^{1} \! w_{it}^{1 - \eta} \mathrm{d}i \right]^{ \frac{1}{1 - \eta} }.
 \end{equation}
 %
 We'll use \eqref{eq:real_wage} when solving for steady-state output;  the assumption of perfect competition, which is used to derive \eqref{eq:real_wage}, eases solving for steady-state output.
@@ -362,7 +362,7 @@ This effect tends to dampen the wage increases chosen by the $(1 - \lambda)$ unr
 Figure~\ref{fig:wage_schedules} gives an example of several wage schedules, the flexible wage schedule $\hat{w}_t(Z)$ and two rigid wage schedules for two levels of inflation.
 
 \begin{center}
-  \noindent \includegraphics[width=\linewidth]{wage_schedule_flex_rigid.pdf}  % TODO: Label your axes.
+  \noindent \includegraphics[width=\linewidth]{wage_schedule_flex_rigid.pdf}
   \label{fig:wage_schedules}
 \end{center}
 %
@@ -441,6 +441,7 @@ where
 \end{equation}
 %
 where $g_t(\cdot)$ is the desnsity of $G_t(\cdot)$.
+The three lines in \eqref{eq:z_star} correspond to the three groups of individuals: the unrestricted, the restricted who are increasing their wage, and the restricted who would like to lower their wage but cannot.
 
 Comparing to the flexible-wage case given in \eqref{eq:output_flexible}, the difference is in $Z_t$ and $Z_t^*$.
 Let's consider two limiting cases.
@@ -454,8 +455,8 @@ With higher inflation fewer individauls end up with a \emph{real} wage that is t
 As inflation becomes large, the cumulative distribution function $G_t(w (1 + \pi))$ becomes one very quickly;
 reflection on \eqref{eq:output_rigid} and \eqref{eq:z_star} shows how this leads to the flexible wage case.
 
-\subsection{Steady State}
-\label{sub:steady_state}
+\subsection{Steady State: Distribution of Changes}
+\label{sub:steady_state_distribution_of_changes}
 
 One comparison to be made between the flexible and rigid cases is the distribution of wage changes.
 Under the flexible case, log normality of the idiosyncratic shocks implies that log wage changes should be normally distributed with a mean equal to the quarterly inflation rate.
@@ -478,7 +479,8 @@ If we look at the change over, say, four periods the distribution of wage change
 \end{center}
 
 
-\subsection{Output}
+\subsection{Steady State: Output}
+\label{sub:steady_state_output}
 
 Contrary to previous results, I find that wage rigidities are, for the most part, increasing in output.
 In Figure~\ref{fig:output} I've shown the steady-state level of output over the range of rigidities simulated at a handful of target inflation levels.
@@ -493,7 +495,7 @@ The model does not expressly forbid higher rigidities leading to higher output;
 earlier it was shown how those individuals free to choose any wage chose one lower than they would have under the flexible case.
 This does lead to more hours worked by those individuals.
 But the usual result---as in, say, \cite{daly_hobijn_2013}---is that this would offset but not overcome the loss of output due individuals being stuck at too high a wage.
-The only output level we have a closed form solution for is the flexible case, when $\lambda = 0$, which is given in \eqref{eq:output_flexible}.
+The only output level we have a closed-form solution for is the flexible case, when $\lambda = 0$, which is given in \eqref{eq:output_flexible}.
 In my simulations, as $\lambda$ converges to zero, the output levels do converge to the flexible output level, modulo approximation and floating-point error.
 But the output level is increasing instead of decreasing in the degree of wage rigidity.
 
