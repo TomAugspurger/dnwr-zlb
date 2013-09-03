@@ -1,0 +1,332 @@
+%----------------------------------------------------------------------------------------
+%    PAGE ADJUSTMENTS
+%----------------------------------------------------------------------------------------
+
+\documentclass[12pt,a4paper]{scrartcl}            % Article 12pt font for a4 paper while hiding links
+\usepackage[margin=1.25in]{geometry}                          % Required to adjust margins
+
+%----------------------------------------------------------------------------------------
+%    TYPE SETTING PACKAGES
+%----------------------------------------------------------------------------------------
+
+\usepackage[english]{babel}                                % English language/hyphenation
+\usepackage[utf8x]{inputenc}                               % Accept different input encodings
+\usepackage{amsmath,amsfonts,amsthm,amssymb}               % Math packages to use equations
+\usepackage{siunitx}                                       % Scientific units and numbering
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}    % Set color of text/background
+\usepackage{titlesec}
+\usepackage{datetime}
+
+\titleformat{\section}
+  {\Large\normalfont\scshape}{\thesection}{.5em}{}
+\titleformat{\subsection}
+  {\normalfont\scshape}{\thesubsection}{.5em}{}
+\linespread{2}                                           % Default line spacing size
+% \usepackage{microtype}                                     % Improves spacing in the document
+% \usepackage{setspace}                                      % Set line spacing dynamically
+\usepackage{tocloft}                                       % List adjustments including ToC
+\DeclareMathOperator*{\argmin}{arg\!\min}
+\definecolor{purple}{HTML}{7A68A6}
+\definecolor{blue}{HTML}{2020A1}
+\definecolor{red}{HTML}{A60628}
+%----------------------------------------------------------------------------------------
+%    FIGURES
+%----------------------------------------------------------------------------------------
+
+\usepackage{graphicx}                                      % Required for the inclusion of images
+\graphicspath{{../model/figures/}}                          % Specifies picture directory
+\usepackage{float}                                         % Allows putting an [H] in \begin{figure}
+\usepackage{wrapfig}                                       % Allows in-line images
+
+\usepackage[colorlinks=true, citecolor=blue, ocgcolorlinks]{hyperref}     % References
+\usepackage{cleveref}                                      % Better References
+%\crefname{lstlisting}{listing}{listings}
+%\Crefname{lstlisting}{Listing}{Listings}
+\crefname{figure}{figure}{figures}
+\Crefname{figure}{Figure}{Figures}
+
+%----------------------------------------------------------------------------------------
+%    INCLUDE CODE
+%----------------------------------------------------------------------------------------
+
+\usepackage{listings}                                      % Package so code looks pretty
+\lstset{
+language=Python,                                           % Choose the language
+basicstyle=\footnotesize,                                  % The size of the fonts used
+numbers=left,                                              % Where to put the line-numbers
+numberstyle=\footnotesize,                                 % The size of the line-numbers
+stepnumber=1,                                              % The step line-numbers
+numbersep=5pt,                                             % How far the line-numbers are from the code
+backgroundcolor=\color{white},                             % Choose the background color
+showspaces=false,                                          % Show spaces adding partiular underscores
+showstringspaces=false,                                    % Underline spaces within strings
+showtabs=false,                                            % Show tabs within strings adding particular underscores
+frame=single,                                              % Adds a frame around the code
+tabsize=2,                                                 % Sets default tabsize to 2 spaces
+captionpos=b,                                              % Sets the caption-position to bottom
+breaklines=true,                                           % Sets automatic line breaking
+breakatwhitespace=false,                                   % Sets if automatic breaks should only happen at whitespace
+escapeinside={\%*}{*)}                                     % If you want to add a comment within your code
+}
+
+\usepackage[T1]{fontenc}
+% \usepackage{inconsolata}
+
+
+%----------------------------------------------------------------------------------------
+%    EXTRAS
+%----------------------------------------------------------------------------------------
+
+% \usepackage{attachfile}                                    % Attach files to your document
+% \usepackage{fancyhdr}                                      % Fancy Header
+\usepackage{natbib}
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%    COMMANDS
+%----------------------------------------------------------------------------------------
+
+% \renewcommand*\thesection{\arabic{section}}                % Renew section numbers
+% \renewcommand{\labelenumi}{\alph{enumi}.}                  % Section ordered numbering
+% \let\oldvec\vec                                            % Save the old vector style
+% \renewcommand{\vec}[1]{\oldvec{\mathbf{#1}}}               % Set vectors to look like vectors
+
+% \renewcommand{\contentsname}{Table of Contents}            % Make ToC actually say ToC
+% \addtocontents{toc}{~\hfill\textbf{Page}\par}              % Add 'page' to top of ToC
+% \renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}      % Makes dots leading up to page number
+% \setcounter{tocdepth}{3}                                   % Depth of ToC
+% \setcounter{lofdepth}{3}                                   % Depth of LoF
+
+% \pagestyle{plain}                                          % Fancy page style for headers
+% \setlength{\headheight}{15pt}                              % Change header hieght
+% \fancyhead[L,LO]{\fontsize{8}{10} \selectfont \firstmark}  % Adds header to left with section name
+% \fancyhead[R,RO]{\fontsize{8}{10} \selectfont Right}       % Adds header to right
+\definecolor{grey}{HTML}{cccccc}                           % The next 4 lines modifies the header (color)
+% \renewcommand{\headrulewidth}{1px}
+% \renewcommand{\headrule}{{\color{grey}%
+% \hrule width\headwidth height\headrulewidth%
+% \vskip-\headrulewidth}}
+
+\numberwithin{equation}{section}                           % Number equations within sections
+\numberwithin{figure}{section}                             % Number figures within sections
+\numberwithin{table}{section}                              % Number tables within sections
+\numberwithin{lstlisting}{section}                         % Number listings within sections
+
+% \renewcommand{\sfdefault}{phv}                             % Change default font
+% \renewcommand{\familydefault}{\sfdefault}                  % Use default font everywhere
+\newcommand{\Lagr}{\mathcal{L}}
+\newcommand{\tvect}[2]{%
+  \ensuremath{\Bigl(\negthinspace\begin{smallmatrix}#1\\#2\end{smallmatrix}\Bigr)}}
+
+\makeatletter
+\def\blfootnote{\xdef\@thefnmark{}\@footnotetext}
+\makeatother
+
+\newdateformat{monthYear}{\monthname[\THEMONTH] \THEYEAR}
+
+%----------------------------------------------------------------------------------------
+%    TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+% \begin{titlepage}
+\title{Seminar Results Section}
+\author{Tom Augspurger}                               % via Seth Miers
+\date{\monthYear\today}
+\maketitle
+%----------------------------------------------------------------------------------------
+%    CONTENT
+%----------------------------------------------------------------------------------------
+
+\section{Setup}
+
+We're looking at model with idiosyncratic shocks to labor preference and downward nominal wage rigidities.
+There's a single final good producer that is perfectly competitive.
+From him we get labor demand curves
+
+\begin{equation}
+    \label{eq:labor_demand}
+    L_t(i) = \left( \frac{W_t(i)}{W_t} \right)^{-\eta}L_t = (w_{it})^{-\eta}L_t.
+\end{equation}
+%
+where $L_t$ is aggregate labor, $W_t(i)$ is an individual's wage, $L_t(i)$ is an individual's labor, $W_t$ is the usual Dixit-Stiglitz price index and $w_{it}$ is the individual's real wage.
+
+There's a single household made up of a continuum of individuals.  They maximize
+
+\begin{equation} \label{eq:utility}
+    \sum_{t=0}^{\infty} \beta^t \left\{\ln Y_t - \frac{\gamma}{\gamma + 1} \int_{0}^{1} Z_t(i)L_t(i)^{\frac{\gamma + 1}{\gamma}}\mathrm{d}i\right\}
+\end{equation}
+
+where $Z_t(i)$ are the idiosyncratic shocks and everything else is standard.
+They maximize subject to the usual constraints and each period a measure $(1 - \lambda)$ of individuals are not allowed to \emph{lower} their wage.
+
+\section{Wage Setting}
+\label{sub:wage_setting}
+
+As a point of comparison for the rigid case, we'll start with perfect wage flexibility~$(\lambda = 0)$.
+The optimal real wage schedule as a function of your idiosyncratic shock and aggregate output is:
+
+\begin{equation}
+    \label{eq:flex}
+    \hat{w}(Z_t(i); L_t) = \hat{w}_{it} = \left( \frac{\eta}{\eta - 1} \right)^{\frac{\gamma}{\eta + \gamma}}\left( Z_t(i) \right)^{\frac{\gamma}{\eta + \gamma}} L_t^{\frac{\gamma + 1}{\gamma + \eta}}.
+\end{equation}
+%
+We will use this schedule when solving for equilibrium output.
+% Consider going straight into equilibrium then looping back around to rigid case.
+
+For the rigid case, $\lambda > 0$, our approach is slightly different.
+Each day, our individual wakes up with his wage from yesterday.
+He receives a labor preference shock, $Z_t(i)$, and finds out whether he is allowed to choose any nominal wage, or just a wage greater than or equal to yesterday's.
+He then chooses a wage to optimize today's utility plus the discounted expected future value of holding that wage.
+This can be written as a value function where the state variable is the real wage $w$.  $\Omega(\cdot; \cdot, \cdot)$ just represents the labor related term's of the individual's problem.
+
+\begin{multline}
+    \label{eq:value_function}
+    V_t(w) = (1 - \lambda) \int_{0}^{\infty} \max_{w_{it} \geq 0} \left\{ \Omega( w_t(i); Z_t(i), L_t ) + \beta V_{t+1}\left( \frac{w_{it}}{(1 + \pi_{t+1})} \right) \right\} \mathrm{d}F(Z_t(i)) \\
+                + \lambda  \int_{0}^{\infty} \max_{w_{it} \geq w} \left\{ \Omega( w_t(i); Z_t(i), L_t ) + \beta V_{t+1}\left( \frac{w_{it}}{(1 + \pi_{t+1})} \right) \right\} \mathrm{d}F(Z_t(i))
+\end{multline}
+
+$F(\cdot)$ is the distribution of idiosyncratic shocks across individuals and $\pi_{t+1}$ is the inflation rate from time $t$ to $t+1$.
+The value function gives us two useful functions: the (rigid) wage schedule $w_t(Z)$ and its inverse, the shock schedule $Z_t(w)$.
+The wage schedule tells us what wage an unconstrained worker---one of the $(1 - \lambda)$---chooses when his idiosyncratic shock is $Z_t$.
+We can show that $w_t(\cdot)$ is strictly increasing, and solve for its inverse $Z_t(w)$.
+
+One thing to note: downward nominal wage rigidities clearly affect workers who fall into the second line of \eqref{eq:value_function}, those who can't lower their wage below $w$.
+But the workers on the first line are also affected.
+If a worker received a high shock and followed the \emph{flexible} wage schedule $\hat{w}(Z_t(i))$ they would choose a relatively high wage.
+While that might be a good thing for today, it would ignore the possibility of receiving a low shock tomorrow, but not being able to lower the wage due to wage rigidity.
+This effect tends to dampen the wage increases chosen by the $(1 - \lambda)$ unrestricted workers.
+\cite{elsby_2009} investigates the importance of wage rigidity with an emphasis on this ``wage compression''.
+Figure~\ref{fig:wage_schedules} gives an example of several wage schedules, the flexible wage schedule $\hat{w}_t(Z)$ and two rigid wage schedules for two levels of inflation.
+
+\begin{center}
+  \noindent \includegraphics[width=\linewidth]{wage_schedule_flex_rigid.pdf}  % TODO: Label your axes.
+  \label{fig:wage_schedules}
+\end{center}
+%
+Notice how the rigid wage schedules are always below the flexible wage schedule.
+Apprehension of being unable to choose a lower wage in the future causes a lower wage choice today.
+Also notice how higher inflation moves the wage schedule closer to the flexible case.
+
+\section{Equilibrium}
+\label{sec:equilibrium}
+
+With flexible wages, $\lambda = 0$, we can write the equilibrium level of output and employment in closed form.
+
+\begin{equation}
+    \label{eq:output_flexible}
+    Y_t = L_t = \left( \frac{\eta - 1}{\eta} \right)^{\frac{\gamma}{1 + \gamma}} \left( \frac{1}{Z_t} \right)^{\frac{\gamma}{1 + \gamma}}
+\end{equation}
+%
+where
+
+\begin{equation}
+    Z_t = \left( \int_{0}^{1}\! \left( \frac{1}{Z_t(i)} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \mathrm{d}i \right)^{-\frac{\eta + \gamma}{\gamma(\eta - 1)}} \!\!\! = e^{-\frac{1}{2} \frac{\eta(1 + \gamma)}{\gamma + \eta}\sigma^2 }.
+\end{equation}
+%
+The second equality follows from the specification that the idiosyncratic shocks $Z_t(i)$ are distributed lognoramlly.
+
+For the rigid case, $\lambda > 0$, we need to keep track of which subset of individuals are constrained.
+
+The first group is those $(1 - \lambda)$ who are not constrained in the downward direction.
+Since the restriction on who is allowed to lower his wage is entirely independent of your current wage or how long you've had that wage, this group is dispersed equally over the range of wages.
+
+The second group is those who are not allowed to lower their wage, but draw an idiosyncratic shock such that they'd like to increase their wage anyway.
+
+Finally, the third group is those who would like to lower their wage, but are not allowed to.
+This group will work fewer hours than they would under the flexible case.
+
+Using $G_t(w)$ to denote the cumulative distribution function of wages at time $t$, we can write the distribution of wages recursively:
+
+\begin{equation}
+    \label{eq:wage_distribution}
+    G_t(w) = (1 - \lambda) F(z_t(w)) + \lambda G_{t-1}\left(w[1 + \pi_t]\right)F(z_t(w))
+\end{equation}
+
+With the distribution of wages in hand, we can solve for the output level with wage rigidity:
+
+\begin{equation}
+    \label{eq:output_rigid}
+    Y_t = L_t = \left(\frac{\eta - 1}{\eta} \right)^{\frac{\gamma}{1 + \gamma}}\left( \frac{1}{Z_t^*} \right)^{\frac{\gamma}{1 + \gamma}}
+\end{equation}
+%
+where
+
+\begin{equation}
+    \label{eq:z_star}
+    \begin{split}
+    Z_t^* &= \Big\{(1 - \lambda) \int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left( \frac{\hat{w}_t(Z)}{w_t(Z)} \right)^{\eta - 1}\ \mathrm{d}F(Z) \\
+          &+            \lambda  \int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left( \frac{\hat{w}_t(Z)}{w_t(Z)} \right)^{\eta - 1} G_{t-1}\left( w_t(Z)[1 + \pi_t] \right)                                                     \ \mathrm{d}F(Z)\\
+          &+            \lambda  \int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left[ \int_{w_t(Z)}^{\infty} (1 + \pi_t)g_{t-1}\left( w[1 + \pi_t] \right) \left( \frac{\hat{w}_t(Z)}{w} \right)^{\eta - 1}\ \mathrm{d}w \right] \mathrm{d}F(Z)
+            \Big\}^{-\frac{\eta + \gamma}{\gamma(\eta - 1)}}
+    \end{split}
+\end{equation}
+
+Comparing to the flexible-wage case given in \eqref{eq:output_flexible}, the difference is in $Z_t$ and $Z_t^*$.
+Let's consider two limiting cases.
+First, as the degree of wage rigidity $\lambda$ goes to zero, only the first line of $Z_t^*$ is relevant.
+When wages are flexible, the ratio $\frac{\hat{w}_t(Z)}{w_t(Z)}$ is one, since the wage schedule will be the flexible wage schedule $\hat{w}_t(Z)$.  % Holy batman awkward.
+This leaves us with the definition of $Z_t$, and we're in the flexible case.
+
+The other limiting case to consider is when inflation becomes large.
+This case illustrates how inflation undoes some of the downward nominal wage rigidity.
+With higher inflation fewer workers end up with a \emph{real} wage that is too high.
+As inflation becomes large, the cumulative distribution function $G_t(w (1 + \pi))$ becomes one very quickly;
+reflection on \eqref{eq:output_rigid} and \eqref{eq:z_star} shows how this leads to the flexible wage case.
+
+To derive \eqref{eq:output_rigid} we've used the assumption of perfect competition in the final good market, so that the real wage $\frac{W_t}{P_t}$ is one.
+
+We're looking at model with idiosyncratic shocks to labor preference and downward nominal wage rigidities.
+There's a single final good producer that is perfectly competitive.
+From him we get labor demand curves
+
+\section{Steady State}
+\label{sub:steady_state}
+
+One comparison to be made between the flexible and rigid cases is the distribution of wage changes.
+Under the flexible case, log normality of the idiosyncratic shocks implies that log wage changes should be normally distributed with a mean equal to the quarterly inflation rate.
+With rigid wages, however, a different picture emerges.
+The most prominent change is a higher spike at zero, no wage change.
+This spike is taking mass from either side: there are fewer wage decreases \emph{and} fewer wage increases.
+But the two tails are not sliced from equally.
+The distribution is now asymmetric with fewer wage decreases than increases.
+
+\begin{center}
+  \includegraphics[width=\linewidth]{pi0x005lambda0x452631578947_2_True.pdf}
+  \label{fig:dist_2_periods}
+\end{center}
+
+If we look at the change over, say, four periods, the distribution of change looks more normal.
+
+\begin{center}
+  \includegraphics[width=\linewidth]{pi0x005lambda0x452631578947_4_True.pdf}
+  \label{fig:dist_4_periods}
+\end{center}
+
+\section{Output}
+
+Contrary to previous results (cf. nearly everything written on the Phillips curve), I find that wage rigidities end up increasing output.
+In figure \ref{fig:output} I've shown the steady-state level of output over the range of rigidities simulated at a handful of inflation levels.
+
+\begin{center}
+  \includegraphics[width=\linewidth]{output_subsection.pdf}
+  \label{fig:output}
+\end{center}
+
+This is \ldots puzzling.
+The model does not expressly forbid higher rigidities leading to higher output;
+earlier we saw that those workers free to choose any wage chose one lower than they would have under the flexible case.
+This does lead to more hours worked by those workers.
+But the usual result---as in, say, \cite{daly_hobijn_2013}---is that this would offset but not overcome the loss of output due workers being stuck at too high a wage.
+The only output level we have a closed form solution for is the flexible case, when $\lambda = 0$, which is given in \eqref{eq:output_flexible}.
+In my simulations, as $\lambda \rightarrow 0$, the output levels do converge to the flexible output level, modulo estimation and floating-point error.
+But the output level increases instead of decreases as the degree of wage rigidity increases.
+I am still brooding over why this is so.
+
+\section{Conclusion}
+
+I used a simplified New Keynesian model whose interesting feature was idiosyncratic shocks to labor preference.
+I found that output tended to be increasing in the degree of wage rigidity, though this ``claim'' rests on shaky ground.
+The combination of idiosyncratic shocks with downward nominal wage rigidities, produced an asymmetrical distribution of wage changes.
+
+\end{document}
