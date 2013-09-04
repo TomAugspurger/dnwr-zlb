@@ -22,7 +22,7 @@ np.random.seed(42)
 def u_(wage, shock=1, eta=2.5, gamma=0.5, aggL=0.85049063822172699):
     utility = (wage ** (1 - eta) -
               ((gamma / (gamma + 1)) * shock *
-              (wage ** (-eta) * aggL) ** ((gamma + 1) / gamma)))
+               (wage ** (-eta) * aggL) ** ((gamma + 1) / gamma)))
     return utility
 
 #-----------------------------------------------------------------------------
@@ -165,7 +165,7 @@ def get_rigid_output(ws, params, flex_ws, g):
     # so output is increasing in p1 + p2
     def z_part(p1, p2, p3):
         z_t = ((1 - lambda_) * p1 +
-                lambda_ * (p2 + p3))**(-(eta + gamma) / (gamma * (eta - 1)))
+               lambda_ * (p2 + p3))**(-(eta + gamma) / (gamma * (eta - 1)))
         return z_t
 
     def output(z_t):
@@ -188,7 +188,7 @@ def iter_bellman(v, tol=1e-3, maxiter=1000, strict=True, log=True, **kwargs):
         Tv, ws, rest = bellman(v, params, **kwargs)
         e = np.max(np.abs(Tv.Y - v.Y))
         print("At iteration {} the error is {} for pi={}, lambda={}.".format(i,
-            e, pi, lambda_))
+              e, pi, lambda_))
         if e < tol:
             if log:
                 return Tv, ws, rest, vfs, wss, rests, ws
