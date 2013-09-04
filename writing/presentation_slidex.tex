@@ -6,7 +6,11 @@
 \usepackage{graphicx}                                      % Required for the inclusion of images
 \graphicspath{{../model/figures/}}                          % Specifies picture directory
 
-\usetheme{CambridgeUS}
+\renewcommand\familydefault{\sfdefault}  % So that there's no serif / sans-serif mixing
+\DeclareMathAlphabet      {\mathup}{OT1}{\familydefault}{m}{n}
+
+
+% \usetheme{CambridgeUS}
 
 % \usepackage{beamerthemesplit} // Activate for custom appearance
 
@@ -21,7 +25,11 @@
 
 \begin{frame}[t]\frametitle{Motivation}
 
+    Understand inflation in recessions
 
+    Wage rigidities
+
+    Idiosyncratic shocks
 
 \end{frame}
 
@@ -33,7 +41,7 @@
 
 \begin{frame}[t]\frametitle{Model Overview}
 
-Perfectly Competitive of only good
+One good, produced in perfectly competitive market
 
 Single household with continuum of individuals
 
@@ -46,7 +54,7 @@ Subject to downward wage rigidity
 \begin{frame}[t]\frametitle{Production}
 
 \begin{equation*} \label{eq:agg_labor}
-    Y_t = L_t = \left[ \int_0^1 L_t(i)^{\frac{\eta - 1}{\eta}} \mathrm{d}i \right]^{\frac{\eta}{\eta - 1}}
+    Y_t = L_t = \left[ \int_0^1 L_t(i)^{\frac{\eta - 1}{\eta}} \mathup{d}i \right]^{\frac{\eta}{\eta - 1}}
 \end{equation*}
 
 Maximization problem yields
@@ -59,12 +67,12 @@ Maximization problem yields
 with
 
 \begin{equation*} \label{eq:wage_index}
-    W_t = \left[\int_{0}^{1}\left(\frac{1}{W_t(i)}\right)^{\eta - 1} \mathrm{d}i \right]^{-\frac{1}{\eta - 1}}
+    W_t = \left[\int_{0}^{1}\left(\frac{1}{W_t(i)}\right)^{\eta - 1} \mathup{d}i \right]^{-\frac{1}{\eta - 1}}
 \end{equation*}
 
-\begin{equation*} \label{eq:real_wage}
-    1 = \frac{W_t}{P_t} = \left[\int_{0}^{1} \left( \frac{W_t(i)}{P_t} \right)^{1 - \eta} \mathrm{d}i \right]^{\frac{1}{1 - \eta} }\!\!\!\! = \ \left[\int_{0}^{1} \! w_{it}^{1 - \eta} \mathrm{d}i \right]^{ \frac{1}{1 - \eta} }.
-\end{equation*}
+% \begin{equation*} \label{eq:real_wage}
+%     1 = \frac{W_t}{P_t} = \left[\int_{0}^{1} \left( \frac{W_t(i)}{P_t} \right)^{1 - \eta} \mathup{d}i \right]^{\frac{1}{1 - \eta} }\!\!\!\! = \ \left[\int_{0}^{1} \! w_{it}^{1 - \eta} \mathup{d}i \right]^{ \frac{1}{1 - \eta} }.
+% \end{equation*}
 
 
 \end{frame}
@@ -72,14 +80,14 @@ with
 \begin{frame}[t]\frametitle{Household}
 
     \begin{equation*} \label{eq:utility}
-        \sum_{t=0}^{\infty} \beta^t \left\{\ln Y_t - \frac{\gamma}{\gamma + 1} \int_{0}^{1} Z_t(i)L_t(i)^{\frac{\gamma + 1}{\gamma}}\mathrm{d}i\right\}
+        \sum_{t=0}^{\infty} \beta^t \left\{\ln Y_t - \frac{\gamma}{\gamma + 1} \int_{0}^{1} Z_t(i)L_t(i)^{\frac{\gamma + 1}{\gamma}}\mathup{d}i\right\}
     \end{equation*}
 
     subject to
 
     \begin{equation*}
         \label{eq:budget}
-        P_t Y_t + A_t = \left(1 + i_{t-1}\right)A_{t-1} + \int_{0}^{1}\! W_t(i)L_t(i)\mathrm{d}i
+        P_t Y_t + A_t = \left(1 + i_{t-1}\right)A_{t-1} + \int_{0}^{1}\! W_t(i)L_t(i)\mathup{d}i
     \end{equation*}
 
 \end{frame}
@@ -101,8 +109,8 @@ with
 
     \begin{multline}
         \label{eq:value_function}
-        V_t(w) = (1 - \lambda) \int_{0}^{\infty} \max_{w_{it} \geq 0} \left\{ \Omega( w_t(i); Z_t(i), L_t ) + \beta V_{t+1}\left( \frac{w_{it}}{(1 + \pi_{t+1})} \right) \right\} \mathrm{d}F(Z_t(i)) \\
-                    + \lambda  \int_{0}^{\infty} \max_{w_{it} \geq w} \left\{ \Omega( w_t(i); Z_t(i), L_t ) + \beta V_{t+1}\left( \frac{w_{it}}{(1 + \pi_{t+1})} \right) \right\} \mathrm{d}F(Z_t(i))
+        V_t(w) = (1 - \lambda) \int_{0}^{\infty} \max_{w_{it} \geq 0} \left\{ \Omega( w_t(i); Z_t(i), L_t ) + \beta V_{t+1}\left( \frac{w_{it}}{(1 + \pi_{t+1})} \right) \right\} \mathup{d}F(Z_t(i)) \\
+                    + \lambda  \int_{0}^{\infty} \max_{w_{it} \geq w} \left\{ \Omega( w_t(i); Z_t(i), L_t ) + \beta V_{t+1}\left( \frac{w_{it}}{(1 + \pi_{t+1})} \right) \right\} \mathup{d}F(Z_t(i))
     \end{multline}
 
 
@@ -138,7 +146,7 @@ with
     where
 
     \begin{equation*}
-        Z_t = \left( \int_{0}^{1}\! \left( \frac{1}{Z_t(i)} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \mathrm{d}i \right)^{-\frac{\eta + \gamma}{\gamma(\eta - 1)}} \!\!\! = e^{-\frac{1}{2} \frac{\eta(1 + \gamma)}{\gamma + \eta}\sigma^2 }.
+        Z_t = \left( \int_{0}^{1}\! \left( \frac{1}{Z_t(i)} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \mathup{d}i \right)^{-\frac{\eta + \gamma}{\gamma(\eta - 1)}} \!\!\! = e^{-\frac{1}{2} \frac{\eta(1 + \gamma)}{\gamma + \eta}\sigma^2 }.
     \end{equation*}
 
 
@@ -156,9 +164,9 @@ with
     \begin{equation*}
         \label{eq:z_star}
         \begin{split}
-        Z_t^* &= \Big\{(1 - \lambda) \int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left( \frac{\hat{w}_t(Z)}{w_t(Z)} \right)^{\eta - 1}\ \mathrm{d}F(Z) \\
-              &+            \lambda  \int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left( \frac{\hat{w}_t(Z)}{w_t(Z)} \right)^{\eta - 1} G_{t-1}\left( w_t(Z)[1 + \pi_t] \right)                                                     \ \mathrm{d}F(Z)\\
-              &+            \lambda  \int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left[ \int_{w_t(Z)}^{\infty} (1 + \pi_t)g_{t-1}\left( w[1 + \pi_t] \right) \left( \frac{\hat{w}_t(Z)}{w} \right)^{\eta - 1}\ \mathrm{d}w \right] \mathrm{d}F(Z)
+        Z_t^* &= \Big\{(1 - \lambda) \int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left( \frac{\hat{w}_t(Z)}{w_t(Z)} \right)^{\eta - 1}\ \mathup{d}F(Z) \\
+              &+            \lambda  \int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left( \frac{\hat{w}_t(Z)}{w_t(Z)} \right)^{\eta - 1} G_{t-1}\left( w_t(Z)[1 + \pi_t] \right)                                                     \ \mathup{d}F(Z)\\
+              &+            \lambda  \int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left[ \int_{w_t(Z)}^{\infty} (1 + \pi_t)g_{t-1}\left( w[1 + \pi_t] \right) \left( \frac{\hat{w}_t(Z)}{w} \right)^{\eta - 1}\ \mathup{d}w \right] \mathup{d}F(Z)
                 \Big\}^{-\frac{\eta + \gamma}{\gamma(\eta - 1)}}
         \end{split}
     \end{equation*}
