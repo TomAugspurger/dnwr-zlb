@@ -90,6 +90,10 @@ with
         P_t Y_t + A_t = \left(1 + i_{t-1}\right)A_{t-1} + \int_{0}^{1}\! W_t(i)L_t(i)\mathup{d}i
     \end{equation*}
 
+Shocks distributed lognormally with $E(Z) = 1$
+
+$\lambda$: degree of wage rigidity; probability you can't change wage
+
 \end{frame}
 
 
@@ -97,7 +101,7 @@ with
 
     \begin{equation*}
         \label{eq:flex}
-        \hat{w}(Z_t(i); L_t) = \hat{w}_{it} = \left( \frac{\eta}{\eta - 1} \right)^{\frac{\gamma}{\eta + \gamma}}\left( Z_t(i) \right)^{\frac{\gamma}{\eta + \gamma}} L_t^{\frac{\gamma + 1}{\gamma + \eta}}.
+        \hat{w}(Z_t(i); L_t) = \hat{w}_{it} = \left( \frac{\eta}{\eta - 1} \right)^{\frac{\gamma}{\eta + \gamma}}\left( Z_t(i) \right)^{\frac{\gamma}{\eta + \gamma}} L_t^{\frac{\gamma + 1}{\gamma + \eta}}
     \end{equation*}
 
 
@@ -106,12 +110,19 @@ with
 
 
 \begin{frame}[t]\frametitle{Wage Setting: Rigid}
+\fontsize{9pt}{12}\selectfont
 
-    \begin{multline}
+    \begin{equation*}
+        \label{eq:labor_part}
+        \Omega( w_t(i); Z_t(i), L_t ) = w_{it}^{1 - \eta} - \frac{\gamma}{\gamma + 1}Z_t(i)\left[ w_{it}^{-\eta}L_t \right]^{\frac{\gamma}{1 + \gamma}}
+    \end{equation*}
+
+
+    \begin{multline*}
         \label{eq:value_function}
         V_t(w) = (1 - \lambda) \int_{0}^{\infty} \max_{w_{it} \geq 0} \left\{ \Omega( w_t(i); Z_t(i), L_t ) + \beta V_{t+1}\left( \frac{w_{it}}{(1 + \pi_{t+1})} \right) \right\} \mathup{d}F(Z_t(i)) \\
                     + \lambda  \int_{0}^{\infty} \max_{w_{it} \geq w} \left\{ \Omega( w_t(i); Z_t(i), L_t ) + \beta V_{t+1}\left( \frac{w_{it}}{(1 + \pi_{t+1})} \right) \right\} \mathup{d}F(Z_t(i))
-    \end{multline}
+    \end{multline*}
 
 
 \end{frame}
@@ -125,7 +136,7 @@ with
 
 \end{frame}
 
-\begin{frame}[t]\frametitle{Results: Wage Distribution}
+\begin{frame}[t]\frametitle{Results: Wage Change Distribution}
 
     \begin{center}
       \includegraphics[width=\linewidth]{gray_pi0x1lambda0x452631578947_1_True.pdf}
@@ -136,7 +147,7 @@ with
 \end{frame}
 
 
-\begin{frame}[t]\frametitle{Output}
+\begin{frame}[t]\frametitle{Output: Flexible}
 
     \begin{equation*}
         \label{eq:output_flexible}
@@ -146,13 +157,14 @@ with
     where
 
     \begin{equation*}
-        Z_t = \left( \int_{0}^{1}\! \left( \frac{1}{Z_t(i)} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \mathup{d}i \right)^{-\frac{\eta + \gamma}{\gamma(\eta - 1)}} \!\!\! = e^{-\frac{1}{2} \frac{\eta(1 + \gamma)}{\gamma + \eta}\sigma^2 }.
+        Z_t = \left( \int_{0}^{1}\! \left( \frac{1}{Z_t(i)} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \mathup{d}i \right)^{-\frac{\eta + \gamma}{\gamma(\eta - 1)}} \!\!\! = e^{-\frac{1}{2} \frac{\eta(1 + \gamma)}{\gamma + \eta}\sigma^2 }
     \end{equation*}
 
 
 \end{frame}
 
-\begin{frame}[t]\frametitle{Output Rigid}
+\begin{frame}[t]\frametitle{Output: Rigid}
+\fontsize{9pt}{12}\selectfont
 
     \begin{equation*}
         \label{eq:output_rigid}
@@ -161,16 +173,24 @@ with
     %
     where
 
-    \begin{equation*}
+\begin{columns}[T]
+\begin{column}{0.1\textwidth}
+
+    \begin{align*}
         \label{eq:z_star}
         \begin{split}
-        Z_t^* &= \Big\{(1 - \lambda) \int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left( \frac{\hat{w}_t(Z)}{w_t(Z)} \right)^{\eta - 1}\ \mathup{d}F(Z) \\
-              &+            \lambda  \int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left( \frac{\hat{w}_t(Z)}{w_t(Z)} \right)^{\eta - 1} G_{t-1}\left( w_t(Z)[1 + \pi_t] \right)                                                     \ \mathup{d}F(Z)\\
-              &+            \lambda  \int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left[ \int_{w_t(Z)}^{\infty} (1 + \pi_t)g_{t-1}\left( w[1 + \pi_t] \right) \left( \frac{\hat{w}_t(Z)}{w} \right)^{\eta - 1}\ \mathup{d}w \right] \mathup{d}F(Z)
-                \Big\}^{-\frac{\eta + \gamma}{\gamma(\eta - 1)}}
+        Z_t^* = \Big\{(1 - \lambda) &\int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left( \frac{\hat{w}_t(Z)}{w_t(Z)} \right)^{\eta - 1}\ \mathup{d}F(Z) \\
+              +            \lambda  &\int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left( \frac{\hat{w}_t(Z)}{w_t(Z)} \right)^{\eta - 1} G_{t-1}\left( w_t(Z)[1 + \pi_t] \right)                                                     \ \mathup{d}F(Z)\\
+              +            \lambda  &\int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left[ \int_{w_t(Z)}^{\infty} (1 + \pi_t)g_{t-1}\left( w[1 + \pi_t] \right) \left( \frac{\hat{w}_t(Z)}{w} \right)^{\eta - 1}\ \mathup{d}w \right] \mathup{d}F(Z)  \\
+              &\Big\}^{-\frac{\eta + \gamma}{\gamma(\eta - 1)}}
         \end{split}
-    \end{equation*}
+    \end{align*}
 
+
+\end{column}
+\begin{column}{0.1\textwidth}
+\end{column}
+\end{columns}
 \end{frame}
 
 \begin{frame}[t]\frametitle{Results: Output}
