@@ -1,7 +1,7 @@
 dnwr-zlb
 ========
 
-Version control for my second-year paper.
+Version control for [my second-year paper](https://www.dropbox.com/s/ldff0p6j6m0jeh1/inflation_and_welfare.pdf).
 
 There are two main topics in this repo: data wrangling and model building.
 They are broken into the main subdirectories `data_wrangling` and `model`.
