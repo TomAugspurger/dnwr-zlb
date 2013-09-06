@@ -33,47 +33,43 @@
 
 \end{frame}
 
-\begin{frame}[t]\frametitle{Evidence for?}
+% \begin{frame}[t]\frametitle{Evidence for?}
 
 
 
-\end{frame}
+% \end{frame}
 
 \begin{frame}[t]\frametitle{Model Overview}
 
-One good, produced in perfectly competitive market
-
-Single household with continuum of individuals
-
-Individuals receive idiosyncratic shock and choose wage
-
-Subject to downward wage rigidity
+\begin{itemize}
+    \item One good, produced in perfectly competitive market
+    \item Single household with continuum of individuals
+    \item Individuals receive idiosyncratic shock and choose wage
+    \item Subject to downward wage rigidity
+\end{itemize}
 
 \end{frame}
 
-\begin{frame}[t]\frametitle{Production}
+    \begin{frame}[t]\frametitle{Production}
 
-\begin{equation*} \label{eq:agg_labor}
-    Y_t = L_t = \left[ \int_0^1 L_t(i)^{\frac{\eta - 1}{\eta}} \mathup{d}i \right]^{\frac{\eta}{\eta - 1}}
-\end{equation*}
+    \begin{equation*} \label{eq:agg_labor}
+        Y_t = L_t = \left[ \int_0^1 L_t(i)^{\frac{\eta - 1}{\eta}} \mathup{d}i \right]^{\frac{\eta}{\eta - 1}}
+    \end{equation*}
 
-Maximization problem yields
+    Maximization problem yields
 
-\begin{equation*}
-    \label{eq:labor_demand}
-    L_t(i) = \left( \frac{W_t(i)}{W_t} \right)^{-\eta}L_t = (w_{it})^{-\eta}L_t
-\end{equation*}
+    \begin{equation*}
+        \label{eq:labor_demand}
+        L_t(i) = \left( \frac{W_t(i)}{W_t} \right)^{-\eta}L_t = (w_{it})^{-\eta}L_t
+    \end{equation*}
 
-with
+    with
 
-\begin{equation*} \label{eq:wage_index}
-    W_t = \left[\int_{0}^{1}\left(\frac{1}{W_t(i)}\right)^{\eta - 1} \mathup{d}i \right]^{-\frac{1}{\eta - 1}}
-\end{equation*}
+    \begin{equation*} \label{eq:wage_index}
+        W_t = \left[\int_{0}^{1}\left(\frac{1}{W_t(i)}\right)^{\eta - 1} \mathup{d}i \right]^{-\frac{1}{\eta - 1}}
+    \end{equation*}
 
-% \begin{equation*} \label{eq:real_wage}
-%     1 = \frac{W_t}{P_t} = \left[\int_{0}^{1} \left( \frac{W_t(i)}{P_t} \right)^{1 - \eta} \mathup{d}i \right]^{\frac{1}{1 - \eta} }\!\!\!\! = \ \left[\int_{0}^{1} \! w_{it}^{1 - \eta} \mathup{d}i \right]^{ \frac{1}{1 - \eta} }.
-% \end{equation*}
-
+    $\eta$ elasticity of substitution and $w_{it}$ is the real wage.
 
 \end{frame}
 
@@ -97,7 +93,16 @@ $\lambda$: degree of wage rigidity; probability you can't change wage
 \end{frame}
 
 
-\begin{frame}[t]\frametitle{Wage Setting: Flexible}
+\begin{frame}[t]\frametitle{Individual Wage Setting: Flexible}
+
+Maximizing
+
+    \begin{equation*}
+        \label{eq:labor_part}
+        \sum_{t=0}^{\infty} \beta^t \Omega( w_t(i); Z_t(i), L_t ) = \sum_{t=0}^{\infty} \beta^t \left\{ w_{it}^{1 - \eta} - \frac{\gamma}{\gamma + 1}Z_t(i)\left[ w_{it}^{-\eta}L_t \right]^{\frac{\gamma}{1 + \gamma}} \right\}
+    \end{equation*}
+
+for every period gives
 
     \begin{equation*}
         \label{eq:flex}
@@ -109,13 +114,8 @@ $\lambda$: degree of wage rigidity; probability you can't change wage
 
 
 
-\begin{frame}[t]\frametitle{Wage Setting: Rigid}
+\begin{frame}[t]\frametitle{Individual Wage Setting: Rigid}
 \fontsize{9pt}{12}\selectfont
-
-    \begin{equation*}
-        \label{eq:labor_part}
-        \Omega( w_t(i); Z_t(i), L_t ) = w_{it}^{1 - \eta} - \frac{\gamma}{\gamma + 1}Z_t(i)\left[ w_{it}^{-\eta}L_t \right]^{\frac{\gamma}{1 + \gamma}}
-    \end{equation*}
 
 
     \begin{multline*}
@@ -124,6 +124,9 @@ $\lambda$: degree of wage rigidity; probability you can't change wage
                     + \lambda  \int_{0}^{\infty} \max_{w_{it} \geq w} \left\{ \Omega( w_t(i); Z_t(i), L_t ) + \beta V_{t+1}\left( \frac{w_{it}}{(1 + \pi_{t+1})} \right) \right\} \mathup{d}F(Z_t(i))
     \end{multline*}
 
+\fontsize{12pt}{12}\selectfont
+where $F(\cdot)$ is the distribution of shocks,
+$\pi$ is the inflation rate
 
 \end{frame}
 
@@ -173,13 +176,13 @@ $\lambda$: degree of wage rigidity; probability you can't change wage
     %
     where
 
-\begin{columns}[T]
+\begin{columns}
 \begin{column}{0.1\textwidth}
 
     \begin{align*}
         \label{eq:z_star}
         \begin{split}
-        Z_t^* = \Big\{(1 - \lambda) &\int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left( \frac{\hat{w}_t(Z)}{w_t(Z)} \right)^{\eta - 1}\ \mathup{d}F(Z) \\
+        \ \ \ Z_t^* = \Big\{(1 - \lambda) &\int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left( \frac{\hat{w}_t(Z)}{w_t(Z)} \right)^{\eta - 1}\ \mathup{d}F(Z) \\
               +            \lambda  &\int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left( \frac{\hat{w}_t(Z)}{w_t(Z)} \right)^{\eta - 1} G_{t-1}\left( w_t(Z)[1 + \pi_t] \right)                                                     \ \mathup{d}F(Z)\\
               +            \lambda  &\int_{0}^{\infty} \! \left( \frac{1}{Z} \right)^{\frac{\gamma(\eta - 1)}{\eta + \gamma}} \left[ \int_{w_t(Z)}^{\infty} (1 + \pi_t)g_{t-1}\left( w[1 + \pi_t] \right) \left( \frac{\hat{w}_t(Z)}{w} \right)^{\eta - 1}\ \mathup{d}w \right] \mathup{d}F(Z)  \\
               &\Big\}^{-\frac{\eta + \gamma}{\gamma(\eta - 1)}}
@@ -191,6 +194,9 @@ $\lambda$: degree of wage rigidity; probability you can't change wage
 \begin{column}{0.1\textwidth}
 \end{column}
 \end{columns}
+
+    where $G_t(\cdot)$ is the CDF of wages.
+
 \end{frame}
 
 \begin{frame}[t]\frametitle{Results: Output}
@@ -204,11 +210,5 @@ $\lambda$: degree of wage rigidity; probability you can't change wage
 
 \end{frame}
 
-
-\begin{frame}[t]\frametitle{End}
-
-
-
-\end{frame}
 
 \end{document}

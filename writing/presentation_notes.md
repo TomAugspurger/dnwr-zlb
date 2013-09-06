@@ -23,6 +23,8 @@ Not much here.  Standard Dixit-Stigliz stuff.
 
 ## Household
 
+Share consumption.
+
 Idiosyncratic shock to labor preference.
 
 Calvoesque DNWR.
@@ -37,6 +39,8 @@ Lognormality gives nice solution
 *Individual* maximizes his own terms.
 
 Possibly restricted to increased wage.
+
+First line is the **Wage Schedule**.  Look at limiting case.
 
 ## Wage Setting Compared
 
