@@ -4,8 +4,6 @@ from Cython.Distutils import build_ext
 
 import os
 import sys
-import shutil
-import warnings
 
 import numpy as np
 
@@ -17,7 +15,7 @@ except ImportError:
     pass
 
 
-setup(name='dnwr-zlb',
+setup(name='dnwr_zlb',
       version='0.1.0',
       description='Reproduction file for my second year paper.',
       author='Tom Augspurger',
