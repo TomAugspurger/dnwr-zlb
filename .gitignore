@@ -117,3 +117,4 @@ results*/*
 model/results*/*
 model/figures/*.eps
 vb_suite/benchmarks.db
+writing/seminar/notes_on_larrys_results.md
