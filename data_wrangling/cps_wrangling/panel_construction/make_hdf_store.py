@@ -547,6 +547,38 @@ def name_handling(month, settings, skip=True):
     return just_name, out_name, s_month, name, dd_name
 
 
+def standardize_cols(df, year, settings):
+    """
+    Rename cols in df according to the spec in settings for that year.
+
+    standaradize_cols :: df -> str -> dict -> df
+    """
+
+    dd = settings[year]
+    renamer = settings["col_rename_by_dd"][dd]
+    df = df.rename(columns=renamer)
+    return df
+
+
+def special_by_dd(key):
+    def expand_year(df):
+        try:
+            s = df["HRYEAR"]
+            k = "HRYEAR"
+        except KeyError:
+            s = df["HdYEAR"]
+            k = "HDYEAR"
+        df[k] = s + 1900  # TODO: check type of year
+        return df
+
+    def combine_age(df):
+        df["PRTAGE"] = df["AdAGEDG1"] + df["AdAGEDG2"]  # TODO: check dtypes
+        return df
+
+    func_dict = {"expand_year": expand_year, "combine_age": combine_age}
+    return func_dict
+
+
 def main():
     import sys
     try:
@@ -561,7 +593,7 @@ def main():
     dds       = pd.HDFStore(settings['store_path'])
 
     skips = get_skips(settings['store_log'])
-
+    skip = True
     for month in raw_path:
         try:
             just_name, out_name, s_month, name, dd_name = (
@@ -602,7 +634,12 @@ def main():
 
             cols = settings['dd_to_vars'][dd_name].values()
 
+            specials = settings["special_by_dd"][dd]
+            for func in specials:
+                df = func(df)
+
             df = get_subset(df, settings=settings, dd_name=dd_name)
+            df = standardize_cols(df, month, settings)
             df.index.name = out_name
 
             #------------------------------------------------------------------
