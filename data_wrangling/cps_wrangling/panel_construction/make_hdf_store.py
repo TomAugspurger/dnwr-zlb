@@ -547,32 +547,31 @@ def name_handling(month, settings, skip=True):
     return just_name, out_name, s_month, name, dd_name
 
 
-def standardize_cols(df, year, settings):
+def standardize_cols(df, dd_name, settings):
     """
     Rename cols in df according to the spec in settings for that year.
 
     standaradize_cols :: df -> str -> dict -> df
     """
-
-    dd = settings[year]
-    renamer = settings["col_rename_by_dd"][dd]
+    renamer = settings["col_rename_by_dd"][dd_name]
     df = df.rename(columns=renamer)
     return df
 
 
 def special_by_dd(key):
-    def expand_year(df):
+    def expand_year(df, dd_name):
+        base_year = int(dd_name[-4:-1]) * 10
         try:
-            s = df["HRYEAR"]
+            last_digit = df["HRYEAR"]
             k = "HRYEAR"
         except KeyError:
-            s = df["HdYEAR"]
+            last_digit = df["HdYEAR"]
             k = "HDYEAR"
-        df[k] = s + 1900  # TODO: check type of year
+        df["HRYEAR4"] = base_year + last_digit   # TODO: check type of year
         return df
 
-    def combine_age(df):
-        df["PRTAGE"] = df["AdAGEDG1"] + df["AdAGEDG2"]  # TODO: check dtypes
+    def combine_age(df, dd_name):
+        df["PRTAGE"] = df["AdAGEDG1"] * 10 + df["AdAGEDG2"]
         return df
 
     func_dict = {"expand_year": expand_year, "combine_age": combine_age}
@@ -633,13 +632,13 @@ def main():
                 df = handle_89_pt2(df)
 
             cols = settings['dd_to_vars'][dd_name].values()
-
-            specials = settings["special_by_dd"][dd]
+            specials = special_by_dd(settings["special_by_dd"][dd_name])
             for func in specials:
-                df = func(df)
+                df = specials[func](df, dd_name)
 
             df = get_subset(df, settings=settings, dd_name=dd_name)
-            df = standardize_cols(df, month, settings)
+            df = standardize_cols(df, dd_name, settings)
+
             df.index.name = out_name
 
             #------------------------------------------------------------------
