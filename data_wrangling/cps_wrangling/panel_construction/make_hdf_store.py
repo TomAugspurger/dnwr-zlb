@@ -631,7 +631,6 @@ def main():
             if dd_name in ['jan1989', 'jan1992']:
                 df = handle_89_pt2(df)
 
-            cols = settings['dd_to_vars'][dd_name].values()
             specials = special_by_dd(settings["special_by_dd"][dd_name])
             for func in specials:
                 df = specials[func](df, dd_name)
