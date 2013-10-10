@@ -22,6 +22,8 @@ import urllib2
 
 from lxml.html import parse
 
+from renamer import renamer
+
 
 def matcher(link, regex):
     try:
@@ -63,6 +65,7 @@ def main(out_dir, regex):
             downloader(fname, out_dir)
             print('Added {}'.format(fname))
 
+    renamer(out_dir)
 
 if __name__ == '__main__':
     """

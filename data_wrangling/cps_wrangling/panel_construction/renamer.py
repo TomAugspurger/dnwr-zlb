@@ -3,9 +3,8 @@ Some files came like dec00pub.zip, we would like cpsb0012.
 """
 import pathlib
 
-if __name__ == '__main__':
-    import sys
-    dir_ = pathlib.Path(sys.argv[1])
+
+def renamer(dir_):
     m_to_yr = {"jan": "01",
                "feb": "02",
                "mar": "03",
@@ -26,3 +25,8 @@ if __name__ == '__main__':
             print(pth)
             pth.rename(str(dir_) + '/' + 'cpsb' + f[YEAR] + m_to_yr[f[:3]] +
                        ext)
+
+if __name__ == '__main__':
+    import sys
+    dir_ = pathlib.Path(sys.argv[1])
+    renamer(dir_)
