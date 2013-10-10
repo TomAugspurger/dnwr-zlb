@@ -42,7 +42,7 @@ from difflib import get_close_matches
 import pathlib
 import pandas as pd
 from matplotlib.cbook import flatten
-
+import numpy as np
 
 #-----------------------------------------------------------------------------
 # File Handling / IO
@@ -619,8 +619,52 @@ def special_by_dd(key):
         df['PEMLR'] = status
         return df
 
+    def expand_hours(df, dd_name):
+        """
+        89 and 92 have a question for hours and bins. I goto midpoint of bin.
+
+        A-EMPHRS    CHARACTER*002 .     (0357:0358)           LFSR=1 OR 2
+           REASONS NOT AT WORK OR HOURS AT WORK
+           -1 = NOT IN UNIVERSE
+           WITH A JOB, BUT NOT AT WORK
+           01 = ILLNESS
+           02 = VACATION
+           03 = BAD WEATHER
+           04 = LABOR DISPUTE
+           05 = ALL OTHER
+           AT WORK
+           06 = 1-4 HOURS
+           07 = 5-14 HOURS
+           08 = 15-21 HOURS
+           09 = 22-29 HOURS
+           10 = 30-34 HOURS
+           11 = 35-39 HOURS
+           12 = 40 HOURS
+           13 = 41-47 HOURS
+           14 = 48 HOURS
+           15 = 49-59 HOURS
+           16 = 60 HOURS OR MORE
+        """
+        hours = df['AhEMPHRS']
+        hours_dic = {1: np.nan, 2: np.nan, 3: np.nan, 4: np.nan, 5: np.nan,
+                     6: 2, 7: 9.5, 8: 18, 9: 25.5, 10: 32, 11: 37, 13: 44,
+                     15: 54}
+        hours = hours.replace(hours_dic)
+        df['AhEMPHRS'] = hours
+        return df
+
+    def combine_hours(df, dd_name):
+        """
+        For 89 and 92; "AdHRS1", "AdHRS2" combine to form "PEHRACTT"
+        """
+        fst = df['AdHRS1']
+        snd = df['ADHRS2']
+        df['PEHRACTT'] = fst * 10 + snd
+        return df
+
     func_dict = {"expand_year": expand_year, "combine_age": combine_age,
-                 "align_lfsr": align_lfsr}
+                 "expand_hours": expand_hours, "align_lfsr": align_lfsr,
+                 "combine_hours": combine_hours}
     return func_dict
 
 
@@ -673,6 +717,7 @@ def main():
                     df = pd.read_fwf(name, widths=widths, names=dd.id.values)
 
             df = pre_process(df, ids=ids).sort_index()
+            df = df.replace({-1, np.nan})
 
             if dd_name in ['jan1989', 'jan1992']:
                 df = handle_89_pt2(df)
