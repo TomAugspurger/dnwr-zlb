@@ -559,22 +559,68 @@ def standardize_cols(df, dd_name, settings):
 
 
 def special_by_dd(key):
+    """All of these are inplace"""
     def expand_year(df, dd_name):
+        """ For jan1989 - sep1995 they wrote the year as a SINGLE DIGIT"""
         base_year = int(dd_name[-4:-1]) * 10
         try:
             last_digit = df["HRYEAR"]
-            k = "HRYEAR"
         except KeyError:
             last_digit = df["HdYEAR"]
-            k = "HDYEAR"
-        df["HRYEAR4"] = base_year + last_digit   # TODO: check type of year
+        df["HRYEAR4"] = base_year + last_digit
         return df
 
     def combine_age(df, dd_name):
+        """For jan89 and jan92 they split the age over two fields."""
         df["PRTAGE"] = df["AdAGEDG1"] * 10 + df["AdAGEDG2"]
         return df
 
-    func_dict = {"expand_year": expand_year, "combine_age": combine_age}
+    def align_lfsr(df, dd_name):
+        """Jan1989 and Jan1999. LFSR (labor focrce status recode)
+        had
+           1 = WORKING
+           2 = WITH JOB,NOT AT WORK
+           3 = UNEMPLOYED, LOOKING FOR WORK
+           4 = UNEMPLOYED, ON LAYOFF
+           5 = NILF - WORKING W/O PAY < 15 HRS;
+                      TEMP ABSENT FROM W/O PAY JOB
+           6 = NILF - UNAVAILABLE
+           7 = OTHER NILF
+        newer ones have
+           1   EMPLOYED-AT WORK
+           2   EMPLOYED-ABSENT
+           3   UNEMPLOYED-ON LAYOFF
+           4   UNEMPLOYED-LOOKING
+           5   NOT IN LABOR FORCE-RETIRED
+           6   NOT IN LABOR FORCE-DISABLED
+           7   NOT IN LABOR FORCE-OTHER
+        this func does several things:
+            1. Change 3 -> 4 and 4 -> 3 in the old ones.
+            2. Change 5 and 6 to 7.
+            2. Read retired from AhNLFREA == 4 and set to 5.
+            3. Read ill/disabled from AhNLFREA == 2 and set to 6.
+        Group 7 kind of loses meaning now.
+        """
+        # 1. realign 3 & 3
+        status = df["AhLFSR"]
+        # status = status.replace({3: 4, 4: 3})  # chcek on ordering
+
+        status_ = status.copy()
+        status_[status == 3] = 4
+        status_[status == 4] = 3
+        status = status_
+
+        # 2. Add 5 and 6 to 7
+        status = status.replace({5: 7, 6: 7})
+
+        # 3. ill/disabled -> 6
+        status[df['AhNLFREA'] == 2] = 6
+
+        df['PEMLR'] = status
+        return df
+
+    func_dict = {"expand_year": expand_year, "combine_age": combine_age,
+                 "align_lfsr": align_lfsr}
     return func_dict
 
 

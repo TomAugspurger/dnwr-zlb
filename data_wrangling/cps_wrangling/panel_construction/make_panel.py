@@ -1,4 +1,9 @@
 """
+TODO:
+
+    - Add renaming function
+    - Add special functions (from special_by_dd field)
+
 Take the HDFStore of monthly cps files and construct the pseudo-panel.
 
 Match based on identifiers and (demographic, etc.).
@@ -109,7 +114,9 @@ def make_full_panel(full_store):
     The unique_id section of the index should be constant through
     the full 8 interview months, modulo survey attrition.
     """
-    
+    df = get_df()
+    new = df["HRMIS"] == 1
+    pass
 
 
 def main():
