@@ -39,6 +39,7 @@ import itertools
 import subprocess
 from difflib import get_close_matches
 
+import arrow
 import pathlib
 import pandas as pd
 from matplotlib.cbook import flatten
@@ -480,9 +481,14 @@ def log_and_store(df):
 
 
 def get_skips(file_):
-    with open(file_, 'r') as f:
-        skips = [line.split(' ')[-1].rstrip()
-                 for line in f if line.startswith('PASSED')]
+    try:
+        with open(file_, 'r') as f:
+            skips = [line.split(' ')[-1].rstrip()
+                     for line in f if line.startswith('PASSED')]
+    except IOError:
+        with open(file_, 'w') as f:
+            skips = []
+
     return skips
 
 
@@ -540,7 +546,8 @@ def name_handling(month, settings, skip=True):
     if just_name == '' or month.is_dir():
         return just_name, _, _, _, _
 
-    out_name = 'm' + settings['file_to_iso8601'][just_name]
+    # out_name = 'm' + settings['file_to_iso8601'][just_name]
+    out_name = arrow.get(just_name[-4:], 'YYMM').strftime('m%Y_%m')
     s_month = str(month)
     name = s_month.split('.')[0]
     dd_name = settings["month_to_dd_by_filename"][just_name]
@@ -559,7 +566,7 @@ def standardize_cols(df, dd_name, settings):
     return df
 
 
-def special_by_dd(key):
+def special_by_dd(keys):
     """All of these are inplace"""
     def expand_year(df, dd_name):
         """ For jan1989 - sep1995 they wrote the year as a SINGLE DIGIT"""
@@ -666,7 +673,8 @@ def special_by_dd(key):
     func_dict = {"expand_year": expand_year, "combine_age": combine_age,
                  "expand_hours": expand_hours, "align_lfsr": align_lfsr,
                  "combine_hours": combine_hours}
-    return func_dict
+    to_apply = filter(lambda x: x in keys, func_dict)
+    return to_apply
 
 
 def main():
@@ -716,7 +724,7 @@ def main():
                     df = pd.read_fwf(name, widths=widths, names=dd.id.values)
 
             df = pre_process(df, ids=ids).sort_index()
-            df = df.replace({-1, np.nan})
+            df[df == -1] = np.nan
 
             if dd_name in ['jan1989', 'jan1992']:
                 df = handle_89_pt2(df)
@@ -740,9 +748,9 @@ def main():
             store_path = settings['store_path']
             writer(df, name=out_name, store_path=store_path, settings=settings)
             print('Added {}'.format(out_name))
-        except:
+        except Exception as e:
             with open(settings["store_log"], 'a') as f:
-                f.write('FAILED {}\n'.format(str(month)))
+                f.write('FAILED {} for reason {}.\n'.format(str(month), e))
     dds.close()
 
 #-----------------------------------------------------------------------------

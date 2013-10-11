@@ -6,7 +6,7 @@
 "dd_path" : "/Volumes/HDD/Users/tom/DataStorage/CPS/dds/",
 "raw_monthly_path": "/Volumes/HDD/Users/tom/DataStorage/CPS/monthly/",
 "repo_path" : "/Users/tom/Dropbox/Economics/inflation_in_recession/dnwr-zlb/data_wrangling",
-"store_log": "/Users/tom/Dropbox/Economics/inflation_in_recession/dnwr-zlb/data_wrangling/cps_wrangling/panel_construction/store_log.txt",
+"store_log": "store_log.txt",
 "dd_path" : "/Volumes/HDD/Users/tom/DataStorage/CPS/dds",
 "dupe_path": "/Volumes/HDD/Users/tom/DataStorage/CPS/monthly/dupes/",
 "dd_to_year":
@@ -87,8 +87,8 @@
 
 "special_by_dd":
     {
-        "jan1989": ["expand_year", "combine_age", "aling_lfsr", "expand_hours", "combine_hours"],
-        "jan1992": ["expand_year", "combine_age", "aling_lfsr", "expand_hours", "combine_hours"],
+        "jan1989": ["expand_year", "combine_age", "align_lfsr", "expand_hours", "combine_hours"],
+        "jan1992": ["expand_year", "combine_age", "align_lfsr", "expand_hours", "combine_hours"],
         "jan1994": ["expand_year"],
         "apr1994": ["expand_year"],
         "jun1995": ["expand_year"],
@@ -396,7 +396,11 @@
         "201208": "may2012",
         "201301": "jan2013",
         "201302": "jan2013",
-        "201303": "jan2013"
+        "201304": "jan2013",
+        "201305": "jan2013",
+        "201306": "jan2013",
+        "201307": "jan2013",
+        "201308": "jan2013"
     },
 
 "month_to_dd_by_filename":
@@ -691,7 +695,12 @@
         "cpsb1212": "may2012",
         "cpsb1301": "jan2013",
         "cpsb1302": "jan2013",
-        "cpsb1303": "jan2013"
+        "cpsb1303": "jan2013",
+        "cpsb1304": "jan2013",
+        "cpsb1305": "jan2013",
+        "cpsb1306": "jan2013",
+        "cpsb1307": "jan2013",
+        "cpsb1308": "jan2013"
    },
    "file_to_iso8601":
    {
