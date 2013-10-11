@@ -105,7 +105,7 @@ class FileHandler(object):
             os.remove(self.new_path)
 
 
-def writer(df, name, store_path, settings):
+def writer(df, name, store_path, settings, overwrite=True):
     """
     Write the dataframe to the HDFStore. Non-pure.
 
@@ -120,10 +120,11 @@ def writer(df, name, store_path, settings):
     None - IO
     """
     with pd.get_store(store_path) as store:
-        try:
-            store.remove('/monthly/data/' + name)
-        except KeyError:
-            pass
+        if overwrite:
+            try:
+                store.remove('/monthly/data/' + name)
+            except KeyError:
+                pass
         store.append('/monthly/data/' + name, df)
 
     with open(settings["store_log"], 'a') as f:
@@ -362,7 +363,7 @@ def check_fieldname(field, settings, dd=None, store_path=None):
     -------
 
     >>> res = check_fieldname(flatten(
-                settings['dd_to_vars']['may2012'].values()), settings, dd=dd)
+        settings['dd_to_vars']['may2012'].values()), settings, dd=dd)
 
     >>> {x: get_close_matches(x, dd.id) for x in res[False]}
     """
@@ -676,10 +677,8 @@ def main():
         settings = json.load(open('settings.txt'))
     #-------------------------------------------------------------------------
     # setup
-    raw_path  = pathlib.Path(str(settings['raw_monthly_path']))
-    base_path = settings['base_path']
-    repo_path = settings['repo_path']
-    dds       = pd.HDFStore(settings['store_path'])
+    raw_path = pathlib.Path(str(settings['raw_monthly_path']))
+    dds = pd.HDFStore(settings['store_path'])
 
     skips = get_skips(settings['store_log'])
     skip = True
