@@ -1,3 +1,4 @@
+arrow
 BeautifulSoup==3.2.1
 Bottleneck==0.6.0
 Cython==0.19.1
