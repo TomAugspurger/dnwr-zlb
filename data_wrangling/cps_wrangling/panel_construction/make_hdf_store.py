@@ -175,6 +175,19 @@ def pre_process(df, ids):
     # forcing numeric chops of leading zeros.
     df = df.convert_objects(convert_numeric=True)
     df = df.set_index(ids)
+
+    if "FILLER" in df.columns:
+        df = df.drop("FILLER", axis=1)
+    if "PADDING" in df.columns:
+        df = df.drop("PADDING", axis=1)
+    try:
+        df[df == -1] = np.nan
+    except TypeError:
+        try:
+            df = df.replace({-1, np.nan})
+        except:
+            # TODO: log here
+            pass
     return df
 
 
@@ -546,7 +559,6 @@ def name_handling(month, settings, skip=True):
     if just_name == '' or month.is_dir():
         return just_name, _, _, _, _
 
-    # out_name = 'm' + settings['file_to_iso8601'][just_name]
     out_name = arrow.get(just_name[-4:], 'YYMM').strftime('m%Y_%m')
     s_month = str(month)
     name = s_month.split('.')[0]
@@ -666,7 +678,7 @@ def special_by_dd(keys):
         For 89 and 92; "AdHRS1", "AdHRS2" combine to form "PEHRACTT"
         """
         fst = df['AdHRS1']
-        snd = df['ADHRS2']
+        snd = df['AdHRS2']
         df['PEHRACTT'] = fst * 10 + snd
         return df
 
@@ -674,7 +686,70 @@ def special_by_dd(keys):
                  "expand_hours": expand_hours, "align_lfsr": align_lfsr,
                  "combine_hours": combine_hours}
     to_apply = filter(lambda x: x in keys, func_dict)
-    return to_apply
+    filtered = {k: func_dict[k] for k in to_apply}
+    return filtered
+
+
+def append_to_store(month, settings, skips, dds, skip=True):
+    try:
+        just_name, out_name, s_month, name, dd_name = (
+            name_handling(month, settings))
+
+        if just_name == '' or month.is_dir():  # . files or subdirs
+            return None
+
+        ids = settings["dd_to_ids"][dd_name]
+
+        if out_name in skips and skip:
+            print("Skipped {}".format(out_name))
+
+        try:
+            dd = dds.select('/monthly/dd/' + dd_name)
+            widths = dd.length.tolist()
+        except KeyError:
+            print("No data dictionary for {}".format(out_name))
+            with open(settings["store_log"], 'a') as f:
+                f.write("FAILED {}. No data dictionary".format(out_name))
+            return None
+
+        if s_month.endswith('.gz'):
+            df = pd.read_fwf(name + '.gz', widths=widths,
+                             names=dd.id.values, compression='gzip')
+        else:
+            with FileHandler(s_month) as handler:
+                try:
+                    name = handler.new_path
+                except AttributeError:
+                    pass
+                df = pd.read_fwf(name, widths=widths, names=dd.id.values)
+
+        df = pre_process(df, ids=ids).sort_index()
+
+        if dd_name in ['jan1989', 'jan1992']:
+            df = handle_89_pt2(df)
+
+        specials = special_by_dd(settings["special_by_dd"][dd_name])
+        for func in specials:
+            df = specials[func](df, dd_name)
+
+        df = get_subset(df, settings=settings, dd_name=dd_name)
+        df = standardize_cols(df, dd_name, settings)
+
+        df.index.name = out_name
+
+        #------------------------------------------------------------------
+        # Ensure uniqueness
+        if not df.index.is_unique:
+            df = handle_dupes(df, settings=settings)
+            assert df.index.is_unique
+        #------------------------------------------------------------------
+        # Writing
+        store_path = settings['store_path']
+        writer(df, name=out_name, store_path=store_path, settings=settings)
+        print('Added {}'.format(out_name))
+    except Exception as e:
+        with open(settings["store_log"], 'a') as f:
+            f.write('FAILED {} for reason {}.\n'.format(str(month), e))
 
 
 def main():
@@ -689,68 +764,9 @@ def main():
     dds = pd.HDFStore(settings['store_path'])
 
     skips = get_skips(settings['store_log'])
-    skip = True
     for month in raw_path:
-        try:
-            just_name, out_name, s_month, name, dd_name = (
-                name_handling(month, settings))
+        append_to_store(month, settings, skips, dds)
 
-            if just_name == '' or month.is_dir():  # . files or subdirs
-                continue
-
-            ids = settings["dd_to_ids"][dd_name]
-
-            if out_name in skips and skip:
-                print("Skipped {}".format(out_name))
-
-            try:
-                dd = dds.select('/monthly/dd/' + dd_name)
-                widths = dd.length.tolist()
-            except KeyError:
-                print("No data dictionary for {}".format(out_name))
-                with open(settings["store_log"], 'a') as f:
-                    f.write("FAILED {}. No data dictionary".format(out_name))
-                continue
-
-            if s_month.endswith('.gz'):
-                df = pd.read_fwf(name + '.gz', widths=widths,
-                                 names=dd.id.values, compression='gzip')
-            else:
-                with FileHandler(s_month) as handler:
-                    try:
-                        name = handler.new_path
-                    except AttributeError:
-                        pass
-                    df = pd.read_fwf(name, widths=widths, names=dd.id.values)
-
-            df = pre_process(df, ids=ids).sort_index()
-            df[df == -1] = np.nan
-
-            if dd_name in ['jan1989', 'jan1992']:
-                df = handle_89_pt2(df)
-
-            specials = special_by_dd(settings["special_by_dd"][dd_name])
-            for func in specials:
-                df = specials[func](df, dd_name)
-
-            df = get_subset(df, settings=settings, dd_name=dd_name)
-            df = standardize_cols(df, dd_name, settings)
-
-            df.index.name = out_name
-
-            #------------------------------------------------------------------
-            # Ensure uniqueness
-            if not df.index.is_unique:
-                df = handle_dupes(df, settings=settings)
-                assert df.index.is_unique
-            #------------------------------------------------------------------
-            # Writing
-            store_path = settings['store_path']
-            writer(df, name=out_name, store_path=store_path, settings=settings)
-            print('Added {}'.format(out_name))
-        except Exception as e:
-            with open(settings["store_log"], 'a') as f:
-                f.write('FAILED {} for reason {}.\n'.format(str(month), e))
     dds.close()
 
 #-----------------------------------------------------------------------------
