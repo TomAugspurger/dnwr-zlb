@@ -15,6 +15,7 @@ import itertools
 import json
 from time import strftime, strptime, struct_time
 
+import arrow
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -58,6 +59,7 @@ def smart_match(df1, df2):
     q = 'PTDTRACE1 != PTDTRACE2 | -1 <= PRTAGE2 - PRTAGE1 <= 3'
     return joined.query(q)
 
+
 def check_dtypes(wp):
     """
     Ensure that the dtypes are numeric.
@@ -100,14 +102,18 @@ def make_earn_panel(earn_store):
     return wp
 
 
-def make_full_panel(full_store):
+def make_full_panel(cps_store, start_month):
     """
-    The full panel.  The store layout will be:
+    store -> str -> Panel
+
+    start month should look like `m2012_08`
+
+    The full panel for a single wave's time in CPS.  The store layout will be:
 
         store.month
 
     where month corresponds to the wave whose first month in
-    the survey equals one (MIS=IM=1).  Each node will be a dataframe?
+    the survey equals one (MIS=IM=1).  Each node will be a dataframe
     where
 
                                         data
@@ -117,9 +123,21 @@ def make_full_panel(full_store):
     The unique_id section of the index should be constant through
     the full 8 interview months, modulo survey attrition.
     """
-    df = get_df()
-    new = df["HRMIS"] == 1
-    pass
+    pre = '/monthly/data/'
+    df1 = cps_store.select(pre + start_month)
+    idx = df1[df1['HRMIS'] == 1]
+    keys = cps_store.keys()
+
+    start_ar = arrow.get(start_month, 'mYY_MM')
+    rng = [1, 2, 3, 9, 10, 11, 12]
+    ars = (pre + start_ar.replace(months=x).strftime('m%Y_%m') for x in rng)
+    dfs = (cps_store.select(x) for x in ars if x in keys)
+
+    df_dict = {1: df1}
+    for i, df in enumerate(dfs, 1):
+        df_dict[i + 1] = df[df['HRMIS'] == i + 1]  # doesn't match (idx)
+
+    return pd.Panel(df_dict)
 
 
 def main():
