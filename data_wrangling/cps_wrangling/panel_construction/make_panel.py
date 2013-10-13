@@ -4,6 +4,10 @@ Take the HDFStore of monthly cps files and construct the pseudo-panel.
 Match based on identifiers and (demographic, etc.).
 Earnings questions are asked in MIS 4 and 8 only, so about a quarter
 of the full sample should be included in the panel (ideally).
+
+Since households cycle out of the survey, if, e.g., MIS 4 is in
+January 2012, MIS 8 will be January 2013.  I.e. we get earnings
+in the same month of two different years.
 """
 from __future__ import division
 
@@ -29,26 +33,30 @@ def get_next_month(this_month):
     return new_month
 
 
-def match_surveys(df1, df2):
+def match_naive(df1, df2):
     """
     DataFrame -> DataFrame -> Index
     """
-    # naiive matching for now.  TODO: Not valid.
-    if 'PRERNWA' in df1.columns:
-        w_id1 = 'PRERNWA'
-    else:
-        w_id1 = 'PTERNWA'
-    if 'PRERNWA' in df2.columns:
-        w_id2 = 'PRERNWA'
-    else:
-        w_id2 = 'PTERNWA'
+    m1 = df1[df1.HRMIS == 4]
+    m2 = df2[df2.HRMIS == 8]
+    m = m1.join(m2, how='inner', lsuffix='1', rsuffix='2')
+    return m
 
-    s1 = df1[w_id1][df1[w_id1] > 0]
-    s2 = df2[w_id2][df2[w_id2] > 0]
 
-    idx = s1.index.intersection(s2.index)
-    return idx
+def smart_match(df1, df2):
+    """
+    Criteria for a match (ideal):
 
+        1. Indicies match (HRHHID, HRHHID2, PULINENO)
+        2. Race is the same
+        3. Age within +3 or -1 years?
+
+    Secondry criteria: What if linno is NaN?
+    """
+    demo = ['PTDTRACE1', 'PTDTRACE2', 'PRTAGE1', 'PRTAGE2', 'PESEX1', 'PESEX2']
+    joined = m1.join(m2, how='inner', lsuffix='1', rsuffix='2')
+    q = 'PTDTRACE1 != PTDTRACE2 | -1 <= PRTAGE2 - PRTAGE1 <= 3'
+    return joined.query(q)
 
 def check_dtypes(wp):
     """
