@@ -124,6 +124,7 @@ def make_full_panel(cps_store, start_month):
     the full 8 interview months, modulo survey attrition.
     """
     # TODO: Handle truncated panels (last 7 months) (may be ok).
+    # TODO: filter accoriding to id's (idx)
     pre = '/monthly/data/'
     df1 = cps_store.select(pre + start_month)
     df1 = df1[df1['HRMIS'] == 1]
@@ -131,7 +132,7 @@ def make_full_panel(cps_store, start_month):
     keys = cps_store.keys()
 
     start_ar = arrow.get(start_month, 'mYY_MM')
-    rng = [1, 2, 3, 9, 10, 11, 12]
+    rng = [1, 2, 3, 12, 13, 14, 15]
     ars = (pre + start_ar.replace(months=x).strftime('m%Y_%m') for x in rng)
     dfs = (cps_store.select(x) for x in ars if x in keys)
 
