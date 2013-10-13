@@ -1,9 +1,4 @@
 """
-TODO:
-
-    - Add renaming function
-    - Add special functions (from special_by_dd field)
-
 Take the HDFStore of monthly cps files and construct the pseudo-panel.
 
 Match based on identifiers and (demographic, etc.).
