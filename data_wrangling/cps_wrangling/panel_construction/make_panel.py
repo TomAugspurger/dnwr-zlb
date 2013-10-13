@@ -123,9 +123,11 @@ def make_full_panel(cps_store, start_month):
     The unique_id section of the index should be constant through
     the full 8 interview months, modulo survey attrition.
     """
+    # TODO: Handle truncated panels (last 7 months) (may be ok).
     pre = '/monthly/data/'
     df1 = cps_store.select(pre + start_month)
-    idx = df1[df1['HRMIS'] == 1]
+    df1 = df1[df1['HRMIS'] == 1]
+    idx = df1.index
     keys = cps_store.keys()
 
     start_ar = arrow.get(start_month, 'mYY_MM')
