@@ -22,12 +22,37 @@ def get_need_fix(settings):
         return pathlibs_to_fix
 
 
+def fix_age_jan2010(settings, store):
+    """
+    Missed need to change jan2010 PEAGE -> PRTAGE
+    """
+    all_months = settings["month_to_dd"]
+    needfix = it.ifilter(lambda x: all_months[x] == 'jan2010', all_months)
+    for month in needfix:
+        month = month[:4] + '_' + month[-2:]
+        name = '/monthly/data/m' + month
+        df = store.select(name)
+        df = df.rename(columns={'PEAGE': 'PRTAGE'})
+        try:
+            store.remove(name)
+        except KeyError:
+            pass
+        store.append(name, df)
+
+
+def main():
+    settings = json.load(open('settings.txt'))
+    store = pd.HDFStore(settings['store_path'])
+    #
+    fix_age_jan2010(settings, store)
+
 if __name__ == '__main__':
 
-    settings = json.load(open('settings.txt'))
-    raw_path = pathlib.Path(str(settings['raw_monthly_path']))
-    dds = pd.HDFStore(settings['store_path'])
+    # settings = json.load(open('settings.txt'))
+    # raw_path = pathlib.Path(str(settings['raw_monthly_path']))
+    # dds = pd.HDFStore(settings['store_path'])
 
-    need_fix = get_need_fix(settings)
-    for month in need_fix:
-        append_to_store(month, settings=settings, skips=[], dds=dds)
+    # need_fix = get_need_fix(settings)
+    # for month in need_fix:
+    #     append_to_store(month, settings=settings, skips=[], dds=dds)
+    main()
