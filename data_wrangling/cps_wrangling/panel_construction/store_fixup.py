@@ -40,11 +40,37 @@ def fix_age_jan2010(settings, store):
         store.append(name, df)
 
 
+def fix_names(settings, store):
+    """
+    Bad names on the older ones. At leas
+
+    dds:
+
+    names: {'HdYEAR': "HRYEAR4", "HdMONTH": "MHRONTH"}
+    """
+    all_months = settings["month_to_dd"]
+    needfix = it.ifilter(lambda x: all_months[x] in ('jan1989'),
+                         all_months)
+    for month in needfix:
+        month = month[:4] + '_' + month[-2:]
+        name = '/monthly/data/m' + month
+        df = store.select(name)
+        df = df.rename(columns={"HdYEAR": "HRYEAR4", "HdMONTH": "HRMONTH"})
+        df["PRTAGE"] = df["AdAGEDG1"] * 10 + df["AdAGEDG2"]
+        df = df.drop(['AdAGEDG1', 'AdAGEDG2'], axis=1)
+        try:
+            store.remove(name)
+        except KeyError:
+            pass
+        store.append(name, df)
+
+
 def main():
     settings = json.load(open('settings.txt'))
     store = pd.HDFStore(settings['store_path'])
     #
-    fix_age_jan2010(settings, store)
+    # fix_age_jan2010(settings, store)
+    fix_names(settings, store)
 
 if __name__ == '__main__':
 

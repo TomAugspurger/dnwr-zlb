@@ -9,6 +9,7 @@
 "repo_path" : "/Users/tom/Dropbox/Economics/inflation_in_recession/dnwr-zlb/data_wrangling",
 "store_log": "store_log.txt",
 "merge_log": "merge_log.txt",
+"panel_log": "panel_log.txt",
 "dd_path" : "/Volumes/HDD/Users/tom/DataStorage/CPS/dds",
 "dupe_path": "/Volumes/HDD/Users/tom/DataStorage/CPS/monthly/dupes/",
 "dd_to_year":
@@ -70,21 +71,21 @@
 
 "col_rename_by_dd":
     {
-        "jan1989": {"age": "PRTAGE", "HhMIS": "HRMIS", "year": "HRYEAR4", "AdSEX": "PESEX", "AdRACE": "PTDTRACE", "AdLFSR": "PEMLR", "AhWERNTP": "PRERNWA", "AhHERNTF": "PTWK", "A$MARIT": "PEMARITL"},
-        "jan1992": {"age": "PRTAGE", "HhMIS": "HRMIS", "year": "HRYEAR4", "AdSEX": "PESEX", "PERACE": "PTDTRACE", "AhLFSR": "PEMLR", "AhWERNTP": "PRERNWA", "AhHERNTF": "PTWK", "A$MARIT": "PEMARITL"},
-        "jan1994": {"PEAGE": "PRTAGE",                 "year": "HRYEAR4",                   "PERACE": "PTDTRACE"                                                                                     },
-        "apr1994": {"PEAGE": "PRTAGE",                 "year": "HRYEAR4",                   "PERACE": "PTDTRACE"                                                                                     },
-        "jun1995": {"PEAGE": "PRTAGE",                 "year": "HRYEAR4",                   "PERACE": "PTDTRACE"                                                                                     },
-        "sep1995": {"PEAGE": "PRTAGE",                 "year": "HRYEAR4",                   "PERACE": "PTDTRACE"                                                                                     },
-        "jan1998": {                                                                        "PERACE": "PTDTRACE",                    "PTERNWA": "PRERNWA"                                            },
-        "jan2003": {"PEAGE": "PRTAGE"                                                                                                                                                                },
-        "may2004": {"PEAGE": "PRTAGE"                                                                                                                                                                },
-        "aug2005": {"PEAGE": "PRTAGE"                                                                                                                                                                },
-        "jan2007": {"PEAGE": "PRTAGE"                                                                                                                                                                },
-        "jan2009": {"PEAGE": "PRTAGE"                                                                                                                                                                },
-        "jan2010": {"PEAGE": "PRTAGE"                                                                                                                                                                },
-        "may2012": {                                                                                                                                                                                 },
-        "jan2013": {                                                                                                                                                                                 }
+        "jan1989": {"age": "PRTAGE", "HhMIS": "HRMIS", "HdYEAR": "HRYEAR4", "AdSEX": "PESEX", "HdMONTH": "HRMONTH", "AdRACE": "PTDTRACE", "AdLFSR": "PEMLR", "AhWERNTP": "PRERNWA", "AhHERNTF": "PTWK", "AdMARIT": "PEMARITL"},
+        "jan1992": {"age": "PRTAGE", "HhMIS": "HRMIS", "HdYEAR": "HRYEAR4", "AdSEX": "PESEX", "HdMONTH": "HRMONTH", "PERACE": "PTDTRACE", "AhLFSR": "PEMLR", "AhWERNTP": "PRERNWA", "AhHERNTF": "PTWK", "AdMARIT": "PEMARITL"},
+        "jan1994": {"PEAGE": "PRTAGE",                 "HRYEAR": "HRYEAR4",                                         "PERACE": "PTDTRACE"                                                                                     },
+        "apr1994": {"PEAGE": "PRTAGE",                 "HRYEAR": "HRYEAR4",                                         "PERACE": "PTDTRACE"                                                                                     },
+        "jun1995": {"PEAGE": "PRTAGE",                 "HRYEAR": "HRYEAR4",                                         "PERACE": "PTDTRACE"                                                                                     },
+        "sep1995": {"PEAGE": "PRTAGE",                 "HRYEAR": "HRYEAR4",                                         "PERACE": "PTDTRACE"                                                                                     },
+        "jan1998": {                                                                                                "PERACE": "PTDTRACE",                    "PTERNWA": "PRERNWA"                                            },
+        "jan2003": {"PEAGE": "PRTAGE"                                                                                                                                                                                        },
+        "may2004": {"PEAGE": "PRTAGE"                                                                                                                                                                                        },
+        "aug2005": {"PEAGE": "PRTAGE"                                                                                                                                                                                        },
+        "jan2007": {"PEAGE": "PRTAGE"                                                                                                                                                                                        },
+        "jan2009": {"PEAGE": "PRTAGE"                                                                                                                                                                                        },
+        "jan2010": {"PEAGE": "PRTAGE"                                                                                                                                                                                        },
+        "may2012": {                                                                                                                                                                                                         },
+        "jan2013": {                                                                                                                                                                                                         }
     },
 
 "special_by_dd":
