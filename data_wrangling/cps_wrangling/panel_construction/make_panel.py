@@ -67,16 +67,6 @@ def smart_match(df1, df2, settings, match_type='age_race', log=False):
     crit_d = {'age_race': age_race, 'age_race_sex': age_race_sex,
               'age': age, 'race': race, 'sex': sex}
 
-    def log_merge(df, ltype):
-        """
-        DataFrame -> String -> Dict
-        """
-        month = (str(int(df['HRYEAR42'].dropna().iloc[0])) + '_' +
-                 str(int(df['HRMONTH2'].dropna().iloc[0])))
-        length = len(df)
-        d = {month: [{"type": ltype}, {"length": length}]}
-        return d
-
     if log:
         with open(settings['merge_log'], 'a') as f:
             for criteria in crit_d:
@@ -115,7 +105,46 @@ def get_earnings_panel(panel_store, month):
     return joined
 
 
-def make_full_panel(cps_store, start_month):
+def log_merge(df, ltype):
+    """
+    DataFrame -> String -> Dict
+    """
+    if ltype == 'panel':
+        year = 'HRYEAR4'
+        month = 'HRMONTH'
+    else:
+        year = 'HRYEAR42'
+        month = 'HRMONTH2'
+    month = (str(int(df[year].dropna().iloc[0])) + '_' +
+             str(int(df[month].dropna().iloc[0])))
+    length = len(df)
+    d = {month: {"type": ltype, "length": length}}
+    return d
+
+
+def match_panel(df1, df2, log=None):
+    # TODO: refactor; combine w/ smart_match
+    left_idx = df1.index
+    df2 = df2.loc[left_idx]  # left merge
+
+    # filter out spurious matches
+    # defined as -1 < delta age < 3 OR sex change
+    age_diff = df2['PRTAGE'] - df1['PRTAGE']
+    age_idx = age_diff[(age_diff > -1) & (age_diff < 3)].index
+    sex_idx = df1['PESEX'][(df1['PESEX'] == df2['PESEX'])].index
+
+    df2 = df2.loc[age_idx.intersection(sex_idx)]
+
+    if log:
+        merge_output = log_merge(df2, ltype='panel')
+        with open(log, 'a') as f:
+            json.dump(merge_output, f)
+            f.write('\n')
+
+    return df2
+
+
+def make_full_panel(cps_store, start_month, settings, keys):
     """
     store -> str -> Panel
 
@@ -135,6 +164,10 @@ def make_full_panel(cps_store, start_month):
     alternatively a panel where the items are interview_date / MIS.
     The unique_id section of the index should be constant through
     the full 8 interview months, modulo survey attrition.
+
+    if filter is True, it will pass the dataframes off to smart_match
+    with the kwargs. Filter each against the initial?
+
     """
     # TODO: Handle truncated panels (last 7 months) (may be ok).
     # TODO: filter accoriding to id's (idx)
@@ -143,24 +176,23 @@ def make_full_panel(cps_store, start_month):
     pre = '/monthly/data/'
     df1 = cps_store.select(pre + start_month)
     df1 = df1[df1['HRMIS'] == 1]
-    idx = df1.index
-    keys = cps_store.keys()
 
     start_ar = arrow.get(start_month, 'mYY_MM')
     rng = [1, 2, 3, 12, 13, 14, 15]
     ars = (pre + start_ar.replace(months=x).strftime('m%Y_%m') for x in rng)
-    dfs = (cps_store.select(x) for x in ars if x in keys)
+    dfs = (cps_store.select(x) for x in ars if x.split('/')[-1] in keys)
 
     df_dict = {1: df1}
     for i, df in enumerate(dfs, 1):
-        df_dict[i + 1] = df[df['HRMIS'] == i + 1]  # doesn't match (idx)
+        df_dict[i + 1] = match_panel(df1, df[df['HRMIS'] == i + 1],
+                                     log=settings['panel_log'])
 
     return pd.Panel(df_dict)
 
 
-def get_finished(settings):
+def get_finished(settings, pat):
     with open(settings['panel_log']) as f:
-        finished = [x.split(' ')[-1].strip() for x in f if x.startswith('FINISHED')]
+        finished = [x.split(' ')[-1].strip() for x in f if x.startswith(pat)]
 
     return finished
 
@@ -181,21 +213,21 @@ def main():
     store = pd.HDFStore(store_path)
     panel_path = settings['panel_path']
     panel_store = pd.HDFStore(panel_path)
-    pre = '/monthly/data/'  # Path inside HDFStore.  Concat to month
 
-    keys = store.keys()
-    finished = get_finished(settings)
+    # calling store.keys() was so slow
+    all_months = itertools.ifilter(lambda x: x.startswith('m'),
+                                   dir(store.root.monthly.data))
+    finished = get_finished(settings, pat='FINISHED-FULL')
 
-    all_months = itertools.ifilter(lambda x: x.startswith(pre), keys)
     all_months = itertools.ifilter(lambda x: x not in finished, all_months)
     all_months = sorted((x.split('/')[-1] for x in all_months))
 
     for month in all_months:
-        wp = make_full_panel(store, month)
+        wp = make_full_panel(store, month, settings, keys=all_months)
         wp.to_hdf(panel_store, key=month, format='f')  # month is wave's MIS=1
 
-        with open('panel_log.txt', 'a') as f:
-            f.write('FINISHED {}'.format(month))
+        with open(settings['panel_log'], 'a') as f:
+            f.write('FINISHED-FULL{}\n'.format(month))
         print('FINISHED {}\n'.format(month))
     # for month in all_months:
     #     start_ar = arrow.get(month, 'mYY_MM')
