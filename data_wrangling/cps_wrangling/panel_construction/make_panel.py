@@ -44,7 +44,7 @@ def match_naive(df1, df2):
     return m
 
 
-def smart_match(df1, df2):
+def smart_match(df1, df2, settings, match_type='age_race', log=False):
     """
     Criteria for a match (ideal):
 
@@ -52,12 +52,38 @@ def smart_match(df1, df2):
         2. Race is the same
         3. Age within +3 or -1 years?
 
-    Secondry criteria: What if linno is NaN?
+    age races is one of ['race', 'age', 'age_race', 'age_race_sex', 'sex']
     """
-    demo = ['PTDTRACE1', 'PTDTRACE2', 'PRTAGE1', 'PRTAGE2', 'PESEX1', 'PESEX2']
-    joined = m1.join(m2, how='inner', lsuffix='1', rsuffix='2')
-    q = 'PTDTRACE1 != PTDTRACE2 | -1 <= PRTAGE2 - PRTAGE1 <= 3'
-    return joined.query(q)
+    # TODO: Log various match sizes (naive, age, years, etc)
+    # demo = ['PTDTRACE1', 'PTDTRACE2', 'PRTAGE1', 'PRTAGE2', 'PESEX1', 'PESEX2']
+    joined = df1.join(df2, how='inner', lsuffix='1', rsuffix='2')
+
+    age = "-1 <= PRTAGE2 - PRTAGE1 <= 3"
+    race = "PTDTRACE1 == PTDTRACE2"
+    sex = "PESEX1 == PESEX2"
+    age_race = ' & '.join([age, race])
+    age_race_sex = ' & '.join([age, race, sex])
+
+    crit_d = {'age_race': age_race, 'age_race_sex': age_race_sex,
+              'age': age, 'race': race, 'sex': sex}
+
+    def log_merge(df, ltype):
+        """
+        DataFrame -> String -> Dict
+        """
+        month = (str(int(df['HRYEAR42'].dropna().iloc[0])) + '_' +
+                 str(int(df['HRMONTH2'].dropna().iloc[0])))
+        length = len(df)
+        d = {month: [{"type": ltype}, {"length": length}]}
+        return d
+
+    if log:
+        with open(settings['merge_log'], 'a') as f:
+            for criteria in crit_d:
+                to_log = log_merge(joined.query(crit_d[criteria]), criteria)
+                json.dump(to_log, f)
+
+    return joined.query(crit_d[match_type])
 
 
 def check_dtypes(wp):
@@ -72,34 +98,21 @@ def check_dtypes(wp):
         return wp
 
 
-def get_earnings_panel(month, store):
-    # TODO: table format pan w/ multiIndex isn't going well.  Used fixed for now.
-    # TODO: Empty frames for 2004-01 : 2004-04
+def get_earnings_panel(panel_store, month):
     """
-    #-----------------------------------------------------------------------------
-    idx = pd.MultiIndex.from_tuples([('one', 1), ('one', 2), ('two', 1), ('two', 2)])
-    df = pd.DataFrame({'A': np.random.randn(4), 'B': np.random.randn(4)}, index=idx)
-    #-----------------------------------------------------------------------------
+    Store -> str -> DataFrame
 
-    str -> Panel
+    Only run *AFTER* building the full panel (below).
 
-    Return panel of a survey wave where the earnings reported are positive.
+    month will be the second of the two outgoing interviews.
+    This will give us the differences from a year before.
+
+    DataFrame is suffixed by 1 or 2
     """
-    pre = '/monthly/data/'
-    next_month = get_next_month(month)
-    df1 = store.select(pre + month)
-    df2 = store.select(pre + next_month)
-
-    idx = match_surveys(df1, df2)
-    pan = pd.Panel({'A': df1.loc[idx], 'B': df2.loc[idx]})
-    return pan
-
-
-def make_earn_panel(earn_store):
-    """Just for those in MIS 4 and 16 who anser income questions"""
-    keys = earn_store.keys()
-    wp = pd.Panel({k.lstrip('/'): earn_store.select(k) for k in keys})
-    return wp
+    wp = panel_store.select(month)
+    df1, df2 = wp[4], wp[8]
+    joined = smart_match(df1, df2)
+    return joined
 
 
 def make_full_panel(cps_store, start_month):
@@ -125,6 +138,8 @@ def make_full_panel(cps_store, start_month):
     """
     # TODO: Handle truncated panels (last 7 months) (may be ok).
     # TODO: filter accoriding to id's (idx)
+    # TODO: set names of axis.
+    # TODO: fillter nonresponses: df = df[~pd.isnull(df).all(1)] ish
     pre = '/monthly/data/'
     df1 = cps_store.select(pre + start_month)
     df1 = df1[df1['HRMIS'] == 1]
@@ -143,66 +158,53 @@ def make_full_panel(cps_store, start_month):
     return pd.Panel(df_dict)
 
 
+def get_finished(settings):
+    with open(settings['panel_log']) as f:
+        finished = [x.split(' ')[-1].strip() for x in f if x.startswith('FINISHED')]
+
+    return finished
+
+
 def main():
+    """
+    Create two panels.
+        1. Full Panel. Each node a panel. Key is each wave's first MIS.
+            items: [0 .. 8] each wave's MIS.
+            major: fields
+            minor: micro ID.
+        2. Earnings Panel.
+    """
     with open('settings.txt', 'r') as f:
         settings = json.load(f)
 
-    cstore_path = settings['cstore_path']
-    store = pd.HDFStore(cstore_path)
-    earn_store_path = settings['earn_store_path']
-    earn_store = pd.HDFStore(earn_store_path)
+    store_path = settings['store_path']
+    store = pd.HDFStore(store_path)
+    panel_path = settings['panel_path']
+    panel_store = pd.HDFStore(panel_path)
     pre = '/monthly/data/'  # Path inside HDFStore.  Concat to month
 
     keys = store.keys()
-    all_months = itertools.ifilter(lambda x: x.startswith(pre), keys)
-    all_months = sorted((x.split('/')[-1] for x in all_months))
-    # This is a bit wasteful on reading in months.  Months 13 .. -13 will be
-    # read twice, once for their year and once for the next.
-    # Read time is less than a second though, so I'm ok with it.
+    finished = get_finished(settings)
 
-    # TEMPORARILY Just filter to months past a certain date
-    # once I know what vars to use when, filter on year/month and
-    # use a dict for multiple dispacth
-    #for month in all_months[:-12]:
-    all_months_ = itertools.ifilter(lambda x: int(x[1:5]) >= 1999, all_months)
-    for month in list(all_months_)[:-12]:
-        try:
-            df_earn = get_earnings_panel(month, store=store)
-            # Write out dfs before makeing panel.
-            df_earn.to_hdf(earn_store, month)
-            print("Added {}".format(month))
-        except KeyError:
-            print("Skipping {}".format(month))
+    all_months = itertools.ifilter(lambda x: x.startswith(pre), keys)
+    all_months = itertools.ifilter(lambda x: x not in finished, all_months)
+    all_months = sorted((x.split('/')[-1] for x in all_months))
+
+    for month in all_months:
+        wp = make_full_panel(store, month)
+        wp.to_hdf(panel_store, key=month, format='f')  # month is wave's MIS=1
+
+        with open('panel_log.txt', 'a') as f:
+            f.write('FINISHED {}'.format(month))
+        print('FINISHED {}\n'.format(month))
+    # for month in all_months:
+    #     start_ar = arrow.get(month, 'mYY_MM')
+    #     # store as second year (so difference).
+    #     store_key = start_ar.replace(years=+1).strftime('e%Y_%m')
+    #     wpe = get_earnings_panel(start_ar)
+    #     wpe.to_hdf(panel_store, key=store_key, format='f')
 
     store.close()
-
-
-#-----------------------------------------------------------------------------
-# -- misc --
-
-def plot_changes(earn_store):
-    fig, ax = plt.subplots()
-
-    for k, _ in earn_store.iteritems():
-        wp = earn_store.select(k)
-        if len(wp.A) == 0:
-            print("Empty panel for {}".format(k))
-            continue
-        elif (wp.A.dtypes == object).all():
-            print("Dtype issues panel for {}".format(k))
-            continue
-
-        try:
-            diff = (wp.A - wp.B)['PRERNWA']
-        except KeyError:
-            diff = (wp.A - wp.B)['PTERNWA']
-        try:
-            diff.plot(kind='kde', ax=ax)
-            print("Added {}".format(k))
-        except TypeError as e:
-            print('Skipping {} due to'.format(k, e))
-
-    return fig, ax
 
 if __name__ == '__main__':
     main()
