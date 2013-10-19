@@ -88,7 +88,7 @@ def check_dtypes(wp):
         return wp
 
 
-def get_earnings_panel(panel_store, month):
+def get_earnings_panel(panel_store, month, settings):
     """
     Store -> str -> DataFrame
 
@@ -101,7 +101,7 @@ def get_earnings_panel(panel_store, month):
     """
     wp = panel_store.select(month)
     df1, df2 = wp[4], wp[8]
-    joined = smart_match(df1, df2)
+    joined = smart_match(df1, df2, settings)
     return joined
 
 
@@ -199,19 +199,24 @@ def get_finished(settings, pat):
         raise ValueError("FINISHED-EARN or FINISHED_EARN only")
     try:
         with open(log_path) as f:
-            finished = [x.split(' ')[-1].strip() for x in f if x.startswith(pat)]
+            finished = [x.split(' ')[-1].strip() for x in f if x.lstrip('.').startswith(pat)]
+            f.seek(0)
+            failed = [x.split(' ')[2].strip() for x in f if
+                      x.startswith(pat.replace('FINISHED', 'FAILED'))]
     except IOError:
-        finished = []
-    return finished
+        finished, failed = [], []
+    return finished, failed
 
 
-def get_months(settings, store, pat):
+def get_months(settings, store, pat, skip_fail=True):
     # calling store.keys() was so slow
     all_months = itertools.ifilter(lambda x: x.startswith('m'),
                                    dir(store.root.monthly.data))
-    finished = get_finished(settings, pat=pat)
+    finished, failed = get_finished(settings, pat=pat)
     all_months = itertools.ifilter(lambda x: x not in finished, all_months)
-    all_months = (x.split('/')[-1] for x in all_months)
+    if skip_fail:
+        all_months = itertools.ifilter(lambda x: x not in failed, all_months)
+    # all_months = (x.split('/')[-1] for x in all_months)
     #TODO: fix the 89-93 ones :(
     all_months = sorted(itertools.ifilter(lambda x: int(x[1:5]) >= 1994, all_months))
 
@@ -247,7 +252,7 @@ def main():
             print('FINISHED {}\n'.format(month))
         except Exception as e:
             with open(settings['panel_log'], 'a') as f:
-                f.write("FAILED on {0} with exception {1}\n.".format(month, e))
+                f.write("FAILED-FULL on {0} with exception {1}\n".format(month, e))
 
     all_months = get_months(settings, store, pat='FINISHED-EARN')
     print("Earning Panels to create: {}".format(all_months))
@@ -258,14 +263,14 @@ def main():
         month_ar = arrow.get(month, 'mYY_MM')
         key = pre + month_ar.replace(years=1).strftime('m%Y_%m')
         try:
-            wp = get_earnings_panel(panel_store, month)
+            wp = get_earnings_panel(panel_store, month, settings)
             wp.to_hdf(earn_store, key)  # difference from year before.
             print('Finsihed {}'.format(month))
             with open(settings['earn_log'], 'a') as f:
                 f.write("FINISHED-EARN {}\n.".format(month))
         except Exception as e:
             with open(settings['earn_log'], 'a') as f:
-                f.write("FAILED on {0} with exception {1}\n.".format(month, e))
+                f.write("FAILED-EARN on {0} with exception {1}\n.".format(month, e))
     store.close()
 
 if __name__ == '__main__':
