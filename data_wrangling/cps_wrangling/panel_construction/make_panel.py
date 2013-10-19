@@ -197,9 +197,11 @@ def get_finished(settings, pat):
         log_path = settings['earn_log']
     else:
         raise ValueError("FINISHED-EARN or FINISHED_EARN only")
-    with open(log_path) as f:
-        finished = [x.split(' ')[-1].strip() for x in f if x.startswith(pat)]
-
+    try:
+        with open(log_path) as f:
+            finished = [x.split(' ')[-1].strip() for x in f if x.startswith(pat)]
+    except IOError:
+        finished = []
     return finished
 
 
@@ -209,7 +211,9 @@ def get_months(settings, store, pat):
                                    dir(store.root.monthly.data))
     finished = get_finished(settings, pat=pat)
     all_months = itertools.ifilter(lambda x: x not in finished, all_months)
-    all_months = sorted((x.split('/')[-1] for x in all_months))
+    all_months = (x.split('/')[-1] for x in all_months)
+    #TODO: fix the 89-93 ones :(
+    all_months = sorted(itertools.ifilter(lambda x: int(x[1:5]) >= 1994, all_months))
 
     return all_months
 
@@ -233,12 +237,16 @@ def main():
 
     all_months = get_months(settings, store, pat='FINISHED-FULL')
     for month in all_months:
-        wp = make_full_panel(store, month, settings, keys=all_months)
-        wp.to_hdf(panel_store, key=month, format='f')  # month is wave's MIS=1
+        try:
+            wp = make_full_panel(store, month, settings, keys=all_months)
+            wp.to_hdf(panel_store, key=month, format='f')  # month is wave's MIS=1
 
-        with open(settings['panel_log'], 'a') as f:
-            f.write('FINISHED-FULL{}\n'.format(month))
-        print('FINISHED {}\n'.format(month))
+            with open(settings['panel_log'], 'a') as f:
+                f.write('FINISHED-FULL {}\n'.format(month))
+            print('FINISHED {}\n'.format(month))
+        except Exception as e:
+            with open(settings['panel_log'], 'a') as f:
+                f.write("FAILED on {0} with exception {1}\n.".format(month, e))
 
     all_months = get_months(settings, store, pat='FINISHED-EARN')
     earn_store = pd.HDFStore(settings["earn_store_path"])
@@ -249,9 +257,12 @@ def main():
         try:
             wp = get_earnings_panel(panel_store, month)
             wp.to_hdf(earn_store, key)  # difference from year before.
+            print('Finsihed {}'.format(month))
+            with open(settings['earn_log'], 'a') as f:
+                f.write("FINISHED-EARN {}\n.".format(month))
         except Exception as e:
             with open(settings['earn_log'], 'a') as f:
-                f.write("FAILED on {0} with exception {1}.".format(month, e))
+                f.write("FAILED on {0} with exception {1}\n.".format(month, e))
     store.close()
 
 if __name__ == '__main__':
