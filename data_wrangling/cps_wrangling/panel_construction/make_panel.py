@@ -191,10 +191,27 @@ def make_full_panel(cps_store, start_month, settings, keys):
 
 
 def get_finished(settings, pat):
-    with open(settings['panel_log']) as f:
+    if pat == 'FINISHED-FULL':
+        log_path = settings['panel_log']
+    elif pat == 'FINISHED-EARN':
+        log_path = settings['earn_log']
+    else:
+        raise ValueError("FINISHED-EARN or FINISHED_EARN only")
+    with open(log_path) as f:
         finished = [x.split(' ')[-1].strip() for x in f if x.startswith(pat)]
 
     return finished
+
+
+def get_months(settings, store, pat):
+    # calling store.keys() was so slow
+    all_months = itertools.ifilter(lambda x: x.startswith('m'),
+                                   dir(store.root.monthly.data))
+    finished = get_finished(settings, pat=pat)
+    all_months = itertools.ifilter(lambda x: x not in finished, all_months)
+    all_months = sorted((x.split('/')[-1] for x in all_months))
+
+    return all_months
 
 
 def main():
@@ -214,14 +231,7 @@ def main():
     panel_path = settings['panel_path']
     panel_store = pd.HDFStore(panel_path)
 
-    # calling store.keys() was so slow
-    all_months = itertools.ifilter(lambda x: x.startswith('m'),
-                                   dir(store.root.monthly.data))
-    finished = get_finished(settings, pat='FINISHED-FULL')
-
-    all_months = itertools.ifilter(lambda x: x not in finished, all_months)
-    all_months = sorted((x.split('/')[-1] for x in all_months))
-
+    all_months = get_months(settings, store, pat='FINISHED-FULL')
     for month in all_months:
         wp = make_full_panel(store, month, settings, keys=all_months)
         wp.to_hdf(panel_store, key=month, format='f')  # month is wave's MIS=1
@@ -229,13 +239,19 @@ def main():
         with open(settings['panel_log'], 'a') as f:
             f.write('FINISHED-FULL{}\n'.format(month))
         print('FINISHED {}\n'.format(month))
-    # for month in all_months:
-    #     start_ar = arrow.get(month, 'mYY_MM')
-    #     # store as second year (so difference).
-    #     store_key = start_ar.replace(years=+1).strftime('e%Y_%m')
-    #     wpe = get_earnings_panel(start_ar)
-    #     wpe.to_hdf(panel_store, key=store_key, format='f')
 
+    all_months = get_months(settings, store, pat='FINISHED-EARN')
+    earn_store = pd.HDFStore(settings["earn_store_path"])
+    pre = '/monthly/data/'
+    for month in all_months:
+        month_ar = arrow.get(month, 'mYY_MM')
+        key = pre + month_ar.replace(years=1).strftime('m%Y_%m')
+        try:
+            wp = get_earnings_panel(panel_store, month)
+            wp.to_hdf(earn_store, key)  # difference from year before.
+        except Exception as e:
+            with open(settings['earn_log'], 'a') as f:
+                f.write("FAILED on {0} with exception {1}.".format(month, e))
     store.close()
 
 if __name__ == '__main__':
