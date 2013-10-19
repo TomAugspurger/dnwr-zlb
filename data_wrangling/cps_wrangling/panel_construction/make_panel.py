@@ -236,6 +236,7 @@ def main():
     panel_store = pd.HDFStore(panel_path)
 
     all_months = get_months(settings, store, pat='FINISHED-FULL')
+    print("Panels to create: {}".format(all_months))
     for month in all_months:
         try:
             wp = make_full_panel(store, month, settings, keys=all_months)
@@ -249,6 +250,8 @@ def main():
                 f.write("FAILED on {0} with exception {1}\n.".format(month, e))
 
     all_months = get_months(settings, store, pat='FINISHED-EARN')
+    print("Earning Panels to create: {}".format(all_months))
+
     earn_store = pd.HDFStore(settings["earn_store_path"])
     pre = '/monthly/data/'
     for month in all_months:
