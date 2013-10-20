@@ -46,7 +46,7 @@ class Checker(object):
     def write_panel(self):
         """ IO """
         with open("panel_check.json", 'w') as f:
-            json.dump(self.out_list, f)
+            json.dump(self.out_list, f, indent=1)
 
     def get_panel_overlap(self):
         for k in self.panel_keys:
@@ -54,7 +54,7 @@ class Checker(object):
             missing = (self.canon - cols).tolist()
             extra = (cols - self.canon).tolist()
             common = self.canon.intersection(cols).tolist()
-            yield {"missing": missing, "extra": extra, "common": common}
+            yield {k.lstip('/'): {"missing": missing, "extra": extra, "common": common}}
             print("Yiedled {}".format(k))
 
     def _call_earn(self):
@@ -67,7 +67,7 @@ def main():
 
     full_check = Checker(settings, kind='panel')
     full_check()
-    full_check.write()
+    full_check.write_panel()
     # earn_check = Checker(settings, kind='earn')
     # earn_check()
 
