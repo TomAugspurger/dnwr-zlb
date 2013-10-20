@@ -643,6 +643,8 @@ def special_by_dd(keys):
         """
         89 and 92 have a question for hours and bins. I goto midpoint of bin.
 
+        Roughly corresponds to PEERNHRO
+
         A-EMPHRS    CHARACTER*002 .     (0357:0358)           LFSR=1 OR 2
            REASONS NOT AT WORK OR HOURS AT WORK
            -1 = NOT IN UNIVERSE
@@ -670,7 +672,7 @@ def special_by_dd(keys):
                      6: 2, 7: 9.5, 8: 18, 9: 25.5, 10: 32, 11: 37, 13: 44,
                      15: 54}
         hours = hours.replace(hours_dic)
-        df['AhEMPHRS'] = hours
+        df['PEERNHRO'] = hours
         return df
 
     def combine_hours(df, dd_name):
