@@ -5,6 +5,7 @@ import json
 import pathlib
 import re
 
+import arrow
 import pandas as pd
 
 from make_hdf_store import append_to_store
@@ -110,13 +111,55 @@ def fix_year_2(settings, store):
         print('added {}'.format(month))
 
 
+def fix_after_check(settings, store):
+    """
+    need to have a panel_check.json file.
+    """
+    panel_store = pd.HDFStore(settings["panel_path"])
+
+    good_cols_by_dd = settings['col_rename_by_dd']
+    # just nonempty
+    good_cols_by_dd = {k: v for k, v in good_cols_by_dd.iteritems() if v}
+    month_to_dd = settings['month_to_dd']
+    tofix = it.ifilter(lambda x: month_to_dd[x] in good_cols_by_dd.keys(),
+                       month_to_dd)
+    for month in tofix:
+        name = '/monthly/data/m' + month[:4] + '_' + month[-2:]
+        dd = month_to_dd[month]
+        good_cols = good_cols_by_dd[dd]
+        df = store.select(name)
+        df = df.rename(columns=good_cols)
+        try:
+            store.remove(name)
+        except KeyError:
+            pass
+        store.append(name, df)
+        print("Fixed month {0} at {1}".format(month, arrow.utcnow()))
+
+        new_name = name.split('/')[-1]
+        try:
+            wp = panel_store.select(new_name)
+        except KeyError:
+            print("No panel for {}".format(month))
+            continue
+
+        wp = wp.rename(good_cols, axis='minor')
+        try:
+            store.remove(new_name)
+        except KeyError:
+            pass
+        store.append(new_name, wp)
+        print("Fixed panel {0} at {1}".format(month, arrow.utcnow()))
+
+
 def main():
     settings = json.load(open('settings.txt'))
     store = pd.HDFStore(settings['store_path'])
     #
     # fix_age_jan2010(settings, store)
     # fix_names(settings, store)
-    fix_year_2(settings, store)
+    # fix_year_2(settings, store)
+    fix_after_check(settings, store)
 
 if __name__ == '__main__':
 
