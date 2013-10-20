@@ -258,10 +258,9 @@ def main():
     print("Earning Panels to create: {}".format(all_months))
 
     earn_store = pd.HDFStore(settings["earn_store_path"])
-    pre = '/monthly/data/'
     for month in all_months:
         month_ar = arrow.get(month, 'mYY_MM')
-        key = pre + month_ar.replace(years=1).strftime('m%Y_%m')
+        key = month_ar.replace(years=1).strftime('m%Y_%m')
         try:
             wp = get_earnings_panel(panel_store, month, settings)
             wp.to_hdf(earn_store, key)  # difference from year before.
