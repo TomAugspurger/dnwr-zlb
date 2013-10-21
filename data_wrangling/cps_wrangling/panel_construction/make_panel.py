@@ -170,9 +170,7 @@ def make_full_panel(cps_store, start_month, settings, keys):
 
     """
     # TODO: Handle truncated panels (last 7 months) (may be ok).
-    # TODO: filter accoriding to id's (idx)
     # TODO: set names of axis.
-    # TODO: fillter nonresponses: df = df[~pd.isnull(df).all(1)] ish
     pre = '/monthly/data/'
     df1 = cps_store.select(pre + start_month)
     df1 = df1[df1['HRMIS'] == 1]
@@ -208,17 +206,18 @@ def get_finished(settings, pat):
     return finished, failed
 
 
-def get_months(settings, store, pat, skip_fail=True):
+def get_months(settings, store, pat, skip_fail=True, overwrite=False):
     # calling store.keys() was so slow
     all_months = itertools.ifilter(lambda x: x.startswith('m'),
                                    dir(store.root.monthly.data))
     finished, failed = get_finished(settings, pat=pat)
+    if overwrite:
+        all_months = finished + failed
+        return all_months
     all_months = itertools.ifilter(lambda x: x not in finished, all_months)
     if skip_fail:
         all_months = itertools.ifilter(lambda x: x not in failed, all_months)
-    # all_months = (x.split('/')[-1] for x in all_months)
-    #TODO: fix the 89-93 ones :(
-    all_months = sorted(itertools.ifilter(lambda x: int(x[1:5]) >= 1994, all_months))
+    all_months = sorted(all_months)
 
     return all_months
 
@@ -240,8 +239,10 @@ def main():
     panel_path = settings['panel_path']
     panel_store = pd.HDFStore(panel_path)
 
-    all_months = get_months(settings, store, pat='FINISHED-FULL')
+    all_months = get_months(settings, store, pat='FINISHED-FULL', skip_fail=False)
     print("Panels to create: {}".format(all_months))
+    with open(settings["panel_log"], 'a') as f:
+        f.write("start time: {}\n".format(arrow.utcnow()))
     for month in all_months:
         try:
             wp = make_full_panel(store, month, settings, keys=all_months)
@@ -254,8 +255,11 @@ def main():
             with open(settings['panel_log'], 'a') as f:
                 f.write("FAILED-FULL on {0} with exception {1}\n".format(month, e))
 
-    all_months = get_months(settings, store, pat='FINISHED-EARN')
+    all_months = get_months(settings, store, pat='FINISHED-EARN', overwrite=True)
     print("Earning Panels to create: {}".format(all_months))
+
+    with open(settings["earn_log"], 'a') as f:
+        f.write("start time: {}\n".format(arrow.utcnow()))
 
     earn_store = pd.HDFStore(settings["earn_store_path"])
     for month in all_months:
@@ -266,10 +270,10 @@ def main():
             wp.to_hdf(earn_store, key)  # difference from year before.
             print('Finsihed {}'.format(month))
             with open(settings['earn_log'], 'a') as f:
-                f.write("FINISHED-EARN {}\n.".format(month))
+                f.write("FINISHED-EARN {}\n".format(month))
         except Exception as e:
             with open(settings['earn_log'], 'a') as f:
-                f.write("FAILED-EARN on {0} with exception {1}\n.".format(month, e))
+                f.write("FAILED-EARN on {0} with exception {1}\n".format(month, e))
     store.close()
 
 if __name__ == '__main__':

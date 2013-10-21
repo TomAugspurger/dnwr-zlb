@@ -125,6 +125,7 @@ def fix_after_check(settings, store):
                        month_to_dd)
     for month in tofix:
         name = '/monthly/data/m' + month[:4] + '_' + month[-2:]
+        print(name)
         dd = month_to_dd[month]
         good_cols = good_cols_by_dd[dd]
         df = store.select(name)
@@ -145,10 +146,10 @@ def fix_after_check(settings, store):
 
         wp = wp.rename(good_cols, axis='minor')
         try:
-            store.remove(new_name)
+            panel_store.remove(new_name)
         except KeyError:
             pass
-        store.append(new_name, wp)
+        wp.to_hdf(panel_store, key=new_name, format='f')  # month is wave's MIS=1
         print("Fixed panel {0} at {1}".format(month, arrow.utcnow()))
 
 
