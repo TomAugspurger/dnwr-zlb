@@ -87,7 +87,7 @@ def check_dtypes(wp):
         return wp
 
 
-def get_earnings_panel(panel_store, month, settings):
+def get_earnings_joined(panel_store, month, settings):
     """
     Store -> str -> DataFrame
 
@@ -265,7 +265,7 @@ def main():
         month_ar = arrow.get(month, 'mYY_MM')
         key = month_ar.replace(years=1).strftime('m%Y_%m')
         try:
-            wp = get_earnings_panel(panel_store, month, settings)
+            wp = get_earnings_joined(panel_store, month, settings)
             wp.to_hdf(earn_store, key)  # difference from year before.
             print('Finsihed {}'.format(month))
             with open(settings['earn_log'], 'a') as f:
