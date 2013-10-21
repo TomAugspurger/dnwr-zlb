@@ -221,6 +221,45 @@ def get_months(settings, store, pat, skip_fail=False, skip_finished=False):
         return sorted(all_months)
 
 
+def write_panel(settings, panel_store, cps_store, all_months):
+    print("Panels to create: {}".format(all_months))
+
+    with open(settings["panel_log"], 'a') as f:
+        f.write("start time: {}\n".format(arrow.utcnow()))
+
+    for month in all_months:
+        try:
+            wp = make_full_panel(cps_store, month, settings, keys=all_months)
+            wp.to_hdf(panel_store, key=month, format='f')  # month is wave's MIS=1
+
+            with open(settings['panel_log'], 'a') as f:
+                f.write('FINISHED-FULL {}\n'.format(month))
+            print('FINISHED {}\n'.format(month))
+        except Exception as e:
+            with open(settings['panel_log'], 'a') as f:
+                f.write("FAILED-FULL on {0} with exception {1}\n".format(month, e))
+
+
+def write_earnings(settings, earn_store, panel_store, all_months):
+    print("Earning Panels to create: {}".format(all_months))
+
+    with open(settings["earn_log"], 'a') as f:
+        f.write("start time: {}\n".format(arrow.utcnow()))
+
+    for month in all_months:
+        month_ar = arrow.get(month, 'mYY_MM')
+        key = month_ar.replace(years=1).strftime('m%Y_%m')
+        try:
+            wp = get_earnings_joined(panel_store, month, settings)
+            wp.to_hdf(earn_store, key)  # difference from year before.
+            print('Finsihed {}'.format(month))
+            with open(settings['earn_log'], 'a') as f:
+                f.write("FINISHED-EARN {}\n".format(month))
+        except Exception as e:
+            with open(settings['earn_log'], 'a') as f:
+                f.write("FAILED-EARN on {0} with exception {1}\n".format(month, e))
+
+
 def main():
     """
     Create two panels.
@@ -239,41 +278,15 @@ def main():
     panel_store = pd.HDFStore(panel_path)
 
     all_months = get_months(settings, store, pat='FINISHED-FULL')
-    print("Panels to create: {}".format(all_months))
-    with open(settings["panel_log"], 'a') as f:
-        f.write("start time: {}\n".format(arrow.utcnow()))
-    for month in all_months:
-        try:
-            wp = make_full_panel(store, month, settings, keys=all_months)
-            wp.to_hdf(panel_store, key=month, format='f')  # month is wave's MIS=1
-
-            with open(settings['panel_log'], 'a') as f:
-                f.write('FINISHED-FULL {}\n'.format(month))
-            print('FINISHED {}\n'.format(month))
-        except Exception as e:
-            with open(settings['panel_log'], 'a') as f:
-                f.write("FAILED-FULL on {0} with exception {1}\n".format(month, e))
+    write_panel(settings, panel_store, store, all_months)
 
     all_months = get_months(settings, store, pat='FINISHED-EARN')
-    print("Earning Panels to create: {}".format(all_months))
-
-    with open(settings["earn_log"], 'a') as f:
-        f.write("start time: {}\n".format(arrow.utcnow()))
-
     earn_store = pd.HDFStore(settings["earn_store_path"])
-    for month in all_months:
-        month_ar = arrow.get(month, 'mYY_MM')
-        key = month_ar.replace(years=1).strftime('m%Y_%m')
-        try:
-            wp = get_earnings_joined(panel_store, month, settings)
-            wp.to_hdf(earn_store, key)  # difference from year before.
-            print('Finsihed {}'.format(month))
-            with open(settings['earn_log'], 'a') as f:
-                f.write("FINISHED-EARN {}\n".format(month))
-        except Exception as e:
-            with open(settings['earn_log'], 'a') as f:
-                f.write("FAILED-EARN on {0} with exception {1}\n".format(month, e))
+
+    write_earnings(settings, earn_store, panel_store, all_months)
     store.close()
+    earn_store.close()
+    panel_store.close()
 
 if __name__ == '__main__':
     main()
