@@ -39,6 +39,7 @@ def fix_age_jan2010(settings, store):
         except KeyError:
             pass
         store.append(name, df)
+        print("Fixed {}".format(month))
 
 
 def fix_names(settings, store):
@@ -153,6 +154,32 @@ def fix_after_check(settings, store):
         print("Fixed panel {0} at {1}".format(month, arrow.utcnow()))
 
 
+def fix_age_older(settings, store):
+    """
+    Missed need to change jan2010 PEAGE -> PRTAGE
+    """
+    all_months = settings["month_to_dd"]
+    with open('panel_log.txt') as f:
+        g = it.dropwhile(lambda x: not x.startswith('start time: 2013-10-21T00:46:47.102951+00:00'), f)
+        failed = it.ifilter(lambda x: x.endswith("u'no item named PRTAGE'\n"), g)
+        needfix = sorted(it.imap(lambda x: x.split(' ')[2], failed))
+
+    def combine_age(df, dd_name):
+        """For jan89 and jan92 they split the age over two fields."""
+        df["PRTAGE"] = df["AdAGEDG1"] * 10 + df["AdAGEDG2"]
+        return df
+
+    for month in needfix:
+        name = '/monthly/data/' + month
+        df = store.select(name)
+        df = df.rename(columns={'PEAGE': 'PRTAGE'})
+        try:
+            store.remove(name)
+        except KeyError:
+            pass
+        store.append(name, df)
+
+
 def main():
     settings = json.load(open('settings.txt'))
     store = pd.HDFStore(settings['store_path'])
@@ -160,7 +187,9 @@ def main():
     # fix_age_jan2010(settings, store)
     # fix_names(settings, store)
     # fix_year_2(settings, store)
-    fix_after_check(settings, store)
+    # fix_after_check(settings, store)
+    # fix_age_older(settings, store)
+    fix_age_jan2010(settings, store)
 
 if __name__ == '__main__':
 

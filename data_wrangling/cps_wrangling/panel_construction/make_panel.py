@@ -16,7 +16,6 @@ import json
 from time import strftime, strptime, struct_time
 
 import arrow
-import matplotlib.pyplot as plt
 import pandas as pd
 
 
@@ -206,20 +205,20 @@ def get_finished(settings, pat):
     return finished, failed
 
 
-def get_months(settings, store, pat, skip_fail=True, overwrite=False):
+def get_months(settings, store, pat, skip_fail=False, skip_finished=False):
     # calling store.keys() was so slow
     all_months = itertools.ifilter(lambda x: x.startswith('m'),
                                    dir(store.root.monthly.data))
     finished, failed = get_finished(settings, pat=pat)
-    if overwrite:
-        all_months = finished + failed
-        return all_months
-    all_months = itertools.ifilter(lambda x: x not in finished, all_months)
-    if skip_fail:
-        all_months = itertools.ifilter(lambda x: x not in failed, all_months)
-    all_months = sorted(all_months)
 
-    return all_months
+    if skip_fail and skip_finished:
+        raise ValueError("One of failed or finished must be returned.")
+    elif skip_fail:
+        return sorted(itertools.ifilter(lambda x: x not in finished, all_months))
+    elif skip_finished:
+        return sorted(itertools.ifilter(lambda x: x not in failed, all_months))
+    else:
+        return sorted(all_months)
 
 
 def main():
@@ -239,7 +238,7 @@ def main():
     panel_path = settings['panel_path']
     panel_store = pd.HDFStore(panel_path)
 
-    all_months = get_months(settings, store, pat='FINISHED-FULL', skip_fail=False)
+    all_months = get_months(settings, store, pat='FINISHED-FULL')
     print("Panels to create: {}".format(all_months))
     with open(settings["panel_log"], 'a') as f:
         f.write("start time: {}\n".format(arrow.utcnow()))
@@ -255,7 +254,7 @@ def main():
             with open(settings['panel_log'], 'a') as f:
                 f.write("FAILED-FULL on {0} with exception {1}\n".format(month, e))
 
-    all_months = get_months(settings, store, pat='FINISHED-EARN', overwrite=True)
+    all_months = get_months(settings, store, pat='FINISHED-EARN')
     print("Earning Panels to create: {}".format(all_months))
 
     with open(settings["earn_log"], 'a') as f:
