@@ -135,8 +135,9 @@ def add_flows_panel(wp, inplace=True):
 def clean_no_lineno(df):
     """drop if lineno is -1"""
     # TODO: why not just df.dropna(how='all', axis=0)?
+    idx_names = df.index.names
     x = df.reset_index()
-    df = (x.loc[~(x['PULINENO'] == -1)]).set_index(['HRHHID', 'HRHHID2', 'PULINENO'])
+    df = (x.loc[~(x['PULINENO'] == -1)]).set_index(idx_names)
     return df
 
 
@@ -167,7 +168,6 @@ def labor_status_value_counts(cps_store, month):
     df = df.dropna(how='all', axis=[0, 1])
     clean = df.dropna(how='all', axis=0)['labor_status']
     labels = {1: 'employed', 2: 'employed', 3: 'unemployed', 4: 'unemployed', 5: 'nilf', 6: 'nilf', 7: 'nilf'}
-    # import ipdb; ipdb.set_trace()
     cts = clean.replace(labels).value_counts().T
     # cts = cts.sort_index().T
     date = datetime(int(df.year.iloc[0]), int(df.month.iloc[0]), 1)
