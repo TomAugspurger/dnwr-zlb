@@ -3,7 +3,7 @@
 "store_path"       : "/Volumes/HDD/Users/tom/DataStorage/CPS/cps_store.h5",
 "cstore_path"      : "/Volumes/HDD/Users/tom/DataStorage/CPS/cps_storec.h5",
 "earn_store_path"  : "/Volumes/HDD/Users/tom/DataStorage/CPS/earn_store.h5",
-"panel_path"       : "/Volumes/HDD/Users/tom/DataStorage/CPS/panel_store.h5",
+"panel_store_path" : "/Volumes/HDD/Users/tom/DataStorage/CPS/panel_store.h5",
 "dd_path"          : "/Volumes/HDD/Users/tom/DataStorage/CPS/dds/",
 "raw_monthly_path" : "/Volumes/HDD/Users/tom/DataStorage/CPS/monthly/",
 "repo_path"        : "/Users/tom/Dropbox/Economics/inflation_in_recession/dnwr-zlb/data_wrangling",
