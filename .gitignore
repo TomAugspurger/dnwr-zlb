@@ -121,3 +121,6 @@ writing/seminar/notes_on_larrys_results.md
 data_wrangling/cps_wrangling/panel_construction/doc/*
 data_wrangling/cps_wrangling/panel_construction/merge_log.txt
 data_wrangling/cps_wrangling/panel_construction/panel_log.txt
+data_wrangling/cps_wrangling/panel_construction/earn_log.txt
+data_wrangling/cps_wrangling/panel_construction/update_panels.txt
+data_wrangling/cps_wrangling/panel_construction/panel_check.json

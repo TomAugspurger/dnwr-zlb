@@ -11,7 +11,7 @@ in the same month of two different years.
 """
 from __future__ import division
 
-import itertools
+import itertools as it
 import json
 from time import strftime, strptime, struct_time
 
@@ -28,7 +28,7 @@ def get_next_month(this_month):
     """
     struct = strptime(this_month, 'm%Y_%m')
     new_year = [struct.tm_year + 1]
-    new_struct = struct_time(itertools.chain(*[new_year, struct[1:]]))
+    new_struct = struct_time(it.chain(*[new_year, struct[1:]]))
     new_month = strftime('m%Y_%m', new_struct)
     return new_month
 
@@ -187,6 +187,18 @@ def make_full_panel(cps_store, start_month, settings, keys):
     return pd.Panel(df_dict)
 
 
+def get_last_log(fpath):
+    with open(fpath, 'r') as f:
+        log = f.read()
+    starts = filter(lambda x: x.startswith('start time'), log.splitlines())
+    try:
+        last_start = starts[-1]
+    except IndexError:
+        last_start = None
+    last_log = it.dropwhile(lambda x: x != last_start, log.splitlines())
+    return last_log
+
+
 def get_finished(settings, pat):
     if pat == 'FINISHED-FULL':
         log_path = settings['panel_log']
@@ -195,11 +207,10 @@ def get_finished(settings, pat):
     else:
         raise ValueError("FINISHED-EARN or FINISHED_EARN only")
     try:
-        with open(log_path) as f:
-            finished = [x.split(' ')[-1].strip() for x in f if x.lstrip('.').startswith(pat)]
-            f.seek(0)
-            failed = [x.split(' ')[2].strip() for x in f if
-                      x.startswith(pat.replace('FINISHED', 'FAILED'))]
+        finished = [x.split(' ')[-1].strip() for x in get_last_log(log_path) if
+                    x.lstrip('.').startswith(pat)]
+        failed = [x.split(' ')[2].strip() for x in get_last_log(log_path) if
+                  x.startswith(pat.replace('FINISHED', 'FAILED'))]
     except IOError:
         finished, failed = [], []
     return finished, failed
@@ -207,16 +218,16 @@ def get_finished(settings, pat):
 
 def get_months(settings, store, pat, skip_fail=False, skip_finished=False):
     # calling store.keys() was so slow
-    all_months = itertools.ifilter(lambda x: x.startswith('m'),
-                                   dir(store.root.monthly.data))
+    all_months = it.ifilter(lambda x: x.startswith('m'),
+                            dir(store.root.monthly.data))
     finished, failed = get_finished(settings, pat=pat)
 
     if skip_fail and skip_finished:
         raise ValueError("One of failed or finished must be returned.")
     elif skip_fail:
-        return sorted(itertools.ifilter(lambda x: x not in finished, all_months))
+        return sorted(it.ifilter(lambda x: x not in finished, all_months))
     elif skip_finished:
-        return sorted(itertools.ifilter(lambda x: x not in failed, all_months))
+        return sorted(it.ifilter(lambda x: x not in failed, all_months))
     else:
         return sorted(all_months)
 
@@ -269,18 +280,32 @@ def main():
             minor: micro ID.
         2. Earnings Panel.
     """
+    import sys
+
+    try:
+        special_months = sys.argv[1]
+    except ImportError:
+        special_months = False
     with open('settings.txt', 'r') as f:
         settings = json.load(f)
 
     store_path = settings['store_path']
     store = pd.HDFStore(store_path)
-    panel_path = settings['panel_path']
-    panel_store = pd.HDFStore(panel_path)
+    panel_store = pd.HDFStore(settings['panel_store_path'])
 
     all_months = get_months(settings, store, pat='FINISHED-FULL')
+
+    if special_months:
+        with open('update_panels.txt') as f:
+            all_months = ['m' + line.strip() for line in f.readlines()]
+
     write_panel(settings, panel_store, store, all_months)
 
-    all_months = get_months(settings, store, pat='FINISHED-EARN')
+    all_months = get_months(settings, store, pat='FINISHED-EARN', skip_finished=True)
+    if special_months:
+        with open('update_panels.txt') as f:
+            all_months = ['m' + line.strip() for line in f.readlines()]
+
     earn_store = pd.HDFStore(settings["earn_store_path"])
 
     write_earnings(settings, earn_store, panel_store, all_months)

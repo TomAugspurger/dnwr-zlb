@@ -180,6 +180,25 @@ def fix_age_older(settings, store):
         store.append(name, df)
 
 
+def fix_age_early_2012(settings, store):
+    """
+    missed age change for 2012-01 : 2012-04 (inclusive)
+    """
+    needfix = ['2012_01', '2012_02', '2012_03', '2012_04']
+    for month in needfix:
+        name = '/monthly/data/m' + month
+        df = store.select(name)
+        df = df.rename(columns={'PEAGE': 'PRTAGE'})
+        try:
+            store.remove(name)
+        except KeyError:
+            pass
+        store.append(name, df)
+
+    with open('update_panels.txt', 'w') as f:
+        f.write(('\n'.join(needfix)))
+
+
 def main():
     settings = json.load(open('settings.txt'))
     store = pd.HDFStore(settings['store_path'])
@@ -189,7 +208,8 @@ def main():
     # fix_year_2(settings, store)
     # fix_after_check(settings, store)
     # fix_age_older(settings, store)
-    fix_age_jan2010(settings, store)
+    # fix_age_jan2010(settings, store)
+    fix_age_early_2012(settings, store)
 
 if __name__ == '__main__':
 

@@ -228,3 +228,20 @@ def cln_shocks(params, shocks=None, size=10000, lower=.005, upper=.995):
     clean = shocks[shocks > a]
     clean = clean[clean < b]
     return clean
+
+
+def get_one(cps_store, month):
+    # apply to each node of store. returns a Series
+    useful = ['age', 'year', 'month', 'labor_status', 'earnings', 'race', 'sex', 'married']
+    df = sane_names(cps_store.select('/monthly/data/m' + month))[useful]
+    df = clean_no_lineno(df)
+    df = df.dropna(how='all', axis=[0, 1])
+    clean = df.dropna(how='any', axis=0)['labor_status']
+    labels = {1: 'employed', 2: 'employed', 3: 'unemployed', 4: 'unemployed', 5: 'nilf', 6: 'nilf', 7: 'nilf'}
+    import ipdb; ipdb.set_trace()
+    cts = clean.replace(labels).apply(lambda x: pd.value_counts(x))
+    cts = cts.sort_index().T
+    date = datetime(int(df.year.iloc[0]), int(df.month.iloc[0]), 1)
+    cts.index = [date]
+    return cts
+    
