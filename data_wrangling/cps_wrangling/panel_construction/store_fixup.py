@@ -257,9 +257,54 @@ def fix_dd_on_old(settings, store):
         f.write('\n')
 
 
+def wrong_race_name(settings, store):
+    """
+    NOT FIXED.  I have no idea where this one came from. The panels under
+    months: m2001_10 m2001_11 m2001_12 m2002_01 m2002_02 m2002_03 m2002_04
+            m2002_05 m2002_06 m2002_07 m2002_08 m2002_09 m2002_10 m2002_11
+            m2002_12
+
+    had race under PRDTRACE when it should be under PTDTRACE.
+    The actual messed up months are 2003-01
+    """
+    months = ["2001_10",
+              "2001_11",
+              "2001_12",
+              "2002_01",
+              "2002_02",
+              "2002_03",
+              "2002_04",
+              "2002_05",
+              "2002_06",
+              "2002_07",
+              "2002_08",
+              "2002_09",
+              "2002_10",
+              "2002_11",
+              "2002_12"]
+    GOOD = 'PTDTRACE'
+    BAD = 'PRDTRACE'
+    for month in months:
+        name = '/m' + month
+        wp = store.select(name)
+        wp2 = wp.drop(GOOD, axis=2)
+        wp2.rename(minor_axis={BAD: GOOD}, inplace=True)
+        wp.update(wp2)
+        try:
+            store.remove(name)
+        except KeyError:
+            pass
+        wp.to_hdf(store, key=name, format='f')
+        print('finsished {}'.format(month))
+
+    with open('update_panels.txt', 'w') as f:
+        f.write(('\n'.join(months)))
+
+
 def main():
     settings = json.load(open('settings.txt'))
-    store = pd.HDFStore(settings['store_path'])
+    # store = pd.HDFStore(settings['store_path'])
+    store = pd.HDFStore(settings['panel_store_path'])
     #
     # fix_age_jan2010(settings, store)
     # fix_names(settings, store)
@@ -268,7 +313,8 @@ def main():
     # fix_age_older(settings, store)
     # fix_age_jan2010(settings, store)
     "fix_age_early_2012(settings, store)"
-    fix_dd_on_old(settings, store)
+    # fix_dd_on_old(settings, store)
+    wrong_race_name(settings, store)
 
 if __name__ == '__main__':
 
