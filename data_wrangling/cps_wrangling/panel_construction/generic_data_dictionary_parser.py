@@ -106,7 +106,7 @@ class Parser(object):
                  'cps92.ddf': 'jan1992',
                  'cpsb_apr94_may95.ddf': 'apr1994',
                  'cpsb_jan94_mar94.ddf': 'jan1994',
-                 'cpsb_jun95_aug95.ddf': 'jun1994',
+                 'cpsb_jun95_aug95.ddf': 'jun1995',
                  'cpsbsep95.ddf': 'sep1995',
                  'cpsbjan98.ddf': 'jan1998',  # renamed this infile
                  'cpsbjan03.ddf': 'jan2003',

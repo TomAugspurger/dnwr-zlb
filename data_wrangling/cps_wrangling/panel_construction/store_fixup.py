@@ -2,6 +2,7 @@ from __future__ import division
 
 import itertools as it
 import json
+import os
 import pathlib
 import re
 
@@ -199,6 +200,63 @@ def fix_age_early_2012(settings, store):
         f.write(('\n'.join(needfix)))
 
 
+def fix_index_on_89_92(settings, store):
+    # TODO: have to run this one.
+    d = settings['month_to_dd']
+    needfix = [x[:4] + '_' + x[4:] for x in d if d[x] in ('jan1989', 'jan1992')]
+    for month in needfix:
+        name = '/monthly/data/m' + month
+        df = store.select(name)
+        df = df.rename(columns={'PEAGE': 'PRTAGE'})
+        try:
+            store.remove(name)
+        except KeyError:
+            pass
+        store.append(name, df)
+
+    with open('update_panels.txt', 'w') as f:
+        f.write(('\n'.join(needfix)))
+
+
+def fix_dd_on_old(settings, store):
+    """
+    Had the wrong dd from some months. These are the correct ones.
+
+    "cpsb9404": "apr1995",
+    "cpsb9405": "apr1995",
+    "cpsb9406": "apr1995",
+    "cpsb9407": "apr1995",
+    "cpsb9408": "apr1995",
+    "cpsb9409": "apr1995",
+    "cpsb9410": "apr1995",
+    "cpsb9411": "apr1995",
+    "cpsb9412": "apr1995",
+    "cpsb9501": "apr1995",
+    "cpsb9502": "apr1995",
+    "cpsb9503": "apr1995",
+    "cpsb9504": "apr1995",
+    "cpsb9505": "apr1995",
+    "cpsb9506": "jun1995",
+    "cpsb9507": "jun1995",
+    """
+    needfix = ["cpsb9404", "cpsb9405", "cpsb9406", "cpsb9407", "cpsb9408",
+               "cpsb9409", "cpsb9410", "cpsb9411", "cpsb9412", "cpsb9501",
+               "cpsb9502", "cpsb9503", "cpsb9504", "cpsb9505", "cpsb9506",
+               "cpsb9507", "cpsb9508"]
+    p = pathlib.PosixPath(str(settings['raw_monthly_path']))
+    files = list(iter(p))
+    posix_fix = [x for x in files if str(x.parts[-1]).rstrip('.gz') in needfix]
+    dds = pd.HDFStore(settings['store_path'])
+    for month in posix_fix:
+        append_to_store(month, settings, skips=[], dds=dds, skip=False)
+
+    needfix = [x[:4] + '_' + x[4:] for x in needfix]
+
+    with open('update_panels.txt', 'a') as f:
+        f.write(('\n'.join(needfix)))
+        f.write('\n')
+
+
 def main():
     settings = json.load(open('settings.txt'))
     store = pd.HDFStore(settings['store_path'])
@@ -209,7 +267,8 @@ def main():
     # fix_after_check(settings, store)
     # fix_age_older(settings, store)
     # fix_age_jan2010(settings, store)
-    fix_age_early_2012(settings, store)
+    "fix_age_early_2012(settings, store)"
+    fix_dd_on_old(settings, store)
 
 if __name__ == '__main__':
 
