@@ -137,6 +137,7 @@ def clean_no_lineno(df):
     # TODO: why not just df.dropna(how='all', axis=0)?
     idx_names = df.index.names
     x = df.reset_index()
+    # good_idx_iloc = x[~pd.isnull(x[idx_names]).any(1)].index
     df = (x.loc[~(x['PULINENO'] == -1)]).set_index(idx_names)
     return df
 
@@ -162,8 +163,10 @@ def labor_status_value_counts(cps_store, month):
     name without leading m ('2010_01').  Sets name of the resulting series
     to month. Concat together with pd.concat([m1, ... m2], axis=1)
     """
+    cols = ['HRYEAR4', 'PTDTRACE', 'PEMARITL', 'PRTAGE', 'PRERNWA', 'PEMLR',
+            'PESEX', 'HRMONTH']
     useful = ['age', 'year', 'month', 'labor_status', 'earnings', 'race', 'sex', 'married']
-    df = sane_names(cps_store.select('/monthly/data/m' + month))[useful]
+    df = sane_names(cps_store.select('/monthly/data/m' + month, columns=cols))[useful]
     df = clean_no_lineno(df)
     df = df.dropna(how='all', axis=[0, 1])
     clean = df.dropna(how='all', axis=0)['labor_status']

@@ -284,7 +284,7 @@ def main():
 
     try:
         special_months = sys.argv[1]
-    except ImportError:
+    except IndexError:
         special_months = False
     with open('settings.txt', 'r') as f:
         settings = json.load(f)
