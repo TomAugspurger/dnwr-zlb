@@ -259,7 +259,7 @@ def write_earnings(settings, earn_store, panel_store, all_months):
 
     for month in all_months:
         month_ar = arrow.get(month, 'mYY_MM')
-        key = month_ar.replace(years=1).strftime('m%Y_%m')
+        key = month_ar.replace(months=15).strftime('m%Y_%m')
         try:
             wp = get_earnings_joined(panel_store, month, settings)
             wp.to_hdf(earn_store, key)  # difference from year before.
