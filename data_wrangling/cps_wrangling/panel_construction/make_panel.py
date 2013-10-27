@@ -313,5 +313,10 @@ def main():
     earn_store.close()
     panel_store.close()
 
+    # clean from update_panels.
+    if special_months:
+        with open('update_panels.txt', 'w') as f:
+            pass
+
 if __name__ == '__main__':
     main()
