@@ -752,6 +752,7 @@ def append_to_store(month, settings, skips, dds, skip=True):
     except Exception as e:
         with open(settings["store_log"], 'a') as f:
             f.write('FAILED {} for reason {}.\n'.format(str(month), e))
+        print('FAILED {} for reason {}.\n'.format(str(month), e))
 
 
 def main():
