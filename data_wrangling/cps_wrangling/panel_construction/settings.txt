@@ -12,7 +12,6 @@
 "merge_log"        : "merge_log.txt",
 "panel_log"        : "panel_log.txt",
 "earn_log"         : "earn_log.txt",
-"dd_path"          : "/Volumes/HDD/Users/tom/DataStorage/CPS/dds",
 "dupe_path"        : "/Volumes/HDD/Users/tom/DataStorage/CPS/monthly/dupes/",
 "dd_to_year"       :
     {
