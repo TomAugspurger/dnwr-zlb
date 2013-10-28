@@ -38,6 +38,7 @@ from datetime import datetime
 from difflib import get_close_matches
 import itertools
 import json
+import os
 import re
 
 import arrow
@@ -198,7 +199,9 @@ def handle_dupes(df, settings):
     deduped = drop_duplicates_index(df, dupes=dupes)
 
     dupe_file = settings['dupe_path'] + df.index.name + '.csv'
-
+    dir_ = '/' + os.path.join(*dupe_file.split('/')[:-1])
+    if not os.path.exists(dir_):
+        os.mkdir(dir_)
     with open(dupe_file, 'w') as f:
         header = ','.join(map(str, df.index.names) + df.columns.tolist()) + '\n'
         f.write(header)
@@ -626,7 +629,7 @@ def special_by_dd(keys):
         status[df['AhNLFREA'] == 2] = 6
 
         df['PEMLR'] = status
-        df = df.drop("AhNLFREA", axis=1)
+        df = df.drop(["AhLFSR", "AhNLFREA"], axis=1)
         return df
 
     def expand_hours(df, dd_name):
