@@ -75,8 +75,18 @@ if __name__ == '__main__':
 
     example outdir: '/Volumes/HDD/Users/tom/DataStorage/CPS/monthly/'
     """
+    import json
     import sys
-    out_dir, dd = sys.argv[1:]
+    with open('settings.txt') as f:
+        settings = json.load(f)
+
+    out_dir = settings["raw_monthly_path"]
+
+    try:
+        dd = sys.argv[1]
+    except IndexError:
+        dd = False
+
     if dd == 'dd':  # download the data dictionaries
         regex = re.compile(r'\w*\.ddf')
     else:
