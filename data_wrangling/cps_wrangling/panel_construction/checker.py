@@ -31,7 +31,7 @@ class Checker(object):
         """
         Treat August 2013's columns as the One True Representation.
         """
-        return self.cps_store.select('/monthly/data/m2013_08').columns
+        return self.cps_store.select('m2013_08').columns
 
     def __call__(self):
         return {'panel': self._call_panel, 'earn': self._call_earn}[self.kind]()
