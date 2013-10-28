@@ -520,10 +520,10 @@ def name_handling(month, settings, skip=True):
     if just_name == '' or month.is_dir():
         return just_name, _, _, _, _
 
-    out_name = arrow.get(just_name[-4:], 'YYMM').strftime('m%Y_%m')
+    out_name = arrow.get(just_name, 'YYYY_MM').strftime('m%Y_%m')
     s_month = str(month)
     name = s_month.split('.')[0]
-    dd_name = settings["month_to_dd_by_filename"][just_name]
+    dd_name = settings["month_to_dd"][''.join(just_name.split('_'))]
 
     return just_name, out_name, s_month, name, dd_name
 
@@ -547,14 +547,14 @@ def standardize_cols(df, dd_name, settings):
     if missing:
         name = str(df.HRYEAR4.iloc[0]) + str(df.HRMONTH.iloc[0])
         key = ' '.join([str(arrow.utcnow()), name, 'missing'])
-        d = {key: missing}
+        d = {key: list(missing)}
         with open('make_hdf_store_log.json', 'a') as f:
             json.dump(d, f, indent=2)
 
     if extra:
         name = str(df.HRYEAR4.iloc[0]) + str(df.HRMONTH.iloc[0])
         key = ' '.join([str(arrow.utcnow()), name, 'extra'])
-        d = {key: extra}
+        d = {key: list(extra)}
         with open('make_hdf_store_log.json', 'a') as f:
             json.dump(d, f, indent=2)
 
@@ -689,7 +689,7 @@ def append_to_store(month, settings, skips, dds, skip=True):
             print("Skipped {}".format(out_name))
 
         try:
-            dd = dds.select('/monthly/dd/' + dd_name)
+            dd = dds.select(dd_name)
             widths = dd.length.tolist()
         except KeyError:
             print("No data dictionary for {}".format(out_name))
@@ -747,11 +747,11 @@ def main():
     #-------------------------------------------------------------------------
     # setup
     raw_path = pathlib.Path(str(settings['raw_monthly_path']))
-    dds = pd.HDFStore(settings['store_path'])
+    dds = pd.HDFStore(settings['dd_store_path'])
 
     skips = get_skips(settings['store_log'])
 
-    months = iter(raw_path)
+    months = (month for month in raw_path if not month.parts[-1].startswith('.'))
     if some_months:
         months = (m for m in months if str(m).parts[-1].rstrip('gz') in month_list)
     for month in months:
