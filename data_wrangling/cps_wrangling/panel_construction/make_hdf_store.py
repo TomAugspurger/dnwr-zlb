@@ -2,35 +2,30 @@
 We have data dictionaries parsed in an HDFStore.
 We have the cps zipped repo.
 
-Combine for an HDFStore of CPS tables.
+All of these programs (make_*) should accept an optinal param
+(just sys.argv for now, argparser later) that will restrict
+the months to a subset. Read from a file for now. the format must be
+YYYY_MM
 
-Note on layout:
-
-cps_store/
-    monthly/
-        dd/
-        data/
-            mYYYY_MM
-            mYYYY_MM
-
-Want to keep pythonic names so I can't go 2013-01.
-
-See generic_data_dictionary_parser.Parser.get_store_name for info
-on which year gets which dd.
-
-They claim to use
-    (HHID, HHNUM, LINENO)
-for '94 that is "HRHHID", "HUHHNUM", "PULINENO"
-and validate with
-    sex, age, race
+Storing the following columns for each month:
 
 
-Possiblye interested in
 
-    PTERNH1C-Earnings-hourly pay rate,excluding overtime
-    PTERNH2-T Earnings-(main job)hourly pay rate,amount
-**  PTWK-T Earnings-weekly-top code flag  **
 
+
+
+
+Here's a dict of CPS names to my names.
+
+names = {'PRTAGE': 'age', 'PTDTRACE': 'race', 'PESEX': 'sex',
+         'PEMARITL': 'married', "PRERNWA": "earnings", "HRYEAR4": "year",
+         'HRMONTH': "month", "PEMLR": 'labor_status'}
+
+The philosophy here is to raise early and raise often. If columns aren't
+aligning then we should raise immediatly.
+
+We'll also be strict about what makes it in to the panel. If *ANY* identifier
+is missing then that line gets dropped. This can be revisted in the future.
 """
 import re
 import os
@@ -48,62 +43,6 @@ import numpy as np
 #-----------------------------------------------------------------------------
 # File Handling / IO
 #-----------------------------------------------------------------------------
-
-class FileHandler(object):
-    """
-    Takes care of file system details when working on the zipped files.
-    Handles .Z, .zip, .gzip.
-
-
-    Sorry windows; Replace subprocess.call with appropriate utility.
-    Implements context manager that decompresses and cleans up once
-    the df has been read in.
-
-    Parameters
-    ----------
-
-    fname : String, path to zipped file.
-    force : Bool, default False.  If True will unzip and rezip the gzip file.
-
-    Example:
-        fname = 'Volumes/HDD/Users/tom/DataStorage/CPS/monthly/cpsb0201.Z'
-        with file_handler(fname):
-            pre_process(df)
-
-
-    """
-    def __init__(self, fname, force=False):
-        if os.path.exists(fname):
-            self.fname = fname
-            self.force = force
-        else:
-            raise IOError("The File does not exist.")
-
-    def __enter__(self):
-
-        if self.fname.endswith('.Z'):
-            subprocess.call(["uncompress", "-v", self.fname])
-        elif self.fname.endswith('.gzip'):
-            if self.force:
-                subprocess.call(["gzip", "-d", self.fname])
-            else:
-                print('Skipping decompression.')
-        elif self.fname.endswith('.zip'):
-            dir_name = '/'.join(self.fname.split('/')[:-1])
-            # Unzipping gives new name; can't control.  Get diff
-            current = {x for x in pathlib.Path(dir_name)}
-            subprocess.call(["unzip", self.fname, "-d", dir_name])
-            new = ({x for x in pathlib.Path(dir_name)} - current).pop()
-            self.new_path = str(new)
-        self.compname = self.fname.split('.')[0]
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        subprocess.call(["gzip", self.compname])  # Gives warnings on zips.
-        if self.fname.endswith('.gz') and self.force:
-            os.remove(self.fname.replace('.gz', '.txt'))
-        if self.fname.endswith('.zip'):
-            os.remove(self.new_path)
 
 
 def writer(df, name, store_path, settings, overwrite=True):
@@ -714,16 +653,8 @@ def append_to_store(month, settings, skips, dds, skip=True):
                 f.write("FAILED {}. No data dictionary".format(out_name))
             return None
 
-        if s_month.endswith('.gz'):
-            df = pd.read_fwf(name + '.gz', widths=widths,
-                             names=dd.id.values, compression='gzip')
-        else:
-            with FileHandler(s_month) as handler:
-                try:
-                    name = handler.new_path
-                except AttributeError:
-                    pass
-                df = pd.read_fwf(name, widths=widths, names=dd.id.values)
+        df = pd.read_fwf(name + '.gz', widths=widths,
+                         names=dd.id.values, compression='gzip')
 
         df = pre_process(df, ids=ids).sort_index()
 
@@ -757,17 +688,28 @@ def append_to_store(month, settings, skips, dds, skip=True):
 
 def main():
     import sys
+
     try:
-        settings = json.load(open(sys.argv[1]))
+        some_months = sys.argv[1]
     except IndexError:
-        settings = json.load(open('settings.txt'))
+        print("Making for all months")
+        some_months = False
+    if some_months:
+        with open('special_months_store.txt', 'r') as f:
+            month_list = [line.strip() for line in f.readlines()]
+
+    settings = json.load(open('settings.txt'))
     #-------------------------------------------------------------------------
     # setup
     raw_path = pathlib.Path(str(settings['raw_monthly_path']))
     dds = pd.HDFStore(settings['store_path'])
 
     skips = get_skips(settings['store_log'])
-    for month in raw_path:
+
+    months = iter(raw_path)
+    if some_months:
+        months = (m for m in months if str(m).parts[-1].rstrip('gz') in month_list)
+    for month in months:
         append_to_store(month, settings, skips, dds)
 
     dds.close()
