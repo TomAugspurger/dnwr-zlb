@@ -568,14 +568,18 @@ def special_by_dd(keys):
         base_year = int(dd_name[-4:-1]) * 10
         try:
             last_digit = df["HRYEAR"]
+            k = 'HRYEAR'
         except KeyError:
             last_digit = df["HdYEAR"]
+            k = 'HRYEAR'
         df["HRYEAR4"] = base_year + last_digit
+        df = df.drop(k, axis=1)
         return df
 
     def combine_age(df, dd_name):
         """For jan89 and jan92 they split the age over two fields."""
         df["PRTAGE"] = df["AdAGEDG1"] * 10 + df["AdAGEDG2"]
+        df = df.drop(["AdAGEDG1", "AdAGEDG2"], axis=1)
         return df
 
     def align_lfsr(df, dd_name):
@@ -620,6 +624,7 @@ def special_by_dd(keys):
         status[df['AhNLFREA'] == 2] = 6
 
         df['PEMLR'] = status
+        df = df.drop("AhNLFREA", axis=1)
         return df
 
     def expand_hours(df, dd_name):
@@ -656,6 +661,7 @@ def special_by_dd(keys):
                      15: 54}
         hours = hours.replace(hours_dic)
         df['PEERNHRO'] = hours
+        df.drop("AhEMPHRS", axis=1)
         return df
 
     def combine_hours(df, dd_name):
@@ -665,6 +671,7 @@ def special_by_dd(keys):
         fst = df['AdHRS1']
         snd = df['AdHRS2']
         df['PEHRACTT'] = fst * 10 + snd
+        df = df.drop(["AdHRS1", "AdHRS2"], axis=1)
         return df
 
     func_dict = {"expand_year": expand_year, "combine_age": combine_age,
