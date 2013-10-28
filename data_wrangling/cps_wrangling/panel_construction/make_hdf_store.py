@@ -10,9 +10,9 @@ YYYY_MM
 Storing the following columns for each month:
 
 
-common = ["PRTAGE", "HRMIS", "HRYEAR4", "PESEX", "HRMONTH", "PTDTRACE",
+common = {"PRTAGE", "HRMIS", "HRYEAR4", "PESEX", "HRMONTH", "PTDTRACE",
           "PEMLR", "PRERNWA", "PTWK", "PEMARITL", "PRDISC",
-          "HEFAMINC", "PTDTRACE", "HWHHWGT", "PEERNHRY"]
+          "HEFAMINC", "PTDTRACE", "HWHHWGT", "PEERNHRY", "HRMIS"}
 
 
 
@@ -73,8 +73,8 @@ def writer(df, name, store_path, settings, overwrite=True):
                 pass
         store.append('/monthly/data/' + name, df)
 
-    with open(settings["store_log"], 'a') as f:
-        f.write('PASSED {}\n'.format(name))
+    with open(settings["make_hdf_store_log.json"], 'a') as f:
+        f.write('PASSED {} {}\n'.format(name, arrow.utcnow()))
 
 
 #-----------------------------------------------------------------------------
@@ -536,6 +536,28 @@ def standardize_cols(df, dd_name, settings):
     """
     renamer = settings["col_rename_by_dd"][dd_name]
     df = df.rename(columns=renamer)
+
+    common = {"PRTAGE", "HRMIS", "HRYEAR4", "PESEX", "HRMONTH", "PTDTRACE",
+              "PEMLR", "PRERNWA", "PTWK", "PEMARITL", "PRDISC",
+              "HEFAMINC", "PTDTRACE", "HWHHWGT", "PEERNHRY", "HRMIS"}
+    cols = set(df.columns.tolist())
+    extra = cols - common
+    missing = common - cols
+
+    if missing:
+        name = str(df.HRYEAR4.iloc[0]) + str(df.HRMONTH.iloc[0])
+        key = ' '.join([str(arrow.utcnow()), name, 'missing'])
+        d = {key: missing}
+        with open('make_hdf_store_log.json', 'a') as f:
+            json.dump(d, f, indent=2)
+
+    if extra:
+        name = str(df.HRYEAR4.iloc[0]) + str(df.HRMONTH.iloc[0])
+        key = ' '.join([str(arrow.utcnow()), name, 'extra'])
+        d = {key: extra}
+        with open('make_hdf_store_log.json', 'a') as f:
+            json.dump(d, f, indent=2)
+
     return df
 
 

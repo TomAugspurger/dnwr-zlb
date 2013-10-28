@@ -18,6 +18,8 @@ from time import strftime, strptime, struct_time
 import arrow
 import pandas as pd
 
+from checker import Checker
+
 
 def get_next_month(this_month):
     """
