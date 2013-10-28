@@ -39,14 +39,14 @@ def full_year(dir_):
     for f in files:
         strf = f.parts[-1]
         year = int(strf[5:7])
-        month = strf[6:8]
-        if year < 50:  # TODO: will break in year 2050 :(
+        month = strf[7:9]
+        if year > 50:  # TODO: will break in year 2050 :(
             year += 1900
         else:
             year += 2000
         year = str(year)
         name = os.path.join(str(dir_), year + '_' + month + '.gz')
-        shutil.move(f, name)
+        shutil.move(strf, name)
         print("Moved {}".format(name))
 
 
