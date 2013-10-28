@@ -73,7 +73,7 @@ def writer(df, name, store_path, settings, overwrite=True):
                 pass
         store.append('/monthly/data/' + name, df)
 
-    with open(settings["make_hdf_store_log.json"], 'a') as f:
+    with open(settings["make_hdf_store_log"], 'a') as f:
         f.write('PASSED {} {}\n'.format(name, arrow.utcnow()))
 
 
@@ -143,12 +143,12 @@ def post_process(df):
     """
     Stuff that depends on standardize_cols
     """
-    df['year'] = df.HRYEAR4.astype(np.int64)
-    df['month'] = df.HRMONTH.astype(np.int64)
-    df['timestamp'] = df.apply(lambda row: datetime(row['year'], row['month'], 1),
-                               axis=1)
-    df = df.drop('year', axis=1)
-    df = df.drop('month', axis=1)
+    assert len(df.HRYEAR4.dropna().unique()) == 1
+    assert len(df.HRMONTH.dropna().unique()) == 1
+    year = int(df.HRYEAR4.iloc[0])
+    month = int(df.HRMONTH.iloc[0])
+
+    df['timestamp'] = datetime(year, month, 1)
     return df
 
 

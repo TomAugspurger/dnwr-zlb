@@ -13,6 +13,7 @@
 "panel_log"        : "panel_log.txt",
 "earn_log"         : "earn_log.txt",
 "dupe_path"        : "/Volumes/HDD/Users/tom/DataStorage/CPS/monthly/dupes/",
+"make_hdf_store_log": "make_hdf_store_log.json",
 "dd_to_year"       :
     {
         "jan1989": ["1989-01","1991-12"],
