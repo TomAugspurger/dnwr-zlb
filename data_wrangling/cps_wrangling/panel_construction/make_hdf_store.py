@@ -10,7 +10,9 @@ YYYY_MM
 Storing the following columns for each month:
 
 
-
+common = ["PRTAGE", "HRMIS", "HRYEAR4", "PESEX", "HRMONTH", "PTDTRACE",
+          "PEMLR", "PRERNWA", "PTWK", "PEMARITL", "PRDISC",
+          "HEFAMINC", "PTDTRACE", "HWHHWGT", "PEERNHRY"]
 
 
 
@@ -26,13 +28,17 @@ aligning then we should raise immediatly.
 
 We'll also be strict about what makes it in to the panel. If *ANY* identifier
 is missing then that line gets dropped. This can be revisted in the future.
+
+Convention:
+
+* all months will be refered to by YYYY_MM. The only excpetion is
+in the keys to stores, which will be 'mYYYY_MM'
 """
-import re
-import os
-import json
-import itertools
-import subprocess
+from datetime import datetime
 from difflib import get_close_matches
+import itertools
+import json
+import re
 
 import arrow
 import pathlib
@@ -113,12 +119,7 @@ def pre_process(df, ids):
     # May want to be careful with index here.
     # forcing numeric chops of leading zeros.
     df = df.convert_objects(convert_numeric=True)
-    df = df.set_index(ids)
 
-    if "FILLER" in df.columns:
-        df = df.drop("FILLER", axis=1)
-    if "PADDING" in df.columns:
-        df = df.drop("PADDING", axis=1)
     try:
         df[df == -1] = np.nan
     except TypeError:
@@ -127,6 +128,27 @@ def pre_process(df, ids):
         except:
             # TODO: log here
             pass
+    good_id_idx = (~pd.isnull(df[ids]).all(1)).index
+    df = df.loc[good_id_idx]
+    df = df.set_index(ids)
+
+    if "FILLER" in df.columns:
+        df = df.drop("FILLER", axis=1)
+    if "PADDING" in df.columns:
+        df = df.drop("PADDING", axis=1)
+    return df
+
+
+def post_process(df):
+    """
+    Stuff that depends on standardize_cols
+    """
+    df['year'] = df.HRYEAR4.astype(np.int64)
+    df['month'] = df.HRMONTH.astype(np.int64)
+    df['timestamp'] = df.apply(lambda row: datetime(row['year'], row['month'], 1),
+                               axis=1)
+    df = df.drop('year', axis=1)
+    df = df.drop('month', axis=1)
     return df
 
 
@@ -667,6 +689,7 @@ def append_to_store(month, settings, skips, dds, skip=True):
 
         df = get_subset(df, settings=settings, dd_name=dd_name)
         df = standardize_cols(df, dd_name, settings)
+        df = post_process(df)
 
         df.index.name = out_name
 
@@ -712,8 +735,11 @@ def main():
     for month in months:
         append_to_store(month, settings, skips, dds)
 
+    # cleanup
     dds.close()
-
+    if some_months:
+        with open('special_months_store.txt', 'w') as f:
+            pass
 #-----------------------------------------------------------------------------
 if __name__ == '__main__':
     main()
