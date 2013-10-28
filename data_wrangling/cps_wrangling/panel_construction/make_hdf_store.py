@@ -489,7 +489,9 @@ def get_subset(df, settings, dd_name, quiet=False):
     subset : DataFrame.
     """
     cols = {x for x in flatten(settings["dd_to_vars"][dd_name].values())}
-    subset = df.columns.intersection(cols)
+    good_cols = {x for x in flatten(settings["dd_to_vars"]["jan2013"].values())}
+    all_cols = cols.union(good_cols)
+    subset = df.columns.intersection(all_cols)
 
     if not quiet:
         print("Implicitly dropping {}".format(cols.symmetric_difference(subset)))
@@ -571,7 +573,7 @@ def special_by_dd(keys):
             k = 'HRYEAR'
         except KeyError:
             last_digit = df["HdYEAR"]
-            k = 'HRYEAR'
+            k = 'HdYEAR'
         df["HRYEAR4"] = base_year + last_digit
         df = df.drop(k, axis=1)
         return df
