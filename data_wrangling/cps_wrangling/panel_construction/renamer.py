@@ -38,8 +38,8 @@ def full_year(dir_):
     files = (x for x in all_files if x.parts[-1].startswith('cpsb'))
     for f in files:
         strf = f.parts[-1]
-        year = int(strf[5:7])
-        month = strf[7:9]
+        year = int(strf[4:6])
+        month = strf[6:8]
         if year > 50:  # TODO: will break in year 2050 :(
             year += 1900
         else:
