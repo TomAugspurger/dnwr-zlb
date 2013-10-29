@@ -96,10 +96,13 @@ def dedup_cols(df):
     Returns
     df : Same DataFrame, less the dupes.
     """
-    idx = df.columns
-    dupes = idx.get_duplicates()
-    print("Duplicates: {}".format(dupes))
-    return df.T.drop(dupes).T
+    if not df.columns.is_unique:
+        idx = df.columns
+        dupes = idx.get_duplicates()
+        print("Duplicates: {}".format(dupes))
+        return df.T.drop(dupes).T
+    else:
+        return df
 
 
 def pre_process(df, ids):
@@ -130,7 +133,7 @@ def pre_process(df, ids):
         except:
             # TODO: log here
             pass
-    good_id_idx = (~pd.isnull(df[ids]).all(1)).index
+    good_id_idx = (~pd.isnull(df[ids]).any(1)).index
     df = df.loc[good_id_idx]
     df = df.set_index(ids)
 
