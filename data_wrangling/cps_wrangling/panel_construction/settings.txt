@@ -15,6 +15,8 @@
 "dupe_path"        : "/Volumes/HDD/Users/tom/DataStorage/CPS/monthly/dupes/",
 "make_hdf_store_log": "make_hdf_store_log.json",
 "make_hdf_store_completed": "make_hdf_store_completed.txt",
+"make_full_panel_completed": "make_full_panel_completed.txt",
+"make_earn_completed": "make_earn_completed.txt",
 "dd_to_year"       :
     {
         "jan1989": ["1989-01","1991-12"],

@@ -201,35 +201,37 @@ def get_last_log(fpath):
     return last_log
 
 
-def get_finished(settings, pat):
-    if pat == 'FINISHED-FULL':
-        log_path = settings['panel_log']
-    elif pat == 'FINISHED-EARN':
-        log_path = settings['earn_log']
+def get_finished(settings, kind):
+    """
+    The log format is:
+    month,  time started,                    time finished
+    1989_01,2013-10-28T20:05:52.995437+00:00,2013-10-28T20:06:01.821006+00:00
+
+    This checks the first column for finished months.
+    """
+    if kind == 'full_panel':
+        log_path = settings['make_full_panel_completed']
+    elif kind == 'earn':
+        log_path = settings['make_earn_completed']
     else:
-        raise ValueError("FINISHED-EARN or FINISHED_EARN only")
+        raise ValueError("full_panel or earn only")
     try:
-        finished = [x.split(' ')[-1].strip() for x in get_last_log(log_path) if
-                    x.lstrip('.').startswith(pat)]
-        failed = [x.split(' ')[2].strip() for x in get_last_log(log_path) if
-                  x.startswith(pat.replace('FINISHED', 'FAILED'))]
+        with open(log_path) as f:
+            finished = [x.split(',')[0].strip() for x in f]
     except IOError:
-        finished, failed = [], []
-    return finished, failed
+        with open(log_path, 'w') as f:
+            pass
+        finished = []
+    return finished
 
 
-def get_months(settings, store, pat, skip_fail=False, skip_finished=False):
+def get_months(settings, store, kind, skip_finished=True):
     # calling store.keys() was so slow
-    all_months = it.ifilter(lambda x: x.startswith('m'),
-                            dir(store.root.monthly.data))
-    finished, failed = get_finished(settings, pat=pat)
+    all_months = store.keys()
+    finished = get_finished(settings, kind=kind)
 
-    if skip_fail and skip_finished:
-        raise ValueError("One of failed or finished must be returned.")
-    elif skip_fail:
-        return sorted(it.ifilter(lambda x: x not in finished, all_months))
-    elif skip_finished:
-        return sorted(it.ifilter(lambda x: x not in failed, all_months))
+    if skip_finished:
+        return sorted((x for x in all_months if x.lstrip('m') not in finished))
     else:
         return sorted(all_months)
 
@@ -295,7 +297,8 @@ def main():
     store = pd.HDFStore(store_path)
     panel_store = pd.HDFStore(settings['panel_store_path'])
 
-    all_months = get_months(settings, store, pat='FINISHED-FULL')
+    all_months = get_months(settings, store, kind='full_panel',
+                            skip_finished=True)
 
     if special_months:
         with open('update_panels.txt') as f:
@@ -303,7 +306,7 @@ def main():
 
     write_panel(settings, panel_store, store, all_months)
 
-    all_months = get_months(settings, store, pat='FINISHED-EARN', skip_finished=True)
+    all_months = get_months(settings, store, kind='earn', skip_finished=True)
     if special_months:
         with open('update_panels.txt') as f:
             all_months = ['m' + line.strip() for line in f.readlines()]
