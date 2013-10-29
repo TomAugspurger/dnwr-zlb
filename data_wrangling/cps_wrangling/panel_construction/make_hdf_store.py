@@ -52,7 +52,7 @@ import numpy as np
 #-----------------------------------------------------------------------------
 
 
-def writer(df, name, store_path, settings, overwrite=True):
+def writer(df, name, store_path, settings, start_time, overwrite=True):
     """
     Write the dataframe to the HDFStore. Non-pure.
 
@@ -69,13 +69,14 @@ def writer(df, name, store_path, settings, overwrite=True):
     with pd.get_store(store_path) as store:
         if overwrite:
             try:
-                store.remove('/monthly/data/' + name)
+                store.remove(name)
             except KeyError:
                 pass
-        store.append('/monthly/data/' + name, df)
+        store.append(name, df)
 
-    with open(settings["make_hdf_store_log"], 'a') as f:
-        f.write('PASSED {} {}\n'.format(name, arrow.utcnow()))
+    logname = name.lstrip('m')
+    with open(settings["make_hdf_store_completed"], 'a') as f:
+        f.write('{},{},{}\n'.format(logname, start_time, arrow.utcnow()))
 
 
 #-----------------------------------------------------------------------------
@@ -460,8 +461,7 @@ def log_and_store(df):
 def get_skips(file_):
     try:
         with open(file_, 'r') as f:
-            skips = [line.split(' ')[-1].rstrip()
-                     for line in f if line.startswith('PASSED')]
+            skips = [line.split(',')[0].rstrip() for line in f]
     except IOError:
         with open(file_, 'w') as f:
             skips = []
@@ -687,7 +687,7 @@ def special_by_dd(keys):
     return filtered
 
 
-def append_to_store(month, settings, skips, dds, skip=True):
+def append_to_store(month, settings, skips, dds, start_time):
     try:
         just_name, out_name, s_month, name, dd_name = (
             name_handling(month, settings))
@@ -696,9 +696,6 @@ def append_to_store(month, settings, skips, dds, skip=True):
             return None
 
         ids = settings["dd_to_ids"][dd_name]
-
-        if out_name in skips and skip:
-            print("Skipped {}".format(out_name))
 
         try:
             dd = dds.select(dd_name)
@@ -735,7 +732,8 @@ def append_to_store(month, settings, skips, dds, skip=True):
         #------------------------------------------------------------------
         # Writing
         store_path = settings['store_path']
-        writer(df, name=out_name, store_path=store_path, settings=settings)
+        writer(df, name=out_name, store_path=store_path, settings=settings,
+               start_time=start_time)
         print('Added {}'.format(out_name))
     except Exception as e:
         with open(settings["store_log"], 'a') as f:
@@ -758,16 +756,20 @@ def main():
     settings = json.load(open('settings.txt'))
     #-------------------------------------------------------------------------
     # setup
+    start_time = arrow.utcnow()
     raw_path = pathlib.Path(str(settings['raw_monthly_path']))
     dds = pd.HDFStore(settings['dd_store_path'])
 
-    skips = get_skips(settings['store_log'])
+    skips = get_skips(settings['make_hdf_store_completed'])
 
     months = (month for month in raw_path if not month.parts[-1].startswith('.'))
     if some_months:
         months = (m for m in months if str(m).parts[-1].rstrip('gz') in month_list)
+
+    months = (x for x in months if x.parts[-1].rstrip('.gz') not in skips)
+
     for month in months:
-        append_to_store(month, settings, skips, dds)
+        append_to_store(month, settings, skips, dds, start_time=start_time)
 
     # cleanup
     dds.close()
