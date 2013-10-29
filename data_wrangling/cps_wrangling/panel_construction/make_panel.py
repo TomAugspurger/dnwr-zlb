@@ -100,8 +100,10 @@ def get_earnings_joined(panel_store, month, settings):
 
     DataFrame is suffixed by 1 or 2
     """
-    wp = panel_store.select(month)
+    wp = panel_store.select(month).transpose('minor', 'major', 'items')
     df1, df2 = wp[4], wp[8]
+    df1 = df1.convert_objects(convert_numeric=True)
+    df2 = df2.convert_objects(convert_numeric=True)
     joined = smart_match(df1, df2, settings)
     return joined
 
@@ -155,20 +157,13 @@ def make_full_panel(cps_store, start_month, settings, keys):
 
         store.month
 
-    where month corresponds to the wave whose first month in
-    the survey equals one (MIS=IM=1).  Each node will be a dataframe
-    where
+    To keep dtypes the Panel's layout is
+    items: df.columns
+    major: df.index
+    minor: [1,2,..8] the MIS.
 
-                                        data
-        (interview_date, unique_id)
-
-    alternatively a panel where the items are interview_date / MIS.
-    The unique_id section of the index should be constant through
-    the full 8 interview months, modulo survey attrition.
-
-    if filter is True, it will pass the dataframes off to smart_match
-    with the kwargs. Filter each against the initial?
-
+    When reading for earn_store you'll need to do:
+        wp = panel_store.select(month).transpose('minor', 'major', 'items')
     """
     # TODO: Handle truncated panels (last 7 months) (may be ok).
     # TODO: set names of axis.
@@ -184,9 +179,10 @@ def make_full_panel(cps_store, start_month, settings, keys):
     for i, df in enumerate(dfs, 1):
         df_dict[i + 1] = match_panel(df1, df[df['HRMIS'] == i + 1],
                                      log=settings['panel_log'])
-    # Lose dtype info here. Could use pd.Panel.fromdict(x, orient='minor')
-    # to preserve dtypes
-    return pd.Panel(df_dict)
+    # Lose dtype info here if I just do from dict.
+    # to preserve dtypes:
+    wp = pd.Panel.from_dict(df_dict, orient='minor')
+    return wp
 
 
 def get_last_log(fpath):
@@ -231,9 +227,10 @@ def get_months(settings, store, kind, skip_finished=True):
     finished = get_finished(settings, kind=kind)
 
     if skip_finished:
-        return sorted((x for x in all_months if x.lstrip('m') not in finished))
+        return (sorted((x for x in all_months if x.lstrip('m') not in finished)),
+                all_months)
     else:
-        return sorted(all_months)
+        return (sorted(all_months), all_months)
 
 
 def write_panel(month, settings, panel_store, cps_store, all_months, start_time):
@@ -262,8 +259,8 @@ def write_earnings(month, settings, earn_store, panel_store, all_months, start_t
         month_ar = arrow.get(month, 'mYY_MM')
         key = month_ar.replace(months=15).strftime('m%Y_%m')
         try:
-            wp = get_earnings_joined(panel_store, month, settings)
-            wp.to_hdf(earn_store, key)  # difference from year before.
+            df = get_earnings_joined(panel_store, month, settings)
+            df.to_hdf(earn_store, key)  # difference from year before.
             print('Finsihed {}'.format(month))
             with open(settings['make_earn_completed'], 'a') as f:
                 f.write('{},{},{}\n'.format(month, start_time, arrow.utcnow()))
@@ -299,27 +296,28 @@ def main():
     #---------------------------------------------------------------------------
     # Create Full Panels
     #---------------------------------------------------------------------------
-    all_months = get_months(settings, store, kind='full_panel',
-                            skip_finished=True)
+    months_to_do, keys = get_months(settings, store, kind='full_panel',
+                                    skip_finished=True)
     if special_months:
         with open('update_panels.txt') as f:
-            all_months = ['m' + line.strip() for line in f.readlines()]
-    print("Panels to create: {}".format(all_months))
-    for month in all_months:
-        write_panel(month, settings, panel_store, store, all_months, start_time)
+            months_to_do = ['m' + line.strip() for line in f.readlines()]
+    print("Panels to create: {}".format(months_to_do))
+    for month in months_to_do:
+        write_panel(month, settings, panel_store, store, keys, start_time)
 
     #---------------------------------------------------------------------------
     # Create Earn DataFrames
     #---------------------------------------------------------------------------
-    all_months = get_months(settings, store, kind='earn', skip_finished=True)
+    months_to_do, keys = get_months(settings, store, kind='earn',
+                                    skip_finished=True)
     if special_months:
         with open('update_panels.txt') as f:
-            all_months = ['m' + line.strip() for line in f.readlines()]
+            months_to_do = ['m' + line.strip() for line in f.readlines()]
 
     earn_store = pd.HDFStore(settings["earn_store_path"])
 
-    for month in all_months:
-        write_earnings(month, settings, earn_store, panel_store, all_months, start_time)
+    for month in months_to_do:
+        write_earnings(month, settings, earn_store, panel_store, keys, start_time)
 
     store.close()
     earn_store.close()
