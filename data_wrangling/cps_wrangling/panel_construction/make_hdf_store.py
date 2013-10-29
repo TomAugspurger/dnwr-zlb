@@ -97,10 +97,9 @@ def dedup_cols(df):
     df : Same DataFrame, less the dupes.
     """
     if not df.columns.is_unique:
-        idx = df.columns
-        dupes = idx.get_duplicates()
+        dupes = df.columns.get_duplicates()
         print("Duplicates: {}".format(dupes))
-        return df.T.drop(dupes).T
+        return df.drop(dupes, axis=1)
     else:
         return df
 
@@ -133,8 +132,7 @@ def pre_process(df, ids):
         except:
             # TODO: log here
             pass
-    good_id_idx = (~pd.isnull(df[ids]).any(1)).index
-    df = df.loc[good_id_idx]
+    df = df.loc[~(pd.isnull(df[ids]).any(1)), :]
     df = df.set_index(ids)
 
     if "FILLER" in df.columns:
