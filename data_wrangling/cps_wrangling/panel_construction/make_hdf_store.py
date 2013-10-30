@@ -571,13 +571,14 @@ def special_by_dd(keys):
     """All of these are inplace"""
     def expand_year(df, dd_name):
         """ For jan1989 - sep1995 they wrote the year as a SINGLE DIGIT"""
-        base_year = int(dd_name[-4:-1]) * 10
-        try:
-            last_digit = df["HRYEAR"]
+        if 'HRYEAR' in df.columns:
             k = 'HRYEAR'
-        except KeyError:
-            last_digit = df["HdYEAR"]
-            k = 'HdYEAR'
+        else:
+            k = k = 'HdYEAR'
+        last_digits = df[k].dropna().unique()[0]
+        if last_digits >= 10:
+            last_digits = last_digits % 10
+        base_year = int(dd_name[-4:-1]) * 10
         df["HRYEAR4"] = base_year + last_digit
         df = df.drop(k, axis=1)
         return df
