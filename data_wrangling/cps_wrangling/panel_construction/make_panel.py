@@ -307,7 +307,7 @@ def get_touching_months(months, kind='full_panel'):
         raise ValueError("Just `full_panel` or `earn`.")
     need_update = set(x.replace(months=y) for y in shifts for x in ars)
     for x in need_update:
-        yield x.strftime('%Y_%m')
+        yield x.strftime('/m%Y_%m')
 
 
 def main():

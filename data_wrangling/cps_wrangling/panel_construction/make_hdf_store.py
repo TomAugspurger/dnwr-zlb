@@ -575,9 +575,9 @@ def special_by_dd(keys):
             k = 'HRYEAR'
         else:
             k = k = 'HdYEAR'
-        last_digits = df[k].dropna().unique()[0]
-        if last_digits >= 10:
-            last_digits = last_digits % 10
+        last_digit = df[k].dropna().unique()[0]
+        if last_digit >= 10:
+            last_digit = last_digit % 10
         base_year = int(dd_name[-4:-1]) * 10
         df["HRYEAR4"] = base_year + last_digit
         df = df.drop(k, axis=1)
