@@ -267,7 +267,47 @@ def write_earnings(month, settings, earn_store, panel_store, all_months, start_t
         except Exception as e:
             with open(settings['earn_log'], 'a') as f:
                 f.write("FAILED-EARN on {0} with exception {1}\n".format(month, e))
-                print("Failed on {}".format(month))
+                print("Failed on {} with exception {}.".format(month, e))
+
+
+def get_touching_months(months, kind='full_panel'):
+    """
+    [YYYY_MM] -> [YYYY_MM]
+
+    If the cps_store for month m changes, which panels and earning stores
+    need to be updated?
+
+    For panels, if month m is changed then we must change months
+    m-15
+    m-14
+    m-13
+    m-12
+    m-03
+    m-02
+    m-01
+    m
+    m+01
+    m+02
+    m+03
+    m+12
+    m+13
+    m+14
+    m+15
+
+
+    for earn_store its just m+3 and m+15.
+    we pass the list since some months will share a common month.
+    """
+    ars = [arrow.get(month, 'YYYY_MM') for month in months]
+    if kind == 'full_panel':
+        shifts = [-15, -15, -13, -12, -3, -2, -1, 0, 1, 2, 3, 12, 13, 14, 15]
+    elif kind == 'earn':
+        shifts = [3, 15]
+    else:
+        raise ValueError("Just `full_panel` or `earn`.")
+    need_update = set(x.replace(months=y) for y in shifts for x in ars)
+    for x in need_update:
+        yield x.strftime('%Y_%m')
 
 
 def main():
@@ -296,27 +336,28 @@ def main():
     #---------------------------------------------------------------------------
     # Create Full Panels
     #---------------------------------------------------------------------------
-    months_to_do, keys = get_months(settings, store, kind='full_panel',
-                                    skip_finished=True)
+    months_todo, keys = get_months(settings, store, kind='full_panel',
+                                   skip_finished=True)
     if special_months:
         with open('update_panels.txt') as f:
-            months_to_do = ['m' + line.strip() for line in f.readlines()]
-    print("Panels to create: {}".format(months_to_do))
-    for month in months_to_do:
+            months_todo = get_touching_months([x.rstrip() for x in f])
+
+    print("Panels to create: {}".format(months_todo))
+    for month in months_todo:
         write_panel(month, settings, panel_store, store, keys, start_time)
 
     #---------------------------------------------------------------------------
     # Create Earn DataFrames
     #---------------------------------------------------------------------------
-    months_to_do, keys = get_months(settings, store, kind='earn',
-                                    skip_finished=True)
+    months_todo, keys = get_months(settings, store, kind='earn',
+                                   skip_finished=True)
     if special_months:
         with open('update_panels.txt') as f:
-            months_to_do = ['m' + line.strip() for line in f.readlines()]
+            months_todo = get_touching_months([x.rstrip() for x in f])
 
     earn_store = pd.HDFStore(settings["earn_store_path"])
 
-    for month in months_to_do:
+    for month in months_todo:
         write_earnings(month, settings, earn_store, panel_store, keys, start_time)
 
     store.close()
