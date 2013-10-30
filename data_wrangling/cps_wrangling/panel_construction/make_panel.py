@@ -294,18 +294,23 @@ def get_touching_months(months, kind='full_panel'):
     m+14
     m+15
 
-
-    for earn_store its just m+3 and m+15.
+    for earn_store its m+j+3 and m+j+15 for all j above.
     we pass the list since some months will share a common month.
+
+    This may not be strictly necessary. If I update month m in panel P,
+    then I need only update earnings for months P_m+3 and P_m+15, i.e.
+    not for P_j+3 and P_j+15 forall j in P. But it doesn't take that
+    long to do the earnings panels anyway.
     """
     ars = [arrow.get(month, 'YYYY_MM') for month in months]
-    if kind == 'full_panel':
-        shifts = [-15, -15, -13, -12, -3, -2, -1, 0, 1, 2, 3, 12, 13, 14, 15]
-    elif kind == 'earn':
-        shifts = [3, 15]
-    else:
-        raise ValueError("Just `full_panel` or `earn`.")
+    shifts = [-15, -15, -13, -12, -3, -2, -1, 0, 1, 2, 3, 12, 13, 14, 15]
     need_update = set(x.replace(months=y) for y in shifts for x in ars)
+    if kind == 'earn':
+        shifts = [3, 15]
+        need_update = set(x.replace(months=y) for y in shifts for x in need_update)
+    else:
+        raise ValueError("Just `full_panel` or `earn` for kind. Got {0} "
+                         "instead.".format(kind))
     for x in need_update:
         yield x.strftime('/m%Y_%m')
 
@@ -353,7 +358,7 @@ def main():
                                    skip_finished=True)
     if special_months:
         with open('update_panels.txt') as f:
-            months_todo = get_touching_months([x.rstrip() for x in f])
+            months_todo = get_touching_months([x.rstrip() for x in f], kind='earn')
 
     earn_store = pd.HDFStore(settings["earn_store_path"])
 
@@ -366,8 +371,17 @@ def main():
 
     # clean from update_panels.
     if special_months:
-        with open('update_panels.txt', 'w') as f:
-            pass
+        df = pd.read_csv(settings['make_full_panel_completed'],
+                         names=['month', 'start', 'end'],
+                         parse_dates=['start', 'end'])
+        finished = df[df['start'] == start_time.datetime]['month']
+        finished = finished.str.strip('/m')
+
+        with open('update_panels.txt', 'r+') as f:
+            months = [x.rstrip() for x in f]
+            unfinished = [y for y in months if y not in finished.values]
+            f.seek(0)
+            f.write('\n'.join(unfinished))
 
 if __name__ == '__main__':
     main()
