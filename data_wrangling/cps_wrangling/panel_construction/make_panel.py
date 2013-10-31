@@ -31,13 +31,13 @@ This means that the following panels will have the following holes:
 Which means we lose earnings *comparisions* for the following months
 (following the earnings method of reporting: k = second obs (MIS=8))
 
-1995_03
-1995_04
-1995_05
+1995_03 (missing 8)
+1995_04 (missing 8)
+1995_05 (missing 8)
 -------
-1996_03
-1996_04
-1996_05
+1996_03 (missing 4)
+1996_04 (missing 4)
+1996_05 (missing 4)
 """
 from __future__ import division
 
@@ -48,8 +48,6 @@ from time import strftime, strptime, struct_time
 import arrow
 
 import pandas as pd
-
-from checker import Checker
 
 
 def get_next_month(this_month):
@@ -160,7 +158,9 @@ def match_panel(df1, df2, log=None):
     # TODO: refactor; combine w/ smart_match
     left_idx = df1.index
     df2 = df2.loc[left_idx]  # left merge
-
+    # When the CPS messed up the ids in June 1995.
+    if pd.isnull(df2).all().all():
+        return None
     # filter out spurious matches
     # defined as -1 < delta age < 3 OR sex change
     age_diff = df2['PRTAGE'] - df1['PRTAGE']
@@ -223,6 +223,7 @@ def make_full_panel(cps_store, start_month, settings, keys):
         df_dict[i] = match_panel(df1, dfn, log=settings['panel_log'])
     # Lose dtype info here if I just do from dict.
     # to preserve dtypes:
+    df_dict = {k: v for k, v in df_dict.iteritems() if v is not None}
     wp = pd.Panel.from_dict(df_dict, orient='minor')
     return wp
 
