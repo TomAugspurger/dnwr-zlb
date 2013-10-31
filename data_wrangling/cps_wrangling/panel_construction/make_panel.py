@@ -255,7 +255,7 @@ def write_earnings(month, settings, earn_store, panel_store, all_months, start_t
     Note: If month is 1 then the following dates apply:
 
         panel_store: m1
-        earn_store:  m16   (MIS 3 and 8, wall-time is months 4 and 16)
+        earn_store:  m16   (MIS 4 and 8, wall-time is months 4 and 16)
     """
     month_ar = arrow.get(month, 'mYY_MM')
     key = month_ar.replace(months=15).strftime('m%Y_%m')
