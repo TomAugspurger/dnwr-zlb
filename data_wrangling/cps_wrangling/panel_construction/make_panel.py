@@ -11,33 +11,33 @@ in the same month of two different years.
 
 
 The CPS messed up the IDs for months 1995-06 through 1995-08 (inclusive).
+They didn't return to the old schema.
 This means that the following panels will have the following holes:
 
 1994_03 x x x x x x x _
 1994_04 x x x x x x _ _
 1994_05 x x x x x _ _ _
-1994_06 x x x x _ _ _ x
-1994_07 x x x x _ _ x x
-1994_08 x x x x _ x x x
------------------------
-1995_02 x x x x x x x x
-1995_03 x x x _ x x x x
-1995_04 x x _ _ x x x x
-1995_05 x _ _ _ x x x x
+1994_06 x x x x _ _ _ _
+1994_07 x x x x _ _ _ _
+1994_08 x x x x _ _ _ _
+1994_09 x x x x _ _ _ _
+1994_10 x x x x _ _ _ _
+1994_11 x x x x _ _ _ _
+1994_12 x x x x _ _ _ _
+1995_01 x x x x _ _ _ _
+1995_02 x x x x _ _ _ _
+1995_03 x x x _ _ _ _ _
+1995_04 x x _ _ _ _ _ _
+1995_05 x _ _ _ _ _ _ _
 1995_06 _ _ _ _ _ _ _ _
 1995_07 _ _ _ _ _ _ _ _
 1995_08 _ _ _ _ _ _ _ _
 
 Which means we lose earnings *comparisions* for the following months
-(following the earnings method of reporting: k = second obs (MIS=8))
+(following the earnings method of reporting: k = second obs (MIS=8),
+    which is 15 months in the future of the above table).
 
-1995_03 (missing 8)
-1995_04 (missing 8)
-1995_05 (missing 8)
--------
-1996_03 (missing 4)
-1996_04 (missing 4)
-1996_05 (missing 4)
+[ 1995_06 .. 1996_11 ]
 """
 from __future__ import division
 
