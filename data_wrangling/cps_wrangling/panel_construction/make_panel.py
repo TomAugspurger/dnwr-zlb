@@ -8,6 +8,36 @@ of the full sample should be included in the panel (ideally).
 Since households cycle out of the survey, if, e.g., MIS 4 is in
 January 2012, MIS 8 will be January 2013.  I.e. we get earnings
 in the same month of two different years.
+
+
+The CPS messed up the IDs for months 1995-06 through 1995-08 (inclusive).
+This means that the following panels will have the following holes:
+
+1994_03 x x x x x x x _
+1994_04 x x x x x x _ _
+1994_05 x x x x x _ _ _
+1994_06 x x x x _ _ _ x
+1994_07 x x x x _ _ x x
+1994_08 x x x x _ x x x
+-----------------------
+1995_02 x x x x x x x x
+1995_03 x x x _ x x x x
+1995_04 x x _ _ x x x x
+1995_05 x _ _ _ x x x x
+1995_06 _ _ _ _ _ _ _ _
+1995_07 _ _ _ _ _ _ _ _
+1995_08 _ _ _ _ _ _ _ _
+
+Which means we lose earnings *comparisions* for the following months
+(following the earnings method of reporting: k = second obs (MIS=8))
+
+1995_03
+1995_04
+1995_05
+-------
+1996_03
+1996_04
+1996_05
 """
 from __future__ import division
 
@@ -168,18 +198,29 @@ def make_full_panel(cps_store, start_month, settings, keys):
     """
     # TODO: Handle truncated panels (last 7 months) (may be ok).
     # TODO: set names of axis.
-    df1 = cps_store.select(start_month)
-    df1 = df1[df1['HRMIS'] == 1]
+    # start_ar = arrow.get(start_month, 'mYY_MM')
+    # rng = [1, 2, 3, 12, 13, 14, 15]
+    # ars = (start_ar.replace(months=x).strftime('/m%Y_%m') for x in rng)
+    # dfs = (cps_store.select(x) for x in ars if x in keys)
 
-    start_ar = arrow.get(start_month, 'mYY_MM')
-    rng = [1, 2, 3, 12, 13, 14, 15]
-    ars = (start_ar.replace(months=x).strftime('/m%Y_%m') for x in rng)
-    dfs = (cps_store.select(x) for x in ars if x in keys)
+    def gen_dfs(start_month):
+        start_ar = arrow.get(start_month, 'YYYY_MM')
+        rng = [0, 1, 2, 3, 12, 13, 14, 15]
+        ars = (start_ar.replace(months=x).strftime('/m%Y_%m') for x in rng)
+        for i, x in enumerate(ars, 1):
+            try:
+                df = cps_store.select(x)
+                yield df[df['HRMIS'] == i]
+            except KeyError:
+                yield None
+
+    dfs = gen_dfs(start_month)
+
+    df1 = next(dfs)
 
     df_dict = {1: df1}
-    for i, df in enumerate(dfs, 1):
-        df_dict[i + 1] = match_panel(df1, df[df['HRMIS'] == i + 1],
-                                     log=settings['panel_log'])
+    for i, dfn in enumerate(dfs, 2):
+        df_dict[i] = match_panel(df1, dfn, log=settings['panel_log'])
     # Lose dtype info here if I just do from dict.
     # to preserve dtypes:
     wp = pd.Panel.from_dict(df_dict, orient='minor')
