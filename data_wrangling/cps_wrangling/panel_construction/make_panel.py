@@ -16,6 +16,7 @@ import json
 from time import strftime, strptime, struct_time
 
 import arrow
+
 import pandas as pd
 
 from checker import Checker
@@ -250,27 +251,27 @@ def write_panel(month, settings, panel_store, cps_store, all_months, start_time)
 
 
 def write_earnings(month, settings, earn_store, panel_store, all_months, start_time):
-        """
-        Note: If month is 1 then the following dates apply:
+    """
+    Note: If month is 1 then the following dates apply:
 
-            panel_store: m1
-            earn_store:  m16   (MIS 3 and 8, wall-time is months 4 and 16)
-        """
-        month_ar = arrow.get(month, 'mYY_MM')
-        key = month_ar.replace(months=15).strftime('m%Y_%m')
-        try:
-            df = get_earnings_joined(panel_store, month, settings)
-            df.to_hdf(earn_store, key)  # difference from year before.
-            print('Finsihed {}'.format(month))
-            with open(settings['make_earn_completed'], 'a') as f:
-                f.write('{},{},{}\n'.format(month, start_time, arrow.utcnow()))
-        except Exception as e:
-            with open(settings['earn_log'], 'a') as f:
-                f.write("FAILED-EARN on {0} with exception {1}\n".format(month, e))
-                print("Failed on {} with exception {}.".format(month, e))
+        panel_store: m1
+        earn_store:  m16   (MIS 3 and 8, wall-time is months 4 and 16)
+    """
+    month_ar = arrow.get(month, 'mYY_MM')
+    key = month_ar.replace(months=15).strftime('m%Y_%m')
+    try:
+        df = get_earnings_joined(panel_store, month, settings)
+        df.to_hdf(earn_store, key)  # difference from year before.
+        print('Finsihed {}'.format(month))
+        with open(settings['make_earn_completed'], 'a') as f:
+            f.write('{},{},{}\n'.format(month, start_time, arrow.utcnow()))
+    except Exception as e:
+        with open(settings['earn_log'], 'a') as f:
+            f.write("FAILED-EARN on {0} with exception {1}\n".format(month, e))
+            print("Failed on {} with exception {}.".format(month, e))
 
 
-def get_touching_months(months, kind='full_panel'):
+def get_touching_months(months, kind='full_panel', direct=False):
     """
     [YYYY_MM] -> [YYYY_MM]
 
@@ -302,14 +303,25 @@ def get_touching_months(months, kind='full_panel'):
     not for P_j+3 and P_j+15 forall j in P. But it doesn't take that
     long to do the earnings panels anyway.
     """
-    ars = [arrow.get(month, 'YYYY_MM') for month in months]
-    shifts = [-15, -15, -13, -12, -3, -2, -1, 0, 1, 2, 3, 12, 13, 14, 15]
-    need_update = set(x.replace(months=y) for y in shifts for x in ars)
-    if kind == 'earn':
+    try:
+        ars = [arrow.get(month, 'YYYY_MM') for month in months]
+    except arrow.parser.ParserError:
+        ars = arrow.get(months, 'YYYY_MM')
+
+    if kind == 'full_panel' and direct:
+        shifts = [0, 1, 2, 3, 12, 13, 14, 15]
+        need_update = (ars.replace(months=y) for y in shifts)
+
+    elif kind == 'earn' and direct:
+        raise NotImplementedError
+    elif kind == 'full_panel' and not direct:
+        shifts = [-15, -15, -13, -12, -3, -2, -1, 0, 1, 2, 3, 12, 13, 14, 15]
+        need_update = set(x.replace(months=y) for y in shifts for x in ars)
+    elif kind == 'earn' and not direct:
         shifts = [3, 15]
         need_update = set(x.replace(months=y) for y in shifts for x in need_update)
     else:
-        raise ValueError("Just `full_panel` or `earn` for kind. Got {0} "
+        raise ValueError("Just `full_panel`, `earn`, or 'direct', for kind. Got {0} "
                          "instead.".format(kind))
     for x in need_update:
         yield x.strftime('/m%Y_%m')
