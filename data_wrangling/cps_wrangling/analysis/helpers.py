@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import arrow
 import numpy as np
 import pandas as pd
 
@@ -176,3 +177,26 @@ def labor_status_value_counts(cps_store, month):
     date = datetime(int(df.year.iloc[0]), int(df.month.iloc[0]), 1)
     cts.name = date
     return cts
+
+
+def transform_date(month, to='earn'):
+    """
+    give month and transform to either:
+        - the resulting earning (if to=`earn`)
+        - the generating panel (if to=`panel`)
+    """
+    month = month.strip('/').strip('m')
+    ar = arrow.get(month, 'YYYY_MM')
+    if to == 'earn':
+        out = ar.replace(months=15)
+    elif to == 'panel':
+        out = ar.replace(months=-15)
+    else:
+        raise ValueError
+    return out.strftime('%Y_%m')
+
+
+def panel_to_frame(wp):
+    df = wp.transpose(1, 0, 2).to_frame().T.stack().reset_index().set_index(
+        ['minor', 'HRHHID', 'HUHHNUM', 'PULINENO']).sort_index()
+    return df
