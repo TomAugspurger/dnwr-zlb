@@ -74,7 +74,7 @@ def match_naive(df1, df2):
     return m
 
 
-def smart_match(df1, df2, settings, match_type='age_race', log=False):
+def smart_match(df):
     """
     Criteria for a match (ideal):
 
@@ -85,25 +85,11 @@ def smart_match(df1, df2, settings, match_type='age_race', log=False):
     age races is one of ['race', 'age', 'age_race', 'age_race_sex', 'sex']
     """
     # TODO: Log various match sizes (naive, age, years, etc)
-    # demo = ['PTDTRACE1', 'PTDTRACE2', 'PRTAGE1', 'PRTAGE2', 'PESEX1', 'PESEX2']
-    joined = df1.join(df2, how='inner', lsuffix='1', rsuffix='2')
+    diffed = df.xs(4, level='minor') - df.xs(8, level='minor')
 
-    age = "-1 <= PRTAGE2 - PRTAGE1 <= 3"
-    race = "PTDTRACE1 == PTDTRACE2"
-    sex = "PESEX1 == PESEX2"
-    age_race = ' & '.join([age, race])
-    age_race_sex = ' & '.join([age, race, sex])
-
-    crit_d = {'age_race': age_race, 'age_race_sex': age_race_sex,
-              'age': age, 'race': race, 'sex': sex}
-
-    if log:
-        with open(settings['merge_log'], 'a') as f:
-            for criteria in crit_d:
-                to_log = log_merge(joined.query(crit_d[criteria]), criteria)
-                json.dump(to_log, f)
-
-    return joined.query(crit_d[match_type])
+    good_age = (diffed['PRTAGE'] >= -1) & (diffed['PRTAGE'] <= 3)
+    good_race = diffed.PTDTRACE == 0
+    return df.unstack()[good_age & good_race].stack()
 
 
 def check_dtypes(wp):
@@ -116,25 +102,6 @@ def check_dtypes(wp):
         return pd.Panel({'A': dfa, 'B': dfb})
     else:
         return wp
-
-
-def get_earnings_joined(panel_store, month, settings):
-    """
-    Store -> str -> DataFrame
-
-    Only run *AFTER* building the full panel (below).
-
-    month will be the second of the two outgoing interviews.
-    This will give us the differences from a year before.
-
-    DataFrame is suffixed by 1 or 2
-    """
-    wp = panel_store.select(month).transpose('minor', 'major', 'items')
-    df1, df2 = wp[4], wp[8]
-    df1 = df1.convert_objects(convert_numeric=True)
-    df2 = df2.convert_objects(convert_numeric=True)
-    joined = smart_match(df1, df2, settings)
-    return joined
 
 
 def log_merge(df, ltype):
@@ -292,25 +259,34 @@ def write_panel(month, settings, panel_store, cps_store, all_months, start_time)
             f.write("FAILED-FULL on {0} with exception {1}\n".format(month, e))
 
 
-def write_earnings(month, settings, earn_store, panel_store, all_months, start_time):
+def get_earnings(month, settings, earn_store, panel_store, all_months, start_time):
     """
     Note: If month is 1 then the following dates apply:
 
         panel_store: m1
         earn_store:  m16   (MIS 4 and 8, wall-time is months 4 and 16)
     """
-    month_ar = arrow.get(month, 'mYY_MM')
-    key = month_ar.replace(months=15).strftime('m%Y_%m')
     try:
-        df = get_earnings_joined(panel_store, month, settings)
-        df.to_hdf(earn_store, key)  # difference from year before.
-        print('Finsihed {}'.format(month))
-        with open(settings['make_earn_completed'], 'a') as f:
-            f.write('{},{},{}\n'.format(month, start_time, arrow.utcnow()))
+        wp = panel_store.select(month)
+        earn_months = wp.loc[:, :, (4, 8)]
+        # Bug in pandas w/ toframe on Multi so I have to T.T.stack()
+        df = earn_months.transpose(1, 0, 2).to_frame(
+            filter_observations=False).T.stack().convert_objects(convert_numeric=True)
+        return smart_match(df)
     except Exception as e:
         with open(settings['earn_log'], 'a') as f:
             f.write("FAILED-EARN on {0} with exception {1}\n".format(month, e))
             print("Failed on {} with exception {}.".format(month, e))
+        raise
+
+
+def write_earnings(df, earn_store, month, settings, start_time):
+    month_ar = arrow.get(month, 'mYY_MM')
+    key = month_ar.replace(months=15).strftime('m%Y_%m')
+    df.to_hdf(earn_store, key)  # difference from year before.
+    print('Finsihed {}'.format(month))
+    with open(settings['make_earn_completed'], 'a') as f:
+        f.write('{},{},{}\n'.format(month, start_time, arrow.utcnow()))
 
 
 def get_touching_months(months, kind='full_panel', direct=False):
@@ -391,6 +367,7 @@ def main():
     store_path = settings['store_path']
     store = pd.HDFStore(store_path)
     panel_store = pd.HDFStore(settings['panel_store_path'])
+    earn_store = pd.HDFStore(settings["earn_store_path"])
 
     #---------------------------------------------------------------------------
     # Create Full Panels
@@ -414,10 +391,13 @@ def main():
         with open('update_panels.txt') as f:
             months_todo = get_touching_months([x.rstrip() for x in f], kind='earn')
 
-    earn_store = pd.HDFStore(settings["earn_store_path"])
-
     for month in months_todo:
-        write_earnings(month, settings, earn_store, panel_store, keys, start_time)
+        try:
+            df = get_earnings(month, settings, earn_store,
+                              panel_store, keys, start_time)
+        except:
+            print("Failed on {}. Logged elsewhere".format(month))
+        write_earnings(df, earn_store, month, settings, start_time)
 
     store.close()
     earn_store.close()
