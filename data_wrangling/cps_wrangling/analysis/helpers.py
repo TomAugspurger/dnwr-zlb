@@ -197,6 +197,6 @@ def transform_date(month, to='earn'):
 
 
 def panel_to_frame(wp):
-    df = wp.transpose(1, 0, 2).to_frame().T.stack().reset_index().set_index(
+    df = wp.transpose(1, 0, 2).to_frame(filter_observations=False).T.stack().reset_index().set_index(
         ['minor', 'HRHHID', 'HUHHNUM', 'PULINENO']).sort_index()
     return df
