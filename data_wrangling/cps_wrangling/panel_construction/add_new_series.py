@@ -84,11 +84,17 @@ def append_to_panel_store(month, panel_store, cps_store, official_id):
 
 def append_to_earn_store(month, earn_store, panel_store, official_id):
     month_name = month.parts[-1].rstrip('.gz')
+    earn_k = arrow.get(month_name,
+                       "YYYY_MM").replace(months=15).strftime('/m%Y_%m')
     try:
-        original = earn_store.select(month_name)
+        original = earn_store.select(earn_k)
     except KeyError:
         print("No panel for {}. Move along.".format(month_name))
         return None
+    wp = panel_store.select('/m' + month_name)
+    s1, s2 = wp[4][official_id], wp[8][official_id]
+
+
 
 def writer(ndframe, store, month_name):
     """
