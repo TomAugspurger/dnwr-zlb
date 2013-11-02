@@ -249,7 +249,11 @@ def write_panel(month, settings, panel_store, cps_store, all_months, start_time)
     """
     try:
         wp = make_full_panel(cps_store, month, settings, keys=all_months)
-        wp.to_hdf(panel_store, key=month, format='f')  # month is wave's MIS=1
+        try:
+            panel_store.remove(month)
+            wp.to_hdf(panel_store, key=month, format='f')  # month is wave's MIS=1
+        except KeyError:
+            wp.to_hdf(panel_store, key=month, format='f')  # month is wave's MIS=1
 
         with open(settings['make_full_panel_completed'], 'a') as f:
             f.write('{},{},{}\n'.format(month, start_time, arrow.utcnow()))
@@ -272,6 +276,7 @@ def get_earnings(month, settings, earn_store, panel_store, all_months, start_tim
         # Bug in pandas w/ toframe on Multi so I have to T.T.stack()
         df = earn_months.transpose(1, 0, 2).to_frame(
             filter_observations=False).T.stack().convert_objects(convert_numeric=True)
+
         return smart_match(df)
     except Exception as e:
         with open(settings['earn_log'], 'a') as f:
@@ -283,7 +288,11 @@ def get_earnings(month, settings, earn_store, panel_store, all_months, start_tim
 def write_earnings(df, earn_store, month, settings, start_time):
     month_ar = arrow.get(month, 'mYY_MM')
     key = month_ar.replace(months=15).strftime('m%Y_%m')
-    df.to_hdf(earn_store, key)  # difference from year before.
+    try:
+        earn_store.remove(key)
+        df.to_hdf(earn_store, key)  # difference from year before.
+    except KeyError:
+        df.to_hdf(earn_store, key)  # difference from year before.
     print('Finsihed {}'.format(month))
     with open(settings['make_earn_completed'], 'a') as f:
         f.write('{},{},{}\n'.format(month, start_time, arrow.utcnow()))
