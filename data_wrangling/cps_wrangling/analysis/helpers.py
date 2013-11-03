@@ -5,30 +5,27 @@ import numpy as np
 import pandas as pd
 
 
-def sane_names(df, flattened=False):
+def sane_names(df):
     names = {'PRTAGE': 'age', 'PTDTRACE': 'race', 'PESEX': 'sex',
              'PEMARITL': 'married', "PRERNWA": "earnings", "HRYEAR4": "year",
-             'HRMONTH': "month", "PEMLR": 'labor_status'}
-    if flattened:
-        names = add_suff(names)
+             'HRMONTH': "month", "PEMLR": 'labor_status', 'PEEDUCA': 'edu',
+             'PEHRUSL1': 'hours'}
     if isinstance(df, pd.Panel):
-        return df.rename(minor_axis=names)
+        return df.rename(items=names, minor_axis=names)
     return df.rename(columns=names)
 
 
-def add_suff(xs):
-    if isinstance(xs, dict):
-        w1 = {k + '1': v + '1' for k, v in xs.iteritems()}
-        w2 = {k + '2': v + '2' for k, v in xs.iteritems()}
-        w1.update(w2)
-        return w1
+def get_useful(df):
+    df = sane_names(df)
+    cols = ['age', 'race', 'sex', 'married', 'earnings', 'year', 'month',
+            'labor_status', 'edu', 'hours']
+    if isinstance(df, pd.Panel):
+        res = df.loc[cols]
     else:
-        w1 = map(lambda x: x + '1', xs)
-        w2 = map(lambda x: x + '2', xs)
-        return w1 + w2
+        res = df[cols]
+    return res
 
-
-def replace_categorical(df, flattened=False):
+def replace_categorical(df):
     sex = {1: "male", 2: "female"}
     race = {1: "White Only",
             2: "Black Only",
@@ -76,12 +73,7 @@ def replace_categorical(df, flattened=False):
 
     replacer = {"sex": sex, "race": race, "married": married,
                 "labor_status": labor_status}
-    if flattened:
-        d1 = {k + '1': v for k, v in replacer.iteritems()}
-        d2 = {k + '2': v for k, v in replacer.iteritems()}
-        replacer = {}
-        replacer.update(d1)
-        replacer.update(d2)
+
     return df.replace(replacer)
 
 
