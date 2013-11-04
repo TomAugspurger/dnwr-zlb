@@ -128,7 +128,7 @@ def pre_process(df, ids):
         df[df == -1] = np.nan
     except TypeError:
         try:
-            df = df.replace({-1, np.nan})
+            df = df.replace(-1, np.nan)
         except:
             # TODO: log here
             pass
