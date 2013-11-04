@@ -15,17 +15,40 @@ def sane_names(df):
     return df.rename(columns=names)
 
 
+def convert_names(code, way='cps'):
+    """
+    Give a key. `way`='cps' goes from my names to CPS codes. `way`='sane'
+    is the inverse.
+    """
+    d = {'age': 'PRTAGE',
+         'earnings': 'PRERNWA',
+         'edu': 'PEEDUCA',
+         'hours': 'PEHRUSL1',
+         'labor_status': 'PEMLR',
+         'married': 'PEMARITL',
+         'month': 'HRMONTH',
+         'race': 'PTDTRACE',
+         'sex': 'PESEX',
+         'year': 'HRYEAR4'}
+
+    if way == 'sane':
+        d = {v: k for k, v in d.iteritems()}
+
+    return d[code]
+
 def get_useful(df):
     df = sane_names(df)
+    # TODO: grab cols from convert_names.keys()
+    # or both from a common function.
     cols = ['age', 'race', 'sex', 'married', 'earnings', 'year', 'month',
-            'labor_status', 'edu', 'hours']
+            'labor_status', 'edu', 'hours', 'timestamp']
     if isinstance(df, pd.Panel):
         res = df.loc[cols]
     else:
         res = df[cols]
     return res
 
-def replace_categorical(df):
+def replace_categorical(df, inverse=False):
     sex = {1: "male", 2: "female"}
     race = {1: "White Only",
             2: "Black Only",
@@ -73,11 +96,16 @@ def replace_categorical(df):
 
     replacer = {"sex": sex, "race": race, "married": married,
                 "labor_status": labor_status}
+    if inverse:
+        replacer = {v: k for k, v in replacer.iteritems()}
 
-    return df.replace(replacer)
+    # df.replace(replacer)  # should work. bug
+    for k, v in replacer.iteritems():
+        df[k] = df[k].replace(v)
+    return df
 
 
-def add_flows(s1, s2):
+def add_flows(s1, s2, categorical=True):
     """
     take a 2 column dataframe.
 
@@ -86,15 +114,24 @@ def add_flows(s1, s2):
     # 1 & 2 is employed
     # 3 & 4 is unemployed
     # 1 - 4 is labor force
-    ee = s1.isin([1, 2]) & s2.isin([1, 2])
-    eu = s1.isin([1, 2]) & s2.isin([3, 4])
-    en = s1.isin([1, 2]) & s2.isin([5, 6, 7])
-    ue = s1.isin([3, 4]) & s2.isin([1, 2])
-    uu = s1.isin([3, 4]) & s2.isin([3, 4])
-    un = s1.isin([3, 4]) & s2.isin([4, 5, 6])
-    ne = s1.isin([5, 6, 7]) & s2.isin([1, 2])
-    nu = s1.isin([5, 6, 7]) & s2.isin([3, 4])
-    nn = s1.isin([5, 6, 7]) & s2.isin([5, 6, 7])
+    if categorical:
+        c1 = ['employed', 'absent']
+        c2 = ['layoff', 'looking']
+        c3 = ['retired', 'disabled', 'other']
+    else:
+        c1 = [1, 2]
+        c2 = [3, 4]
+        c3 = [4, 5, 6]
+
+    ee = s1.isin(c1) & s2.isin(c1)
+    eu = s1.isin(c1) & s2.isin(c2)
+    en = s1.isin(c1) & s2.isin(c3)
+    ue = s1.isin(c2) & s2.isin(c1)
+    uu = s1.isin(c2) & s2.isin(c2)
+    un = s1.isin(c2) & s2.isin(c3)
+    ne = s1.isin(c3) & s2.isin(c1)
+    nu = s1.isin(c3) & s2.isin(c2)
+    nn = s1.isin(c3) & s2.isin(c3)
 
     flows = {"ee": ee, "eu": eu, "en": en, "ue": ue, "uu": uu, "un": un,
              "ne": ne, "nu": nu, "nn": nn}
