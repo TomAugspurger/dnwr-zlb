@@ -1,3 +1,14 @@
+"""
+The CPS messed up the numbering for the May 2004 and August 2005 dictionaries
+
+The line reading:
+
+    FILLER          2                                      (411 - 412)
+
+should read
+
+    FILLER          2                                      (410 - 411)
+"""
 import pathlib
 
 from generic_data_dictionary_parser import Parser
@@ -58,7 +69,7 @@ def main():
     base_path = str(settings['base_path'])
     dd_path = base_path + '/dds/'
     dd_path = pathlib.Path(dd_path)
-    outfile = base_path + 'cps_store.h5'
+    outfile = settings["dd_store_path"]
     logfile = 'fail_log.txt'
 
     run_parse_dictionaries(dd_path, outfile=outfile)
