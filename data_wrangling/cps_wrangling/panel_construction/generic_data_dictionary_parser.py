@@ -63,7 +63,15 @@ class Parser(object):
                 self.holder.append(formatted)
             # Fake break
             elif formatted[self.pos_start] > self.holder[-1][self.pos_end] + 1:
-                self.handle_padding(formatted, f)
+                bad = ('/Volumes/HDD/Users/tom/DataStorage/CPS/dds/cpsbmay04.ddf',
+                       '/Volumes/HDD/Users/tom/DataStorage/CPS/dds/cpsbaug05.ddf')
+                if formatted == ('FILLER', 2, 411, 412) and self.infile in bad:
+                    # cpsbmay04 dd is wrong. Should be 410-411 not 411-412
+                    formatted = (formatted[0], formatted[1], 410, 411)
+                    self.holder.append(formatted)
+                    print("Fixed {}".format(line))
+                else:
+                    self.handle_padding(formatted, f)
             # Real break
             elif formatted[self.pos_start] < self.holder[-1][self.pos_end]:
                 self.handle_real_break(formatted)
