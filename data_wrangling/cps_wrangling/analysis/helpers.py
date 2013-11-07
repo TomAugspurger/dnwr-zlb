@@ -148,15 +148,15 @@ def add_flows_panel(wp, inplace=True):
 
     If not doing it inplace, assings with wp.loc[:, :, 'flow'] = returned
     """
-    labor = wp.minor_xs('labor_status')
+    labor = wp['labor_status']
     d = {1: pd.Series(np.nan, labor[1].index)}
     for i in range(1, 8):
         s1 = labor[i]
         s2 = labor[i+1]
-        d[i+1] = add_flows(s1, s2)
+        d[i+1] = add_flows(s1, s2, categorical=False)
     d = pd.DataFrame(d)
     if inplace:
-        wp.loc[:, :, 'flow'] = d
+        wp['flow'] = d
         return wp
     else:
         return wp
@@ -238,3 +238,8 @@ def get_from_earn(month, earn_store, stat='median'):
     df = replace_categorical(df)
     x = df['earnings'].unstack()
     return getattr((x[8] - x[4]), 'median')()
+
+
+def quantile_list(df, quantiles):
+    # this will work for both Series and DataFrames
+    return type(df)({q: df.quantile(q) for q in quantiles})
