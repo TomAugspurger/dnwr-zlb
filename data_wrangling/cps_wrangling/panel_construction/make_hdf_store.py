@@ -127,12 +127,8 @@ def pre_process(df, ids):
     try:
         df[df == -1] = np.nan
     except TypeError:
-        try:
-            df = df.replace(-1, np.nan)
-        except:
-            # TODO: log here
-            pass
-    df = df.replace({'-', np.nan})
+        df = df.replace(-1, np.nan)
+    df = df.replace('-', np.nan)
     df = df.loc[~(pd.isnull(df[ids]).any(1)), :]
     df = df.set_index(ids)
 
