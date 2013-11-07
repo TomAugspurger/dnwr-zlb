@@ -229,3 +229,12 @@ def panel_to_frame(wp):
     df = wp.transpose(1, 0, 2).to_frame(filter_observations=False).T.stack().reset_index().set_index(
         ['minor', 'HRHHID', 'HUHHNUM', 'PULINENO']).sort_index()
     return df
+
+
+def get_from_earn(month, earn_store, stat='median'):
+    df = earn_store.select('m' + month)
+    df = get_useful(df)
+    df = df.replace(-1, np.nan)
+    df = replace_categorical(df)
+    x = df['earnings'].unstack()
+    return getattr((x[8] - x[4]), 'median')()
