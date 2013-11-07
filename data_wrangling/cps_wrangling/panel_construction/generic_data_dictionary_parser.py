@@ -222,7 +222,7 @@ class Parser(object):
         """
         store = pd.HDFStore(self.outfile)
         df = self.dataframes[0]  # Only should happen in the old ones.
-        store.append('monthly/dd/' + self.store_name, df, append=False)
+        store.append(self.store_name, df, append=False)
         store.close()
 
     def handle_replacers(self, id_):
