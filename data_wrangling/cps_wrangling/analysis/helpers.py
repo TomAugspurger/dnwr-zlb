@@ -315,7 +315,7 @@ def make_MultiIndex_date(df, month):
     You have a dict of {month: dfs} and want to join them. But you need to
     add the date to the existing df's multiIndex.
     """
-    df['timestamp'] = pd.to_datetime(month, format='%Y_%M')
+    df['timestamp'] = pd.to_datetime(month, format='%Y_%m')
     df = df.reset_index()
     df = df.rename(columns={'HUHHNUM': 'HRHHID2'})
     df = df.set_index(['timestamp'] + ['HRHHID', 'HRHHID2', 'PULINENO'])
