@@ -6,32 +6,38 @@ import pandas as pd
 
 
 def sane_names(df):
-    names = {'PRTAGE': 'age', 'PTDTRACE': 'race', 'PESEX': 'sex',
-             'PEMARITL': 'married', "PRERNWA": "earnings", "HRYEAR4": "year",
-             'HRMONTH': "month", "PEMLR": 'labor_status', 'PEEDUCA': 'edu',
-             'PEHRUSL1': 'hours'}
+    names = _gen_items()
     if isinstance(df, pd.Panel):
         return df.rename(items=names, minor_axis=names)
     return df.rename(columns=names)
 
+
+def _gen_items():
+    """
+    Keep one dict of interesting items. Filter this down.
+    """
+    d = {'PRTAGE': 'age',
+         'PRERNWA': 'earnings',
+         'PEEDUCA': 'edu',
+         'PEHRUSL1': 'hours',
+         'PEMLR': 'labor_status',
+         'PEMARITL': 'married',
+         'HRMONTH': 'month',
+         'PTDTRACE': 'race',
+         'PESEX': 'sex',
+         'HRYEAR4': 'year',
+         'flow': 'flow',
+         'timestamp': 'timestamp'}
+    return d
 
 def convert_names(code, way='cps'):
     """
     Give a key. `way`='cps' goes from my names to CPS codes. `way`='sane'
     is the inverse.
     """
-    d = {'age': 'PRTAGE',
-         'earnings': 'PRERNWA',
-         'edu': 'PEEDUCA',
-         'hours': 'PEHRUSL1',
-         'labor_status': 'PEMLR',
-         'married': 'PEMARITL',
-         'month': 'HRMONTH',
-         'race': 'PTDTRACE',
-         'sex': 'PESEX',
-         'year': 'HRYEAR4'}
+    d = _gen_items()
 
-    if way == 'sane':
+    if way == 'cps':
         d = {v: k for k, v in d.iteritems()}
 
     return d[code]
@@ -40,12 +46,18 @@ def get_useful(df):
     df = sane_names(df)
     # TODO: grab cols from convert_names.keys()
     # or both from a common function.
-    cols = ['age', 'race', 'sex', 'married', 'earnings', 'year', 'month',
-            'labor_status', 'edu', 'hours', 'timestamp']
+    cols = _gen_items().values()
+    no_flow = list(set(cols) - {'flow'})
     if isinstance(df, pd.Panel):
-        res = df.loc[cols]
+        try:
+            res = df.loc[cols]
+        except KeyError:
+            res = df.loc[no_flow]
     else:
-        res = df[cols]
+        try:
+            res = df[cols]
+        except KeyError:
+            res = df[no_flow]
     return res
 
 def replace_categorical(df, inverse=False):
@@ -104,6 +116,22 @@ def replace_categorical(df, inverse=False):
         df[k] = df[k].replace(v)
     return df
 
+
+def add_flows_wrapper(frame, inplace=True):
+    if isinstance(frame, pd.DataFrame):
+        return add_flows_df(frame, inplace=inplace)
+    elif isinstance(frame, pd.Panel):
+        return add_flows_panel(frame, inplace=inplace)
+    else:
+        raise ValueError
+
+def add_flows_df(df, inplace=True):
+    s1 = df.labor_status.unstack()[4]
+    s1 = df.labor_status.unstack()[8]
+    res = add_flows(s1, s2)
+    if inplace:
+        raise ValueError
+    raise ValueError
 
 def add_flows(s1, s2, categorical=True):
     """
@@ -195,12 +223,14 @@ def labor_status_value_counts(cps_store, month):
     """
     cols = ['HRYEAR4', 'PTDTRACE', 'PEMARITL', 'PRTAGE', 'PRERNWA', 'PEMLR',
             'PESEX', 'HRMONTH']
-    useful = ['age', 'year', 'month', 'labor_status', 'earnings', 'race', 'sex', 'married']
+    useful = ['age', 'year', 'month', 'labor_status', 'earnings', 'race', 'sex',
+              'married']
     df = sane_names(cps_store.select('/monthly/data/m' + month, columns=cols))[useful]
     df = clean_no_lineno(df)
     df = df.dropna(how='all', axis=[0, 1])
     clean = df.dropna(how='all', axis=0)['labor_status']
-    labels = {1: 'employed', 2: 'employed', 3: 'unemployed', 4: 'unemployed', 5: 'nilf', 6: 'nilf', 7: 'nilf'}
+    labels = {1: 'employed', 2: 'employed', 3: 'unemployed', 4: 'unemployed',
+              5: 'nilf', 6: 'nilf', 7: 'nilf'}
     cts = clean.replace(labels).value_counts().T
     # cts = cts.sort_index().T
     date = datetime(int(df.year.iloc[0]), int(df.month.iloc[0]), 1)
@@ -230,16 +260,63 @@ def panel_to_frame(wp):
         ['minor', 'HRHHID', 'HUHHNUM', 'PULINENO']).sort_index()
     return df
 
+def quantile_list(df, quantiles):
+    # this will work for both Series and DataFrames
+    return type(df)({q: df.quantile(q) for q in quantiles})
+
+
+def panel_select(store, month):
+    # cols = _gen_items().values
+    pass
+
+def hex_plot(df, nbins=30):
+    pass
+
 
 def get_from_earn(month, earn_store, stat='median'):
-    df = earn_store.select('m' + month)
-    df = get_useful(df)
-    df = df.replace(-1, np.nan)
+    df = get_useful(earn_store.select('m' + month))
     df = replace_categorical(df)
     x = df['earnings'].unstack()
     return getattr((x[8] - x[4]), 'median')()
 
+def get_earn_quantiles(month, earn_store, quantiles=[.05, .1, .25, .5, .75, .9, .95]):
+    df = get_useful(earn_store.select('m' + month))
+    df = replace_categorical(df)
+    x = df['earnings'].unstack()
+    diff = x[8] - x[4]
+    return quantile_list(diff, quantiles)
 
-def quantile_list(df, quantiles):
-    # this will work for both Series and DataFrames
-    return type(df)({q: df.quantile(q) for q in quantiles})
+def get_earn_summary(month, earn_store):
+    df = get_useful(earn_store.select('m' + month))
+    df = replace_categorical(df)
+    x = df['earnings'].unstack()
+    diff = x[8] - x[4]
+    return diff.describe()
+
+def get_earn_summary_group(month, earn_store):
+    df = get_useful(earn_store.select('m' + month))
+    df = replace_categorical(df)
+    e = df['earnings'].unstack()
+    status = df['labor_status'].unstack()
+    flows = add_flows(status[4], status[8])
+    res = e.groupby(flows).describe()
+    return res
+
+def get_earn_diff_with_flow(month, earn_store):
+    df = get_useful(earn_store.select('m' + month))
+    e = df.earnings.unstack()
+    ls = df.labor_status.unstack()
+    s1, s2 = ls[4], ls[8]
+    e['flow'] = add_flows(s1, s2, categorical=False)
+    return e
+
+def make_MultiIndex_date(df, month):
+    """"
+    You have a dict of {month: dfs} and want to join them. But you need to
+    add the date to the existing df's multiIndex.
+    """
+    df['timestamp'] = pd.to_datetime(month, format='%Y_%M')
+    df = df.reset_index()
+    df = df.rename(columns={'HUHHNUM': 'HRHHID2'})
+    df = df.set_index(['timestamp'] + ['HRHHID', 'HRHHID2', 'PULINENO'])
+    return df
