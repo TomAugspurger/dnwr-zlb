@@ -15,15 +15,6 @@ with open('../panel_construction/settings.txt') as f:
 
 panel_store = pd.HDFStore(settings['panel_store_path'])
 
-m0 = arrow.get('1996-12', 'YYYY-MM')
-mn = arrow.get(panel_store.keys()[-1], '/mYY_MM')
-months = [x.strftime('%Y_%m') for x in arrow.Arrow.range('month', m0, mn)]
-
-month = months[0]
-wp = panel_store.select('m' + month)
-
-wp = wp.loc[:, ((wp['age'] >= 22) & (wp['age'] <= 65)).any(1)]
-
 
 def is_recently_unemployed(wp, month='both'):
     """
@@ -39,6 +30,8 @@ def is_recently_unemployed(wp, month='both'):
     A list (MIS=4, 8) of dicts of labor status to DataFrames containing just
     that group.
     """
+    wp = wp.loc[:, ((wp['age'] >= 22) & (wp['age'] <= 65)).any(1)]
+
     if month == 'both':
         months = [4, 8]
     elif month in (4, '4'):
@@ -81,11 +74,14 @@ class Runner(object):
                                                                       m0, mn)]
         self.apply_func = apply_func
         self.agg_func = agg_func
-        self.args = args
-        self.kwargs = kwargs
+        self._args = args
+        self._kwargs = kwargs
 
     def __call__(self):
-        self.results = [self.apply_func(self.store.select('m' + month)) for
-                        month in self.months]
-        self.aggerated = [self.agg_func(x) for x in self.results]
+        self.results = {month: self.apply_func(self.store.select('m' + month))
+                        for month in self.months}
+        self.aggerated = [self.agg_func(x) for k, x in self.results.iteritems()]
         return self.aggregated
+
+    def write(self, path, key, value):
+        raise NotImplementedError
