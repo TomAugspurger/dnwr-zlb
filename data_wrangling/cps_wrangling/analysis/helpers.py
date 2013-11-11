@@ -320,3 +320,34 @@ def make_MultiIndex_date(df, month):
     df = df.rename(columns={'HUHHNUM': 'HRHHID2'})
     df = df.set_index(['timestamp'] + ['HRHHID', 'HRHHID2', 'PULINENO'])
     return df
+
+def add_employedment_status_last_period(wp, kind, inplace=True):
+    """
+    Add the employment status for each worker to a panel.
+
+    Employment status is over the last 4 months (MIS 1-4, MIS 5-8)
+
+    `kind` is one of {'employed', 'unemployed', 'nonemployed'}
+
+    Assumes useful names
+
+    1    EMPLOYED-AT WORK
+    2    EMPLOYED-ABSENT
+    3    UNEMPLOYED-ON LAYOFF
+    4    UNEMPLOYED-LOOKING
+    5    NOT IN LABOR FORCE-RETIRED
+    6    NOT IN LABOR FORCE-DISABLED
+    7    NOT IN LABOR FORCE-OTHER
+    """
+    ls = wp['labor_status']
+    d = {'employed': [1, 2], 'unemployed': [3, 4], 'nonemployed': [5, 6, 7]}
+
+    emp4 = ls.loc[:, 1:4].isin(d[kind]).any(1)
+    emp8 = ls.loc[:, 5:8].isin(d[kind]).any(1)
+    emp = pd.concat([emp4, emp8], axis=1, keys=[4, 8]).reindex_like(ls)
+
+    if inplace:
+        wp[kind + '_last_period'] = emp
+        return wp
+    else:
+        return emp
