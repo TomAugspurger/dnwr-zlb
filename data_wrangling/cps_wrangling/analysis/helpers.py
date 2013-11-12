@@ -60,7 +60,13 @@ def get_useful(df):
             res = df[no_flow]
     return res
 
-def replace_categorical(df, inverse=False):
+def replace_categorical(df, kind=None, inverse=False):
+    """
+    Replace the numeric values with catigorical for a DataFrame.
+
+    kind must be one of {'sex', 'race', 'married', 'labor_status'}
+    by defualt all are replaced.
+    """
     sex = {1: "male", 2: "female"}
     race = {1: "White Only",
             2: "Black Only",
@@ -112,8 +118,12 @@ def replace_categorical(df, inverse=False):
         replacer = {v: k for k, v in replacer.iteritems()}
 
     # df.replace(replacer)  # should work. bug
-    for k, v in replacer.iteritems():
-        df[k] = df[k].replace(v)
+
+    if kind is None:
+        for k, v in replacer.iteritems():
+            df[k] = df[k].replace(v)
+    else:
+        df = df.replace(replacer[kind])
     return df
 
 
@@ -320,6 +330,7 @@ def make_MultiIndex_date(df, month):
     df = df.rename(columns={'HUHHNUM': 'HRHHID2'})
     df = df.set_index(['timestamp'] + ['HRHHID', 'HRHHID2', 'PULINENO'])
     return df
+
 
 def add_employedment_status_last_period(wp, kind, inplace=True):
     """
