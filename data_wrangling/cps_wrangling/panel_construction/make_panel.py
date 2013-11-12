@@ -49,7 +49,7 @@ import arrow
 
 import pandas as pd
 
-from ..analysis import add_to_panel
+from data_wrangling.cps_wrangling.analysis import add_to_panel
 
 
 def get_next_month(this_month):
