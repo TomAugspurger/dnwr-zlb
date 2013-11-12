@@ -327,7 +327,7 @@ def add_employedment_status_last_period(wp, kind, inplace=True):
 
     Employment status is over the last 4 months (MIS 1-4, MIS 5-8)
 
-    `kind` is one of {'employed', 'unemployed', 'nonemployed'}
+    `kind` is one of {'either', 'unemployed', 'nonemployed'}
 
     Assumes useful names
 
@@ -340,14 +340,28 @@ def add_employedment_status_last_period(wp, kind, inplace=True):
     7    NOT IN LABOR FORCE-OTHER
     """
     ls = wp['labor_status']
-    d = {'employed': [1, 2], 'unemployed': [3, 4], 'nonemployed': [5, 6, 7]}
+    d = {'either': [3, 4, 5, 6, 7], 'unemployed': [3, 4],
+         'nonemployed': [5, 6, 7]}
 
-    emp4 = ls.loc[:, 1:4].isin(d[kind]).any(1)
-    emp8 = ls.loc[:, 5:8].isin(d[kind]).any(1)
-    emp = pd.concat([emp4, emp8], axis=1, keys=[4, 8]).reindex_like(ls)
+    # Should be True if in `kind`. But should be False
+    # *only* if employed. (i.e. don't get U in with E whenk `kind=n`)
+    # so filter out the others (e.g. always nonemployed) first
+    if kind == 'unemployed':
+        sub4 = ls[~ls.loc[:, 1:4].isin(d['nonemployed']).all(1)]
+        sub8 = ls[~ls.loc[:, 5:8].isin(d['nonemployed']).all(1)]
+    elif kind == 'nonemployed':
+        sub4 = ls[~ls.loc[:, 1:4].isin(d['unemployed']).all(1)]
+        sub8 = ls[~ls.loc[:, 5:8].isin(d['unemployed']).all(1)]
+    elif kind == 'either':
+        sub4 = ls
+        sub8 = ls
+    else:
+        raise ValueError
+    emp4 = sub4.loc[:, 1:4].isin(d[kind]).any(1)
+    emp8 = sub8.loc[:, 5:8].isin(d[kind]).any(1)
+    emp = pd.concat([emp4, emp8], axis=1, keys=[4, 8]).reindex_like(ls).dropna(how='all')
 
     if inplace:
         wp[kind + '_last_period'] = emp
-        return wp
     else:
         return emp
