@@ -49,6 +49,7 @@ import arrow
 
 import pandas as pd
 
+from ..analysis.add_to_panel import add_flows, add_history
 
 def get_next_month(this_month):
     """
