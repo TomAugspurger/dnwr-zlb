@@ -49,7 +49,8 @@ import arrow
 
 import pandas as pd
 
-from ..analysis.add_to_panel import add_flows, add_history
+from ..analysis import add_to_panel
+
 
 def get_next_month(this_month):
     """
@@ -391,6 +392,8 @@ def main():
     print("Panels to create: {}".format(months_todo))
     for month in months_todo:
         write_panel(month, settings, panel_store, store, keys, start_time)
+        add_to_panel.add_flows(month, panel_store)
+        add_to_panel.add_history(month, panel_store)
 
     #---------------------------------------------------------------------------
     # Create Earn DataFrames
@@ -408,6 +411,7 @@ def main():
         except:
             print("Failed on {}. Logged elsewhere".format(month))
         write_earnings(df, earn_store, month, settings, start_time)
+        # TODO: check if m is prefixed
 
     store.close()
     earn_store.close()

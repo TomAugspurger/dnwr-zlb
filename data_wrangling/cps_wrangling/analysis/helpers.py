@@ -180,26 +180,6 @@ def add_flows(s1, s2, categorical=True):
     return s
 
 
-def add_flows_panel(wp, inplace=True):
-    """wrapper for add_flows.
-    The flow in 2 is the flow *from* 1 *to* 2. 1 will contain NaNs.
-
-    If not doing it inplace, assings with wp.loc[:, :, 'flow'] = returned
-    """
-    labor = wp['labor_status']
-    d = {1: pd.Series(np.nan, labor[1].index)}
-    for i in range(1, 8):
-        s1 = labor[i]
-        s2 = labor[i+1]
-        d[i+1] = add_flows(s1, s2, categorical=False)
-    d = pd.DataFrame(d)
-    if inplace:
-        wp['flow'] = d
-        return wp
-    else:
-        return wp
-
-
 def clean_no_lineno(df):
     """drop if lineno is -1"""
     # TODO: why not just df.dropna(how='all', axis=0)?
@@ -330,49 +310,3 @@ def make_MultiIndex_date(df, month):
     df = df.rename(columns={'HUHHNUM': 'HRHHID2'})
     df = df.set_index(['timestamp'] + ['HRHHID', 'HRHHID2', 'PULINENO'])
     return df
-
-
-def add_employedment_status_last_period(wp, kind, inplace=True):
-    """
-    Add the employment status for each worker to a panel.
-
-    Employment status is over the last 4 months (MIS 1-4, MIS 5-8)
-
-    `kind` is one of {'either', 'unemployed', 'nonemployed'}
-
-    Assumes useful names
-
-    1    EMPLOYED-AT WORK
-    2    EMPLOYED-ABSENT
-    3    UNEMPLOYED-ON LAYOFF
-    4    UNEMPLOYED-LOOKING
-    5    NOT IN LABOR FORCE-RETIRED
-    6    NOT IN LABOR FORCE-DISABLED
-    7    NOT IN LABOR FORCE-OTHER
-    """
-    ls = wp['labor_status']
-    d = {'either': [3, 4, 5, 6, 7], 'unemployed': [3, 4],
-         'nonemployed': [5, 6, 7]}
-
-    # Should be True if in `kind`. But should be False
-    # *only* if employed. (i.e. don't get U in with E whenk `kind=n`)
-    # so filter out the others (e.g. always nonemployed) first
-    if kind == 'unemployed':
-        sub4 = ls[~ls.loc[:, 1:4].isin(d['nonemployed']).all(1)]
-        sub8 = ls[~ls.loc[:, 5:8].isin(d['nonemployed']).all(1)]
-    elif kind == 'nonemployed':
-        sub4 = ls[~ls.loc[:, 1:4].isin(d['unemployed']).all(1)]
-        sub8 = ls[~ls.loc[:, 5:8].isin(d['unemployed']).all(1)]
-    elif kind == 'either':
-        sub4 = ls
-        sub8 = ls
-    else:
-        raise ValueError
-    emp4 = sub4.loc[:, 1:4].isin(d[kind]).any(1)
-    emp8 = sub8.loc[:, 5:8].isin(d[kind]).any(1)
-    emp = pd.concat([emp4, emp8], axis=1, keys=[4, 8]).reindex_like(ls).dropna(how='all')
-
-    if inplace:
-        wp[kind + '_last_period'] = emp
-    else:
-        return emp
