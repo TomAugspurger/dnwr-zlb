@@ -251,8 +251,9 @@ def write_panel(month, settings, panel_store, cps_store, all_months, start_time)
     """
     try:
         wp = make_full_panel(cps_store, month, settings, keys=all_months)
+        wp['timestamp'] = wp['timestamp'].fillna(method='ffill')
         # month is wave's MIS=1
-        wp.to_hdf(panel_store, key=month, format='f', append=False)
+        wp.to_hdf(panel_store, key=month, append=False)
 
         with open(settings['make_full_panel_completed'], 'a') as f:
             f.write('{},{},{}\n'.format(month, start_time, arrow.utcnow()))
@@ -408,7 +409,6 @@ def main():
         except:
             print("Failed on {}. Logged elsewhere".format(month))
         write_earnings(df, earn_store, month, settings, start_time)
-        # TODO: check if m is prefixed
 
     cps_store.close()
     earn_store.close()
