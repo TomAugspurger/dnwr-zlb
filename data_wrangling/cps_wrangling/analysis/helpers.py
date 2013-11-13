@@ -315,3 +315,35 @@ def make_MultiIndex_date(df, month):
     df = df.rename(columns={'HUHHNUM': 'HRHHID2'})
     df = df.set_index(['timestamp'] + ['HRHHID', 'HRHHID2', 'PULINENO'])
     return df
+
+
+def bin_others(ser, others, name="other", strict=True, inplace=False):
+    """
+    Group together other values before handing off to a groupby.
+
+    Parameters
+    ----------
+
+    ser : Series
+    others : list
+        column names that you want binned into "other"
+    how : str
+        how to aggregate the other functions. One of {"sum"}
+    name : str
+        name to give to new bin. Deafult "other"
+
+    Returns
+    -------
+
+    Series
+    """
+    if not inplace:
+        ser = ser.copy()
+
+    extras = set(others) - set(ser.unique())
+    if extras and strict:
+        raise ValueError("others must be a subset of `ser`"
+                         " Extra are {}".format(extras))
+
+    ser[ser.isin(others)] = name
+    return ser
