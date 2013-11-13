@@ -18,6 +18,34 @@ def add_flows(month, panel_store):
     The flows are: ee, eu, en, ue, uu, un, ne, nu, nn/
     """
 
+    def add_flow_series(s1, s2, categorical=False):
+        if categorical:
+            c1 = ['employed', 'absent']
+            c2 = ['layoff', 'looking']
+            c3 = ['retired', 'disabled', 'other']
+        else:
+            c1 = [1, 2]
+            c2 = [3, 4]
+            c3 = [4, 5, 6]
+
+        ee = s1.isin(c1) & s2.isin(c1)
+        eu = s1.isin(c1) & s2.isin(c2)
+        en = s1.isin(c1) & s2.isin(c3)
+        ue = s1.isin(c2) & s2.isin(c1)
+        uu = s1.isin(c2) & s2.isin(c2)
+        un = s1.isin(c2) & s2.isin(c3)
+        ne = s1.isin(c3) & s2.isin(c1)
+        nu = s1.isin(c3) & s2.isin(c2)
+        nn = s1.isin(c3) & s2.isin(c3)
+
+        flows = {"ee": ee, "eu": eu, "en": en, "ue": ue, "uu": uu, "un": un,
+                 "ne": ne, "nu": nu, "nn": nn}
+
+        s = pd.Series(np.nan, index=s1.index)
+        for k, v in flows.iteritems():
+            s.loc[v] = k
+        return s
+
     def add_flows_panel(wp, inplace=True):
         """wrapper for add_flows.
         The flow in 2 is the flow *from* 1 *to* 2. 1 will contain NaNs.
@@ -29,7 +57,7 @@ def add_flows(month, panel_store):
         for i in range(1, 8):
             s1 = labor[i]
             s2 = labor[i+1]
-            d[i+1] = add_flows(s1, s2, categorical=False)
+            d[i+1] = add_flow_series(s1, s2, categorical=False)
         d = pd.DataFrame(d)
         if inplace:
             wp['flow'] = d
@@ -42,8 +70,8 @@ def add_flows(month, panel_store):
         add_flows_panel(wp, inplace=True)
         _wp['flow'] = wp['flow']
         _wp.to_hdf(panel_store, 'm' + month, append=False)
-    except:
-        print("Skipping {}".format(month))
+    except Exception as e:
+        print("Skipping {}, because of {}".format(month, e))
 
 
 def add_history(month, panel_store):
