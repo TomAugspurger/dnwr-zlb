@@ -46,7 +46,7 @@ def convert_names(code, way='cps'):
 
     return d[code]
 
-def get_useful(df):
+def get_useful(df, strict=True):
     df = sane_names(df)
     # TODO: grab cols from convert_names.keys()
     # or both from a common function.
@@ -57,12 +57,18 @@ def get_useful(df):
         try:
             res = df.loc[cols]
         except KeyError:
-            res = df.loc[no_history]
+            if strict:
+                raise KeyError
+            else:
+                res = df.loc[no_history]
     else:
         try:
             res = df[cols]
         except KeyError:
-            res = df[no_history]
+            if strict:
+                raise KeyError
+            else:
+                res = df[no_history]
     return res
 
 def replace_categorical(df, kind=None, inverse=False):
