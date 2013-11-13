@@ -2,6 +2,7 @@ import unittest
 
 import pandas as pd
 import numpy as np
+from numpy import nan
 import pandas.util.testing as tm
 
 from data_wrangling.cps_wrangling.analysis import add_to_panel
@@ -38,6 +39,21 @@ class TestAddHistory(unittest.TestCase):
         expected.loc['h', 8] = True
         expected.loc['i', 8] = False
 
+        tm.assert_frame_equal(result, expected)
+
+    def test_status(self):
+        result = add_to_panel._add_flows_panel(self.wp, inplace=False)
+        expected = pd.DataFrame({'a': [nan, 'ee', 'ee', 'ee', 'ee', 'ee', 'ee', 'ee'],
+                                 'b': [nan, 'ee', 'ee', 'ee', 'ee', 'ee', 'ee', 'eu'],
+                                 'c': [nan, 'ue', 'ee', 'ee', 'eu', 'uu', 'uu', 'ue'],
+                                 'd': [nan, 'ue', 'ee', 'eu', 'ue', 'ee', 'ee', 'en'],
+                                 'e': [nan, 'ne', 'ee', 'ee', 'eu', 'uu', 'uu', 'uu'],
+                                 'f': [nan, 'ne', 'ee', 'en', 'nn', 'nn', 'ne', 'ee'],
+                                 'g': [nan, 'ne', 'ee', 'eu', 'ue', 'ee', 'en', 'ne'],
+                                 'h': [nan, 'ee', 'ee', 'eu', 'ue', 'ee', 'eu', 'ue'],
+                                 'i': [nan, 'ee', 'ee', 'en', 'ne', 'ee', 'ee', 'ee']
+                                 }, index=range(1, 9)).T
+        expected = expected.convert_objects(convert_numeric=True)
         tm.assert_frame_equal(result, expected)
 
     def tearDown(self):

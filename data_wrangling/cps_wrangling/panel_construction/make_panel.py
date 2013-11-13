@@ -387,6 +387,9 @@ def main():
         with open('update_panels.txt') as f:
             months_todo = get_touching_months([x.rstrip() for x in f])
 
+    # Just 1994+ for now
+    months_todo = [x for x in months_todo if int(x[2:6]) >= 1994]
+
     print("Panels to create: {}".format(months_todo))
     for month in months_todo:
         write_panel(month, settings, panel_store, cps_store, keys, start_time)
@@ -401,6 +404,9 @@ def main():
     if special_months:
         with open('update_panels.txt') as f:
             months_todo = get_touching_months([x.rstrip() for x in f], kind='earn')
+
+    # Just 1994+ for now
+    months_todo = [x for x in months_todo if int(x[2:6]) >= 1994]
 
     for month in months_todo:
         try:
