@@ -251,11 +251,8 @@ def write_panel(month, settings, panel_store, cps_store, all_months, start_time)
     """
     try:
         wp = make_full_panel(cps_store, month, settings, keys=all_months)
-        try:
-            panel_store.remove(month)
-            wp.to_hdf(panel_store, key=month, format='f')  # month is wave's MIS=1
-        except KeyError:
-            wp.to_hdf(panel_store, key=month, format='f')  # month is wave's MIS=1
+        # month is wave's MIS=1
+        wp.to_hdf(panel_store, key=month, format='f', append=False)
 
         with open(settings['make_full_panel_completed'], 'a') as f:
             f.write('{},{},{}\n'.format(month, start_time, arrow.utcnow()))
@@ -376,14 +373,14 @@ def main():
 
     start_time = arrow.utcnow()
     store_path = settings['store_path']
-    store = pd.HDFStore(store_path)
+    cps_store = pd.HDFStore(store_path)
     panel_store = pd.HDFStore(settings['panel_store_path'])
     earn_store = pd.HDFStore(settings["earn_store_path"])
 
     #---------------------------------------------------------------------------
     # Create Full Panels
     #---------------------------------------------------------------------------
-    months_todo, keys = get_months(settings, store, kind='full_panel',
+    months_todo, keys = get_months(settings, cps_store, kind='full_panel',
                                    skip_finished=True)
     if special_months:
         with open('update_panels.txt') as f:
@@ -391,14 +388,14 @@ def main():
 
     print("Panels to create: {}".format(months_todo))
     for month in months_todo:
-        write_panel(month, settings, panel_store, store, keys, start_time)
-        add_to_panel.add_flows(month, panel_store)
-        add_to_panel.add_history(month, panel_store)
+        write_panel(month, settings, panel_store, cps_store, keys, start_time)
+        add_to_panel.add_flows(month.strip('/m'), panel_store)
+        add_to_panel.add_history(month.strip('/m'), panel_store)
 
     #---------------------------------------------------------------------------
     # Create Earn DataFrames
     #---------------------------------------------------------------------------
-    months_todo, keys = get_months(settings, store, kind='earn',
+    months_todo, keys = get_months(settings, cps_store, kind='earn',
                                    skip_finished=True)
     if special_months:
         with open('update_panels.txt') as f:
@@ -413,7 +410,7 @@ def main():
         write_earnings(df, earn_store, month, settings, start_time)
         # TODO: check if m is prefixed
 
-    store.close()
+    cps_store.close()
     earn_store.close()
     panel_store.close()
 
