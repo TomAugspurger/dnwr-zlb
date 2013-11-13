@@ -111,6 +111,12 @@ def _add_employment_status_last_period(wp, kind, inplace=True):
     """
     Add the employment status for each worker to a panel.
 
+    Will return one of {True, False NaN} where
+
+        - True if kind anytime in past 3 months and employed today (new hire)
+        - False if employed past 3 months and employed today
+        - NaN if un/non employed today.
+
     Employment status is over the last 4 months (MIS 1-4, MIS 5-8)
 
     `kind` is one of {'either', 'unemployed', 'nonemployed'}
@@ -137,8 +143,8 @@ def _add_employment_status_last_period(wp, kind, inplace=True):
     employed_at_4 = ls.loc[:, 1:4].isin([1, 2]).all(1)
     employed_at_8 = ls.loc[:, 5:8].isin([1, 2]).all(1)
 
-    kind_at_4 = ls.loc[:, 1:4].isin(d[kind]).any(1)
-    kind_at_8 = ls.loc[:, 5:8].isin(d[kind]).any(1)
+    kind_at_4 = ls.loc[:, 1:3].isin(d[kind]).any(1) & ls[4].isin([1, 2])
+    kind_at_8 = ls.loc[:, 5:7].isin(d[kind]).any(1) & ls[8].isin([1, 2])
 
     sub4 = ls.loc[:, 1:4][kind_at_4 | employed_at_4]
     sub4 = sub4.isin(d[kind]).any(1)
@@ -146,7 +152,7 @@ def _add_employment_status_last_period(wp, kind, inplace=True):
     sub8 = ls.loc[:, 5:8][kind_at_8 | employed_at_8]
     sub8 = sub8.isin(d[kind]).any(1)
 
-    emp = pd.concat([kind_at_4, kind_at_8], axis=1, keys=[4, 8]).reindex_like(ls)
+    emp = pd.concat([sub4, sub8], axis=1, keys=[4, 8]).reindex_like(ls)
 
     if inplace:
         wp[kind] = emp
