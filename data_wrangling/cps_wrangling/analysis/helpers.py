@@ -26,8 +26,12 @@ def _gen_items():
          'PTDTRACE': 'race',
          'PESEX': 'sex',
          'HRYEAR4': 'year',
+         'PUIODP1': 'same_employer',
          'flow': 'flow',
-         'timestamp': 'timestamp'}
+         'timestamp': 'timestamp',
+         'unemployed_history': 'unemployed_history',
+         'nonemployed_history': 'nonemployed_history',
+         'either_history': 'either_history'}
     return d
 
 def convert_names(code, way='cps'):
@@ -47,17 +51,18 @@ def get_useful(df):
     # TODO: grab cols from convert_names.keys()
     # or both from a common function.
     cols = _gen_items().values()
-    no_flow = list(set(cols) - {'flow'})
+    no_history = list(set(cols) - {'unemployed_history', 'nonemployed_history',
+                                   'either_history', 'flow'})
     if isinstance(df, pd.Panel):
         try:
             res = df.loc[cols]
         except KeyError:
-            res = df.loc[no_flow]
+            res = df.loc[no_history]
     else:
         try:
             res = df[cols]
         except KeyError:
-            res = df[no_flow]
+            res = df[no_history]
     return res
 
 def replace_categorical(df, kind=None, inverse=False):
