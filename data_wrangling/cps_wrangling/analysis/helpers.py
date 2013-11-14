@@ -510,3 +510,64 @@ def make_to_long(store, out_store, start=None, stop=None):
 
         df.to_hdf(out_store, name, format='table', append=False)
 
+
+class Handler(object):
+
+    def __init__(self, store):
+        """
+        Object to chunk reading / aggregation of long tables.
+
+        For now just handles one file at a time. May add more control later.
+        """
+        self.store = store
+        self.keys = list(self._gen_keys())
+        self.reduced = None
+
+    def __call__(self, grouper, aggfunc, groupby_columns=None,
+                 store_columns=None, *args, **kwargs):
+        """
+        grouper: str or mappable or series
+        aggfunc: str (agg) or func
+        groupby_columns: list of column names to include in groupby
+        store_columns: list of column names to select from store
+        """
+        for key in self._gen_keys():
+            df = self.store.select(key, columns=store_columns)
+
+            if groupby_columns is None:
+                cols = df.columns
+            else:
+                cols = groupby_columns
+            if isinstance(grouper, str):
+                if grouper in df.index.names:
+                    gr = df[cols].groupby(level=grouper)
+            else:
+                gr = df[cols].groupby(grouper).apply(aggfunc)
+
+            if isinstance(aggfunc, str):
+                res = gr.agg(aggfunc)
+            else:
+                res = gr.apply(aggfunc)
+
+            self.add_to_reduced(df)
+
+        return self.final_reduction()
+
+    def _gen_keys(self):
+        return (x for x in self.store.keys() if x.startswith('/long'))
+
+    def add_to_reduced(self, df):
+        """
+        For each chunk/file, will apply aggfunc to each group.
+        self.reduced holds the DataFrames from each file.
+
+        Index should (always?) include stamp. May optionally contain
+        otherse like sex, age, to be reduced further.
+        """
+        if self.reduced is None:
+            self.reduced = df
+        else:
+            self.reduced = pd.concat([self.reduced, df])
+
+    def final_reduction(self):
+        return self.reduced
