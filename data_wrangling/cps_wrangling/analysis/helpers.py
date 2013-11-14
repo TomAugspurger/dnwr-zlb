@@ -462,6 +462,7 @@ def read_to_long(store, months):
             by_time.append(df)
 
     df = pd.concat(by_time).sort_index()
+    # Can't write bool mixed NaNs.
     df['either_history'] = df['either_history'].replace({True: 1, False: 0,
                                                          np.nan: -1})
     df['unemployed_history'] = df['unemployed_history'].replace({True: 1, False: 0,
@@ -497,6 +498,7 @@ def make_to_long(store, out_store, start=None, stop=None):
 
     chunks = []
     for i, v in enumerate(bins, 0):
+        # just go up to bins[:-1]?
         if i+1 != len(bins):
             chunks.append(range(v, bins[i+1]))
 
@@ -507,3 +509,4 @@ def make_to_long(store, out_store, start=None, stop=None):
         name = 'long_' + chunk[0] + '_' + chunk[-1]
 
         df.to_hdf(out_store, name, format='table', append=False)
+
