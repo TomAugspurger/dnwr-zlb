@@ -526,6 +526,9 @@ class Handler(object):
     def __call__(self, grouper, aggfunc, groupby_columns=None,
                  store_columns=None, *args, **kwargs):
         """
+        # TODO: handle timeseries and by demo groups differently.
+        just by demo doesn't need to the whole thing read in.
+
         grouper: str or mappable or series
         aggfunc: str (agg) or func
         groupby_columns: list of column names to include in groupby
@@ -549,7 +552,7 @@ class Handler(object):
             else:
                 res = gr.apply(aggfunc)
 
-            self.add_to_reduced(df)
+            self.add_to_reduced(res)
 
         return self.final_reduction()
 
