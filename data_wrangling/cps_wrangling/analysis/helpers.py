@@ -409,20 +409,82 @@ def filter_panel(wp, *args):
 
     return wp.loc[:, final_idx]
 
+
 def _make_timestamps(wp):
     years = wp['year'].dropna()
     months = wp['month'].dropna()
 
-    ncols = len(years.columns)
-    idx = range(1, ncols + 1)
+    if isinstance(wp, (pd.DataFrame, pd.Series)):
+        years = int(years[0])
+        months = int(months[0])
+        expected = pd.to_datetime(str(years) + '-' + str(months) + '-01')
 
-    years = df_unique(years, index=idx)
-    months = df_unique(months, index=idx)
+    else:
+        ncols = len(years.columns)
+        idx = range(1, ncols + 1)
 
-    expected = pd.to_datetime(years.astype(int).astype(str) + '-' +
-                              months.astype(int).astype(str) + '-01')
+        years = df_unique(years, index=idx)
+        months = df_unique(months, index=idx)
+
+        expected = pd.to_datetime(years.astype(int).astype(str) + '-' +
+                                  months.astype(int).astype(str) + '-01')
 
     return expected
+
+
+def chunk_quarters(months, n):
+    """
+    Chunklist is nice and generic. This deals with stripping the first couple
+    that may not have a full quarter and then hands things off the chunklist.
+
+    I wonder if I could use a coroutine?
+    """
+    a0 = date_parser(months[0])
+    months_to_strip = 1 - (a0.month % n)
+
+    yield months[:months_to_strip]
+    for x in chunk_list(months[months_to_strip:], n):
+        yield x
+
+
+def chunk_list(l, n):
+    """ Yield successive n-sized chunks from l.
+    """
+    for i in range(0, len(l), n):
+        yield l[i:i+n]
+
+
+def make_chunk_name(chunk):
+    """
+    Base off first name. Write into quarters.
+    """
+    m = chunk[0]
+    year = m[:4]
+    month = int(m[-2:])
+    name = 'long_' + year + '_Q' + str(int(np.ceil(month / 3.)))
+    return name
+
+
+def select_data(month, panel_store):
+    """
+    Each panel maps to 8 months. 1 month gathers data from 8 panels.
+
+    if month = 0 then month selects from
+        ms = [0, -1, -2, -3, -12, -13, -14, -15]
+              ^               ^                 earnings
+    """
+    a0 = date_parser(month)
+    shifters = [0, -1, -2, -3, -12, -13, -14, -15]
+    months = [(i, a0.replace(months=x).strftime('%Y_%m')) for i, x
+              in enumerate(shifters, 1)]
+    for i, month in months:
+        try:
+            df = filter_panel(get_useful(panel_store.select('m' + month)), 'age')
+            df = df.loc[:, :, i]
+            yield df
+        except KeyError:
+            yield None
+
 
 def read_to_long(store, months):
     """
@@ -446,17 +508,14 @@ def read_to_long(store, months):
 
     by_time = []
     for month in months:
-        wp = get_useful(store.select('m' + month))
-        wp = filter_panel(wp, 'age')
-        stamps = _make_timestamps(wp)
 
-        for i in wp.minor_axis:
-            df = wp.loc[:, :, i]
+        frames = select_data(month, store)
+
+        for df in frames:
             df = df.drop('timestamp', axis=1)
-            df['stamp'] = stamps[i]
+            stamp = _make_timestamps(df)
+            df['stamp'] = stamp
             df = df.set_index('stamp', append=True)
-            df.index.set_names(['HRHHID', 'HRHHID2', 'PULINENO', 'stamp'], inplace=True)
-
             # TODO: submit PR for reorder_levels docstring taking names
             df = df.reorder_levels(['stamp', 'HRHHID', 'HRHHID2', 'PULINENO']).sort_index()
             by_time.append(df)
@@ -470,45 +529,6 @@ def read_to_long(store, months):
     df['nonemployed_history'] = df['nonemployed_history'].replace({True: 1, False: 0,
                                                                    np.nan: -1})
     return df
-
-
-def make_to_long(store, out_store, start=None, stop=None):
-
-    if isinstance(store, str):
-        store = pd.HDFStore(store)
-
-    keys = sorted(store.keys())
-
-    m0 = start or keys[0]
-    m0 = date_parser(m0)
-
-    mn = stop or keys[-1]
-    mn = date_parser(mn)
-
-    months = [x.strftime('%Y_%m') for x in arrow.Arrow.range('month', m0, mn)
-              if x.strftime('/m%Y_%m') in keys]
-
-    # Getting some memory pressure. break into chunks, write each out.
-    # read proccessed chucnks, merge, and do a final write.
-    # worked up till that last step.  Too big.
-    MAX_MONTHS = 36
-    N = len(months)
-    bins = MAX_MONTHS * np.arange(0, N % MAX_MONTHS)
-    bins[-1] = N
-
-    chunks = []
-    for i, v in enumerate(bins, 0):
-        # just go up to bins[:-1]?
-        if i+1 != len(bins):
-            chunks.append(range(v, bins[i+1]))
-
-    month_chunks = [[months[y] for y in x] for x in chunks]
-
-    for chunk in month_chunks:
-        df = read_to_long(store, chunk)
-        name = 'long_' + chunk[0] + '_' + chunk[-1]
-
-        df.to_hdf(out_store, name, format='table', append=False)
 
 
 class Handler(object):
@@ -527,7 +547,7 @@ class Handler(object):
                  store_columns=None, *args, **kwargs):
         """
         # TODO: handle timeseries and by demo groups differently.
-        just by demo doesn't need to the whole thing read in.
+        just by month/quarter doesn't need to the whole thing read in.
 
         grouper: str or mappable or series
         aggfunc: str (agg) or func
