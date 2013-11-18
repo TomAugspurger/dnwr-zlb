@@ -94,6 +94,18 @@
         "jan2013": {                                                                                                                                                                                                         }
     },
 
+"id_rename_by_dd":
+    {
+        "jan1989": ["HRHHID", "HRHHID2", "PULINENO"],
+        "jan1992": ["HRHHID", "HRHHID2", "PULINENO"],
+        "jan1994": ["HRHHID", "HRHHID2", "PULINENO"],
+        "apr1994": ["HRHHID", "HRHHID2", "PULINENO"],
+        "jun1995": ["HRHHID", "HRHHID2", "PULINENO"],
+        "sep1995": ["HRHHID", "HRHHID2", "PULINENO"],
+        "jan1998": ["HRHHID", "HRHHID2", "PULINENO"],
+        "jan2003": ["HRHHID", "HRHHID2", "PULINENO"]
+    },
+
 "special_by_dd":
     {
         "jan1989": ["expand_year", "combine_age", "align_lfsr", "expand_hours", "combine_hours"],

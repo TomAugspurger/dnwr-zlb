@@ -564,6 +564,15 @@ def standardize_cols(df, dd_name, settings):
     return df
 
 
+def standardize_ids(df, dd_name, settings):
+    """
+    grab a *list* from settings with the correct names.
+    """
+    ids = settings["id_rename_by_dd"][dd_name]
+    df.index.names = ids
+    return df
+
+
 def special_by_dd(keys):
     """All of these are inplace"""
     def expand_year(df, dd_name):
