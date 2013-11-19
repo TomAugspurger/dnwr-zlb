@@ -82,7 +82,7 @@ def _add_flows_panel(wp, inplace=True):
 #-----------------------------------------------------------------------------
 # History
 #-----------------------------------------------------------------------------
-def add_history(month, panel_store=None, frame):
+def add_history(month, panel_store=None, frame=None):
     """
     Add the 3 month history for every employee working.
 

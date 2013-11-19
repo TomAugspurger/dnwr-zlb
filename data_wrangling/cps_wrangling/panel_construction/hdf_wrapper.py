@@ -144,7 +144,7 @@ class HDFHandler(object):
         Assumes that self.stores has been set?
         """
         for f in self.stores:
-            f.close()
+            self[f].close()
 
     def write(self, frame, key, *args, **kwargs):
         #TODO: need to seprate store key from self key.

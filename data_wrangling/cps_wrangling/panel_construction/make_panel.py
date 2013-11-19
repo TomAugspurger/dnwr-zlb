@@ -427,7 +427,7 @@ def main():
         wp = make_full_panel(cps_store, month, settings)
         wp = add_to_panel.add_flows(month.strip('/m'), frame=wp)
         wp = add_to_panel.add_history(month.strip('/m'), frame=wp)
-        panel_h.write(wp, key=month, append=False, format='f')
+        panel_h.write(wp, key='m' + month, append=False, format='f')
 
     #---------------------------------------------------------------------------
     # Create Earn DataFrames
