@@ -177,7 +177,7 @@ def match_panel(df1, df2, log=None):
     return df2
 
 
-def make_full_panel(cps_store, start_month, settings, keys):
+def make_full_panel(cps_store, start_month, settings):
     """
     store -> str -> Panel
 
@@ -407,20 +407,16 @@ def main():
     start_time = arrow.utcnow()
     store_path = settings['store_path']
     cps_store = pd.HDFStore(store_path)
-    panel_store = pd.HDFStore(settings['panel_store_path'])
+
     earn_store = pd.HDFStore(settings["earn_store_path"])
 
     #---------------------------------------------------------------------------
     # Create Full Panels
     #---------------------------------------------------------------------------
-    months_todo, keys = get_months(settings, cps_store, kind='full_panel',
-                                   skip_finished=True)
-    if special_months:
-        with open('update_panels.txt') as f:
-            months_todo = get_touching_months([x.rstrip() for x in f])
 
-    # Just 1994+ for now
-    months_todo = [x for x in months_todo if int(x[2:6]) >= 1994]
+    a0 = arrow.get('1994-01', format='YYYY-MM')
+    an = arrow.get('2013-06', format='YYYY-MM"')
+    months_todo = [x.strftime('%Y_%m') for x in arrow.Arrow.range('month', a0, an)]
 
     print("Panels to create: {}".format(months_todo))
 
@@ -428,9 +424,9 @@ def main():
                          frequency='monthly')
 
     for month in months_todo:
-        wp = make_full_panel(cps_store, month, settings, keys=keys)
-        wp = add_to_panel.add_flows(month.strip('/m'), panel_store, frame=wp)
-        wp = add_to_panel.add_history(month.strip('/m'), panel_store, frame=wp)
+        wp = make_full_panel(cps_store, month, settings)
+        wp = add_to_panel.add_flows(month.strip('/m'), panel_store=None, frame=wp)
+        wp = add_to_panel.add_history(month.strip('/m'), panel_store=None, frame=wp)
         panel_h.write(wp, key=month, append=False, format='f')
 
     #---------------------------------------------------------------------------

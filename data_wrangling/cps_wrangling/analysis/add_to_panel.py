@@ -1,7 +1,7 @@
 """
 Run during or after panel_constructoin.
 
-Every toplevel function should have the api `(month, panel_store)`
+Every toplevel function should have the api `(month, panel_store, frame)`
 
 where month is a 'YYYY_MM' str.
 Modifies the panels on disk... so be careful.
@@ -14,7 +14,7 @@ import numpy as np
 from helpers import get_useful
 
 
-def add_flows(month, panel_store, frame=None):
+def add_flows(month, panel_store=None, frame=None):
     """
     Add the *montly* flows for each worker, for each month (2 :: 8).
 
@@ -82,7 +82,7 @@ def _add_flows_panel(wp, inplace=True):
 #-----------------------------------------------------------------------------
 # History
 #-----------------------------------------------------------------------------
-def add_history(month, panel_store, frame):
+def add_history(month, panel_store=None, frame):
     """
     Add the 3 month history for every employee working.
 
