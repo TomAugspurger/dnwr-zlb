@@ -5,7 +5,9 @@ import pandas as pd
 import pandas.util.testing as tm
 
 from data_wrangling.cps_wrangling.analysis.helpers import (bin_others,
-    date_parser, filter_panel)
+                                                           date_parser,
+                                                           filter_panel)
+
 
 class TestHelpers(unittest.TestCase):
 
@@ -21,6 +23,11 @@ class TestHelpers(unittest.TestCase):
 
 
 class TestReadPanel(unittest.TestCase):
+
+    # def setUp(self):
+    #     self.store = pd.HDFStore('tst.h5')
+    #     df = pd.DataFrame({'month': range(1, 13)})
+    #     wp = pd.Panel({'i'})
 
     def test_date_parser(self):
         result = date_parser('2010_01').strftime('%Y_%m')
