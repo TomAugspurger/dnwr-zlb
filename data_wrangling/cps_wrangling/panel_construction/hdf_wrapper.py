@@ -22,14 +22,14 @@ class HDFHandler(object):
     will be broken up by frequency, either quarterly or monthly.
 
     Names will be:
-    /path/to/base_pat/
+    /path/to/base_path/
         # monthly
-        /m1994_01.h5
-        /m1994_02.h5
+        /kind/m1994_01.h5
+        /kind/m1994_02.h5
 
         # quarterly
-        /q1994_1.h5
-        /q1994_4.h5
+        /kind/q1994_1.h5
+        /kind/q1994_4.h5
     """
     # TODO: context manager
     def __init__(self, settings, kind, months=None, frequency=None):
@@ -49,6 +49,14 @@ class HDFHandler(object):
         self.kind = kind
         self.base_path = settings['base_path']
         self.frequency = frequency
+
+        if frequency in ('monthly', 'M', 'm'):
+            self.pre = 'm'
+        elif frequency in ('quarterly', 'Q', 'q'):
+            self.pre = 'q'
+        else:
+            raise ValueError("Frequency expected `M` or `Q`")
+
         self.months = months
         if months is None:
             self.select_all(kind)
@@ -66,6 +74,15 @@ class HDFHandler(object):
             return self._make_panel(self, months)
         else:
             raise ValueError
+
+    def __getitem__(self, key):
+        # TODO: handle ranges
+        key = self.pre + key.lstrip(self.pre)
+        return self.stores[key]
+
+    def __repr__(self):
+        return "A {} container of {} stores".format(self.__class__,
+                                                    len(self.stores))
 
     def select_all(self, kind):
         """
@@ -104,12 +121,7 @@ class HDFHandler(object):
         list of pd.HDFStores
             files are base_path + kind + freq + month + .h5
         """
-        if frequency in ('monthly', 'M', 'm'):
-            pre = 'm'
-        elif frequency in ('quarterly', 'Q', 'q'):
-            pre = 'q'
-        else:
-            raise ValueError("Frequency expected `M` or `Q`")
+        pre = self.pre
         base_names = (os.path.join(self.base_path, self.kind, pre + month + '.h5')
                       for month in months)
 
@@ -119,9 +131,10 @@ class HDFHandler(object):
         if not os.path.exists(os.path.join(self.base_path, self.kind)):
             os.mkdir(os.path.join(self.base_path, self.kind))
 
-        stores = []
+        stores = {}
         for name in base_names:
-            stores.append(pd.HDFStore(name))
+            k, _ = os.path.splitext(os.path.basename(name))
+            stores[k] = pd.HDFStore(name)
         return stores
 
     def close(self):
@@ -133,3 +146,7 @@ class HDFHandler(object):
         for f in self.stores:
             f.close()
 
+    def write(self, frame, key, *args, **kwargs):
+        #TODO: need to seprate store key from self key.
+        store = self[key]
+        frame.to_hdf(store, key, *args, **kwargs)
