@@ -130,3 +130,6 @@ data_wrangling/cps_wrangling/panel_construction/make_hdf_store_completed.txt
 data_wrangling/cps_wrangling/panel_construction/make_hdf_store_log.json
 data_wrangling/cps_wrangling/panel_construction/make_hdf_store_special.txt
 data_wrangling/cps_wrangling/panel_construction/make_panel_special.txt
+data_wrangling/cps_wrangling/analysis/reveal.js
+data_wrangling/cps_wrangling/analysis/output_toggle.tpl
+data_wrangling/cps_wrangling/analysis/presentation.slides.html
