@@ -143,10 +143,10 @@ def huhhnum_to_hrhhid_index(df1, df2):
     ts2 = pd.to_datetime(str(df2.timestamp.dropna().unique()[0]))
 
     if ts1 >= pd.datetime(2003, 2, 1) and ts2 <= pd.datetime(2004, 5, 1):
-        ids = df2.index.names
+
         replace = df2.reset_index()
         replace['HRHHID2'] = replace['HRHHID2'] % 10
-        replace = replace.set_index(ids)
+        replace = replace.set_index(["HRHHID", "HRHHID2", "PULINENO"])
         return replace
     else:
         return df2
@@ -425,8 +425,8 @@ def main():
 
     for month in months_todo:
         wp = make_full_panel(cps_store, month, settings)
-        wp = add_to_panel.add_flows(month.strip('/m'), panel_store=None, frame=wp)
-        wp = add_to_panel.add_history(month.strip('/m'), panel_store=None, frame=wp)
+        wp = add_to_panel.add_flows(month.strip('/m'), frame=wp)
+        wp = add_to_panel.add_history(month.strip('/m'), frame=wp)
         panel_h.write(wp, key=month, append=False, format='f')
 
     #---------------------------------------------------------------------------
