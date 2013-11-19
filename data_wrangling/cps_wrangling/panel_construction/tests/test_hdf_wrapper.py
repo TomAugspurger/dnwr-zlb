@@ -8,8 +8,6 @@ class TestHDFWrapper(unittest.TestCase):
 
     def setUp(self):
         self.fdir = os.path.join('.', 'test_files', 'panel')
-        os.mkdir('test_files')
-        os.mkdir(self.fdir)
 
         settings = {'base_path': './test_files/'}
         months = ['1994_01', '1994_02', '1994_03']
