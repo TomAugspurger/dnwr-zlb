@@ -123,3 +123,13 @@ class HDFHandler(object):
         for name in base_names:
             stores.append(pd.HDFStore(name))
         return stores
+
+    def close(self):
+        """
+        Close every store in self.stores.
+
+        Assumes that self.stores has been set?
+        """
+        for f in self.stores:
+            f.close()
+
