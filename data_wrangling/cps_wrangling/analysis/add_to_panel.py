@@ -116,12 +116,14 @@ def _add_employment_status_last_period(wp, kind, inplace=True):
     """
     Add the employment status for each worker to a panel.
 
-    Will return one of {True, False NaN} where
+    Will return one of  {1,    0,    NaN}
+                        {True, False NaN} where
 
-        - True if kind anytime in past 3 months and employed today (new hire)
-        - False if employed past 3 months and employed today
-        - NaN if un/non employed today.
+        - (1) True if kind anytime in past 3 months and employed today (new hire)
+        - (0) False if employed past 3 months and employed today
+        - (-1) NaN if un/non employed today.
 
+    Had to go with the 1, 0, -1 since there isn't a bool NaN dtype
     Employment status is over the last 4 months (MIS 1-4, MIS 5-8)
 
     `kind` is one of {'either', 'unemployed', 'nonemployed'}
@@ -158,6 +160,7 @@ def _add_employment_status_last_period(wp, kind, inplace=True):
     sub8 = sub8.isin(d[kind]).any(1)
 
     emp = pd.concat([sub4, sub8], axis=1, keys=[4, 8]).reindex_like(ls)
+    emp = emp.replace({True: 1, False: 0, np.nan: -1})
 
     if inplace:
         wp[kind] = emp

@@ -521,13 +521,7 @@ def read_to_long(store, months):
             by_time.append(df)
 
     df = pd.concat(by_time).sort_index()
-    # Can't write bool mixed NaNs.
-    df['either_history'] = df['either_history'].replace({True: 1, False: 0,
-                                                         np.nan: -1})
-    df['unemployed_history'] = df['unemployed_history'].replace({True: 1, False: 0,
-                                                                 np.nan: -1})
-    df['nonemployed_history'] = df['nonemployed_history'].replace({True: 1, False: 0,
-                                                                   np.nan: -1})
+
     return df
 
 
