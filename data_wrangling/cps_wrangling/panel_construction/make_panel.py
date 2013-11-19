@@ -50,7 +50,7 @@ import arrow
 import pandas as pd
 
 from data_wrangling.cps_wrangling.analysis import add_to_panel
-
+from hdf_wrapper import HDFHandler
 
 def get_next_month(this_month):
     """
@@ -123,8 +123,38 @@ def log_merge(df, ltype):
     return d
 
 
+def huhhnum_to_hrhhid_index(df1, df2):
+    """
+    When they switched names they also changed the numbering.
+    df1 will have the older index values, df2 will have the newer.
+
+    From the HRHHID2 doc:
+
+        Part 1 of this number is found in columns 1-15 of the record.
+    Concatenate this item with Part 1 for matching forward in time.
+
+    The component parts of this number are as follows:
+    71-72   Numeric component of the sample number (HRSAMPLE)
+    73-74   Serial suffix-converted to numerics (HRSERSUF)
+    75      Household Number (HUHHNUM)
+    """
+
+    ts1 = pd.to_datetime(str(df1.timestamp.dropna().unique()[0]))
+    ts2 = pd.to_datetime(str(df2.timestamp.dropna().unique()[0]))
+
+    if ts1 >= pd.datetime(2003, 2, 1) and ts2 <= pd.datetime(2004, 5, 1):
+        ids = df2.index.names
+        replace = df2.reset_index()
+        replace['HRHHID2'] = replace['HRHHID2'] % 10
+        replace = replace.set_index(ids)
+        return replace
+    else:
+        return df2
+
+
 def match_panel(df1, df2, log=None):
     # TODO: refactor; combine w/ smart_match
+    df2 = huhhnum_to_hrhhid_index(df1, df2)
     left_idx = df1.index
     df2 = df2.loc[left_idx]  # left merge
     # When the CPS messed up the ids in June 1995.
@@ -187,8 +217,14 @@ def make_full_panel(cps_store, start_month, settings, keys):
 
     df1 = next(dfs)
 
+    ids = ["HRHHID", "HRHHID2", "PULINENO"]
+    if not ids == df1.index.names:
+        df1.index.names = ids
+
     df_dict = {1: df1}
     for i, dfn in enumerate(dfs, 2):
+        if not dfn.index.names == ids:
+            dfn.index.names = ids
         df_dict[i] = match_panel(df1, dfn, log=settings['panel_log'])
     # Lose dtype info here if I just do from dict.
     # to preserve dtypes:
@@ -250,10 +286,6 @@ def write_panel(month, settings, panel_store, cps_store, all_months, start_time)
     Just a wrapper around creation and writing with logging.
     """
     try:
-        wp = make_full_panel(cps_store, month, settings, keys=all_months)
-        wp['timestamp'] = wp['timestamp'].fillna(method='ffill')
-        # month is wave's MIS=1
-        wp.to_hdf(panel_store, key=month, append=False)
 
         with open(settings['make_full_panel_completed'], 'a') as f:
             f.write('{},{},{}\n'.format(month, start_time, arrow.utcnow()))
@@ -391,10 +423,15 @@ def main():
     months_todo = [x for x in months_todo if int(x[2:6]) >= 1994]
 
     print("Panels to create: {}".format(months_todo))
+
+    panel_h = HDFHandler(settings, kind='full_panel', months=months_todo,
+                         frequency='monthly')
+
     for month in months_todo:
-        write_panel(month, settings, panel_store, cps_store, keys, start_time)
-        add_to_panel.add_flows(month.strip('/m'), panel_store)
-        add_to_panel.add_history(month.strip('/m'), panel_store)
+        wp = make_full_panel(cps_store, month, settings, keys=keys)
+        wp = add_to_panel.add_flows(month.strip('/m'), panel_store, frame=wp)
+        wp = add_to_panel.add_history(month.strip('/m'), panel_store, frame=wp)
+        panel_h.write(wp, key=month, append=False, format='f')
 
     #---------------------------------------------------------------------------
     # Create Earn DataFrames

@@ -13,19 +13,22 @@ import numpy as np
 
 from helpers import get_useful
 
-def add_flows(month, panel_store):
+
+def add_flows(month, panel_store, frame=None):
     """
     Add the *montly* flows for each worker, for each month (2 :: 8).
 
     The flows are: ee, eu, en, ue, uu, un, ne, nu, nn/
     """
-
-    _wp = panel_store.select('m' + month)
+    if frame is None:
+        _wp = panel_store.select('m' + month)
+    else:
+        _wp = frame
     wp = get_useful(_wp.copy())
     try:
         _add_flows_panel(wp, inplace=True)
         _wp['flow'] = wp['flow']
-        _wp.to_hdf(panel_store, 'm' + month, append=False)
+        return _wp
     except Exception as e:
         print("Skipping {}, because of {}".format(month, e))
 
@@ -79,7 +82,7 @@ def _add_flows_panel(wp, inplace=True):
 #-----------------------------------------------------------------------------
 # History
 #-----------------------------------------------------------------------------
-def add_history(month, panel_store):
+def add_history(month, panel_store, frame):
     """
     Add the 3 month history for every employee working.
 
@@ -92,7 +95,10 @@ def add_history(month, panel_store):
     """
     # TODO: Chcek this...
 
-    _wp = panel_store.select('m' + month)
+    if frame is None:
+        _wp = panel_store.select('m' + month)
+    else:
+        _wp = frame
     wp = get_useful(_wp.copy())
     e_types = ['either', 'unemployed', 'nonemployed']
 
@@ -102,8 +108,7 @@ def add_history(month, panel_store):
         _wp['unemployed_history'] = wp['unemployed']
         _wp['nonemployed_history'] = wp['nonemployed']
         _wp['either_history'] = wp['either']
-        _wp.to_hdf(panel_store, 'm' + month, append=False)
-
+        return _wp
     except KeyError:
         return None
 
