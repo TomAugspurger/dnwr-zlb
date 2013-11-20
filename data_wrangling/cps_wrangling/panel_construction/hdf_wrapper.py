@@ -9,6 +9,8 @@ import os
 
 import pandas as pd
 
+from data_wrangling.cps_wrangling.analysis.helpers import date_parser
+
 
 class HDFHandler(object):
     """
@@ -77,7 +79,7 @@ class HDFHandler(object):
 
     def __getitem__(self, key):
         # TODO: handle ranges
-        key = self.pre + key.lstrip(self.pre)
+        key = self.pre + date_parser(key).strftime('%Y_%m')
         return self.stores[key]
 
     def __repr__(self):
@@ -150,3 +152,9 @@ class HDFHandler(object):
         #TODO: need to seprate store key from self key.
         store = self[key]
         frame.to_hdf(store, key, *args, **kwargs)
+
+    def select(self, key):
+        """
+        same as store.select()
+        """
+        return self[key].select(key)
