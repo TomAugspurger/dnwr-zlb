@@ -35,6 +35,7 @@ def _gen_items():
          'HRMIS': 'month_in_sample',
          'PRDTIND1': 'industry',
          'PRDTOCC1': 'occupation'}
+    # TODO: check on older industries/occupation codes.
     return d
 
 def convert_names(code, way='cps'):
@@ -557,9 +558,9 @@ def select_data(month, panel_store):
     shifters = [0, -1, -2, -3, -12, -13, -14, -15]
     months = [(i, a0.replace(months=x).strftime('%Y_%m')) for i, x
               in enumerate(shifters, 1)]
-    for i, month in months:
+    for i, m in months:
         try:
-            df = filter_panel(get_useful(panel_store.select('m' + month)), 'age')
+            df = filter_panel(get_useful(panel_store.select('m' + m)), 'age')
             df = df.loc[:, :, i]
             yield df
         except KeyError:
