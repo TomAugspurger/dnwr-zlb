@@ -76,12 +76,18 @@ class HDFHandler(object):
 
     def __getitem__(self, key):
         # TODO: handle ranges
-        key = self.pre + date_parser(key).strftime('%Y_%m')
+        key = self._sanitize_key(key)
         return self.stores[key]
 
     def __repr__(self):
         return "A {} container of {} stores".format(self.__class__,
                                                     len(self.stores))
+
+    def __iter__(self):
+        return iter(sorted(self.stores.keys()))
+
+    # def iteritems(self):
+    #     return iter(self.stores)
 
     def _select_stores(self):
         pre = self.pre
@@ -132,8 +138,12 @@ class HDFHandler(object):
         store = self[key]
         frame.to_hdf(store, key, *args, **kwargs)
 
+    def _sanitize_key(self, key):
+        return self.pre + date_parser(key).strftime('%Y_%m')
+
     def select(self, key):
         """
         same as store.select()
         """
+        key = self._sanitize_key(key)
         return self[key].select(key)

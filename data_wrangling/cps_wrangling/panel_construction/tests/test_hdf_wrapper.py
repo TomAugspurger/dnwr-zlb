@@ -31,7 +31,6 @@ class TestHDFWrapper(unittest.TestCase):
         handler = HDFHandler(settings, kind='panel', months=months,
                              frequency=frequency)
         assert handler.stores.keys() == ['long_1994_Q1']
-        handler.close()
 
     def test_getitem(self):
         result = self.handler['1994_01']
@@ -46,6 +45,11 @@ class TestHDFWrapper(unittest.TestCase):
         self.handler.write(df, 'm1994_01', format='f', append=False)
         res = self.handler.stores['m1994_01'].select('m1994_01')
         tm.assert_frame_equal(df, res)
+
+    def test_iter(self):
+        result = [x for x in self.handler]
+        expected = ['m1994_01', 'm1994_02', 'm1994_03']
+        assert result == expected
 
     # def test_select_all(self):
     #     import ipdb; ipdb.set_trace()
