@@ -30,14 +30,16 @@ class TestAddHistory(unittest.TestCase):
         result = add_to_panel._add_employment_status_last_period(wp, 'unemployed',
                                                                  inplace=False)
         expected = pd.DataFrame([np.nan]).reindex_like(wp['labor_status'])
-        expected.loc['a', [4, 8]] = False
-        expected.loc['b', 4] = False
-        expected.loc['c', [4, 8]] = True
+        expected.loc['a', [4, 8]] = 0
+        expected.loc['b', 4] = 0
+        expected.loc['c', [4, 8]] = 1
         # expected.loc['e', 4] = np.NaN  #  donesn't match kind
         # expected.loc['f', 8] = np.Nan
         # expected.loc['g', 8] = np.Nan
-        expected.loc['h', 8] = True
-        expected.loc['i', 8] = False
+        expected.loc['h', 8] = 1
+        expected.loc['i', 8] = 0
+        expected = expected.fillna(-1)
+        expected = expected.astype('int64')
 
         tm.assert_frame_equal(result, expected)
 
