@@ -63,7 +63,7 @@ class HDFHandler(object):
         if months is None:
             self.select_all(kind)
         else:
-            self.stores = self._make_stores(months, frequency)
+            self.stores = self._select_stores(months, frequency)
 
     def __call__(self, kind, months=None):
         # should return a success/failure code.
@@ -86,58 +86,32 @@ class HDFHandler(object):
         return "A {} container of {} stores".format(self.__class__,
                                                     len(self.stores))
 
-    def select_all(self, kind):
-        """
-        Called at init when months is None.
+    def _select_stores(self, kind, months=None):
+        pre = self.pre
+        # base_names = (os.path.join(self.base_path, self.kind, pre + month + '.h5')
+                      # for month in months)
 
-        Parameters
-        ----------
-        kind: str
+        if not os.path.exists(self.base_path):
+            os.mkdir(self.base_path)
 
-        Returns
-        -------
+        with_kind = os.path.join(self.base_path, self.kind)
+        if not os.path.exists(with_kind):
+            os.mkdir(with_kind)
 
-        list of HDFStores
-            appends that list to self.stores
-        """
-        pass
+        stores = {}
+        if months is None:
+            base_names = (os.path.join(with_kind, f) for f in os.listdir(with_kind)
+                          if f.endswith('.h5'))
+        for name in base_names:
+            k, _ = os.path.splitext(os.path.basename(name))
+            stores[k] = pd.HDFStore(name)
+        return stores
 
     def _make_panel(self, months):
         """
         Make the files and write months to those files.
         """
         self.stores = self._make_stores(self, months, self.frequency)
-
-    def _make_stores(self, months, frequency):
-        """
-        Handle the creation of each HDFStores one for each bin (according
-        to frequency).
-
-        months: possibly will remove. just here for overrides.
-        freqency: str
-            one of `Q` or `M` or synonyms
-
-        Returns
-        -------
-
-        list of pd.HDFStores
-            files are base_path + kind + freq + month + .h5
-        """
-        pre = self.pre
-        base_names = (os.path.join(self.base_path, self.kind, pre + month + '.h5')
-                      for month in months)
-
-        if not os.path.exists(self.base_path):
-            os.mkdir(self.base_path)
-
-        if not os.path.exists(os.path.join(self.base_path, self.kind)):
-            os.mkdir(os.path.join(self.base_path, self.kind))
-
-        stores = {}
-        for name in base_names:
-            k, _ = os.path.splitext(os.path.basename(name))
-            stores[k] = pd.HDFStore(name)
-        return stores
 
     def close(self):
         """
