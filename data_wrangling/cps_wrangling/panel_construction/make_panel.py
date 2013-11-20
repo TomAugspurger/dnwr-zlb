@@ -44,6 +44,7 @@ from __future__ import division
 import itertools as it
 import json
 from time import strftime, strptime, struct_time
+import warnings
 
 import arrow
 
@@ -142,11 +143,20 @@ def huhhnum_to_hrhhid_index(df1, df2):
     ts1 = pd.to_datetime(str(df1.timestamp.dropna().unique()[0]))
     ts2 = pd.to_datetime(str(df2.timestamp.dropna().unique()[0]))
 
-    if ts1 >= pd.datetime(2003, 2, 1) and ts2 <= pd.datetime(2004, 5, 1):
+    if ts1 >= pd.datetime(2003, 2, 1) and ts2 <= pd.datetime(2005, 7, 1):
 
         replace = df2.reset_index()
         replace['HRHHID2'] = replace['HRHHID2'] % 10
         replace = replace.set_index(["HRHHID", "HRHHID2", "PULINENO"])
+
+        # need to drop duplicates after the renaming.
+        # see GH 5553
+        if not replace.index.is_unique:
+
+            dupes = df2.index.get_duplicates()
+            warnings.warn('Dropping Duplicates {}'.format(dupes))
+            replace = df2.drop(dupes)
+
         return replace
     else:
         return df2
@@ -425,9 +435,16 @@ def main():
 
     for month in months_todo:
         wp = make_full_panel(cps_store, month, settings)
-        wp = add_to_panel.add_flows(month.strip('/m'), frame=wp)
-        wp = add_to_panel.add_history(month.strip('/m'), frame=wp)
+        try:
+            wp = add_to_panel.add_flows(month.strip('/m'), frame=wp)
+            wp = add_to_panel.add_history(month.strip('/m'), frame=wp)
+        except KeyError as e:
+            print(e)
+            pass
+
         panel_h.write(wp, key='m' + month, append=False, format='f')
+        panel_h[month].close()
+        print("Finished " + month)
 
     #---------------------------------------------------------------------------
     # Create Earn DataFrames
