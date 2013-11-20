@@ -433,7 +433,7 @@ def main():
 
     panel_h = HDFHandler(settings, kind='full_panel', months=months_todo,
                          frequency='monthly')
-
+    import time
     for month in months_todo:
         wp = make_full_panel(cps_store, month, settings)
         try:
@@ -443,8 +443,13 @@ def main():
             print(e)
             pass
 
-        panel_h.write(wp, key='m' + month, append=False, format='f')
-        panel_h[month].close()
+        time.sleep(.5)
+        s = panel_h[month]
+        time.sleep(.5)
+        wp.to_hdf(s, key='m' + month, append=False, format='f')
+        time.sleep(.5)
+        s.close()
+
         print("Finished " + month)
 
     #---------------------------------------------------------------------------
