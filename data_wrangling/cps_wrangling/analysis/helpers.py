@@ -591,7 +591,7 @@ def read_to_long(store, months):
     for month in months:
 
         frames = select_data(month, store)
-
+        frames = (df for df in frames if df is not None)
         for df in frames:
             df = df.drop('timestamp', axis=1)
             stamp = _make_timestamps(df)
