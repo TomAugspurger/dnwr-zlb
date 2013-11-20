@@ -9,7 +9,7 @@ import os
 
 import pandas as pd
 
-from data_wrangling.cps_wrangling.analysis.helpers import date_parser
+from data_wrangling.cps_wrangling.analysis.helpers import date_parser, make_chunk_name
 
 
 class HDFHandler(object):
@@ -39,7 +39,7 @@ class HDFHandler(object):
         settings : dict
             must at least contain `base_path`
         kind : str
-            one of `full_cps`, `panel`, `earnigns`, `analyzed`.
+            one of `full_cps`, `panel`, `earnigns`, `analyzed`, 'long'.
         months : list
             of months to create. Will overwrite existing ones.
             If months is None then just selects all of that kind.
@@ -60,10 +60,7 @@ class HDFHandler(object):
             raise ValueError("Frequency expected `M` or `Q`")
 
         self.months = months
-        if months is None:
-            self.select_all(kind)
-        else:
-            self.stores = self._select_stores(months, frequency)
+        self.stores = self._select_stores()
 
     def __call__(self, kind, months=None):
         # should return a success/failure code.
@@ -86,10 +83,10 @@ class HDFHandler(object):
         return "A {} container of {} stores".format(self.__class__,
                                                     len(self.stores))
 
-    def _select_stores(self, kind, months=None):
+    def _select_stores(self):
         pre = self.pre
-        # base_names = (os.path.join(self.base_path, self.kind, pre + month + '.h5')
-                      # for month in months)
+        months = self.months
+
 
         if not os.path.exists(self.base_path):
             os.mkdir(self.base_path)
@@ -102,6 +99,14 @@ class HDFHandler(object):
         if months is None:
             base_names = (os.path.join(with_kind, f) for f in os.listdir(with_kind)
                           if f.endswith('.h5'))
+        else:
+            if isinstance(months[0], list):
+                base_names = (os.path.join(self.base_path, self.kind,
+                              make_chunk_name(chunk))
+                              for chunk in months)
+            else:
+                base_names = (os.path.join(self.base_path, self.kind,
+                              pre + month + '.h5') for month in months)
         for name in base_names:
             k, _ = os.path.splitext(os.path.basename(name))
             stores[k] = pd.HDFStore(name)
