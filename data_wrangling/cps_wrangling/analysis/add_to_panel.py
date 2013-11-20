@@ -31,6 +31,7 @@ def add_flows(month, panel_store=None, frame=None):
         return _wp
     except Exception as e:
         print("Skipping {}, because of {}".format(month, e))
+        raise KeyError(e)
 
 
 def _add_flow_series(s1, s2, categorical=False):
@@ -102,15 +103,12 @@ def add_history(month, panel_store=None, frame=None):
     wp = get_useful(_wp.copy())
     e_types = ['either', 'unemployed', 'nonemployed']
 
-    try:
-        # inplace
-        [_add_employment_status_last_period(wp, kind=x) for x in e_types]
-        _wp['unemployed_history'] = wp['unemployed']
-        _wp['nonemployed_history'] = wp['nonemployed']
-        _wp['either_history'] = wp['either']
-        return _wp
-    except KeyError:
-        return None
+    # inplace
+    [_add_employment_status_last_period(wp, kind=x) for x in e_types]
+    _wp['unemployed_history'] = wp['unemployed']
+    _wp['nonemployed_history'] = wp['nonemployed']
+    _wp['either_history'] = wp['either']
+    return _wp
 
 def _add_employment_status_last_period(wp, kind, inplace=True):
     """
