@@ -44,7 +44,9 @@ def make_to_long(panel_h, start=None, stop=None):
         df = read_to_long(panel_h, chunk)
         name = make_chunk_name(chunk)
 
-        df.to_hdf(out_store, name, format='table', append=False)
+        # out_store.write(df, name, format='table', append=False)
+        s = out_store.stores[name]
+        df.to_hdf(s, name, format='table', append=False)
         print("Finished " + str(chunk))
 
 
