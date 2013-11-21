@@ -78,6 +78,12 @@ class TestHDFWrapper(unittest.TestCase):
         # expected = "long_1996_Q1"
         # self.assertEqual(result, expected)
 
+    def test_iteritems(self):
+        g = self.handler.iteritems()
+        name, value = next(g)
+        self.assertEqual(name, 'm1994_01')
+        self.assertIs(value, None)
+
     def tearDown(self):
         self.handler.close()
         def unlink(subdir):
@@ -88,8 +94,8 @@ class TestHDFWrapper(unittest.TestCase):
                         os.unlink(file_path)
                 except OSError:
                     pass
-                except Exception, e:
-                    print e
+                except Exception as e:
+                    print(e)
 
             os.rmdir(os.path.join('test_files', subdir))
         unlink('panel')

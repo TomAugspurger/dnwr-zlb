@@ -5,8 +5,10 @@ We want to keep thing broken into separate files so that
 a failure (e.g. segfault) doesn't corrept the entire
 HDFStore.
 """
+from itertools import izip
 import os
 
+import pathlib
 import pandas as pd
 
 from data_wrangling.cps_wrangling.analysis.helpers import date_parser, make_chunk_name
@@ -86,8 +88,26 @@ class HDFHandler(object):
     def __iter__(self):
         return iter(sorted(self.stores.keys()))
 
-    # def iteritems(self):
-    #     return iter(self.stores)
+    def iteritems(self):
+        """
+        Returns tuples containing the store/self key and the
+        pandas object in the associated store.
+        """
+        for key in self:
+            try:
+                yield zip(key, self[key][key])
+            except KeyError:
+                yield key, None
+
+    def from_directory(self, directory):
+        """
+        Alternative constructor. Should only be used for collecting
+        previously constructed wrappers. Directory is a path (str).
+        Returns all stores in that direcotry.
+        """
+        p = pathlib.Path(directory)
+        self.stores = dict((str(c), pd.HDFStore(str(c))) for c in p)
+        return self
 
     def _select_stores(self):
         pre = self.pre
@@ -108,7 +128,7 @@ class HDFHandler(object):
         else:
             if isinstance(months[0], list):
                 base_names = (os.path.join(self.base_path, self.kind,
-                              make_chunk_name(chunk))
+                              make_chunk_name(chunk)) + '.h5'
                               for chunk in months)
             else:
                 base_names = (os.path.join(self.base_path, self.kind,
@@ -159,3 +179,33 @@ class HDFHandler(object):
         """
         key = self._sanitize_key(key)
         return self[key].select(key)
+
+    def apply(self, func, groupby=None, levels=None, *args, **kwargs):
+        """
+        Apply a function to each pandas object in self. Optionally group by
+        groupby, or levels.
+
+
+        Parameters
+        ----------
+
+        - func : callable
+        - groupby : str or list of
+            columns in each frame to groupby
+        - levels : str or list of
+            index names to group on
+        - *args and **kwargs are passed along to func
+
+        Returns
+        -------
+
+        NDFrame
+            DataFrame if the result of func is singleton, Panel otherwise.
+
+
+        """
+        # results = []
+
+        # for df in self.
+        #     if groupby:
+        pass
