@@ -134,12 +134,24 @@ class HDFHandler(object):
             self[f].close()
 
     def write(self, frame, key, *args, **kwargs):
+        """
+        Similar API to pd.NDFrame.to_hdf()
+
+        Parameters
+        ----------
+
+        frame : a pandas object with to_hdf
+        key : key to use in the store
+        """
         #TODO: need to seprate store key from self key.
         store = self[key]
         frame.to_hdf(store, key, *args, **kwargs)
 
     def _sanitize_key(self, key):
-        return self.pre + date_parser(key).strftime('%Y_%m')
+        if self.kind == 'long':
+            return key
+        else:
+            return self.pre + date_parser(key).strftime('%Y_%m')
 
     def select(self, key):
         """
