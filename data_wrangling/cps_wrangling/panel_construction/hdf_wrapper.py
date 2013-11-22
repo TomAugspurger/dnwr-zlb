@@ -36,7 +36,7 @@ class HDFHandler(object):
         /kind/q1994_4.h5
     """
     # TODO: context manager
-    def __init__(self, settings, kind, months=None, frequency=None):
+    def __init__(self, base_path, kind=None, months=None, frequency=None):
         """
         settings : dict
             must at least contain `base_path`
@@ -48,21 +48,35 @@ class HDFHandler(object):
         frequency: str
             one of `monthly` (m), `quarterly` (q)
         """
-
-        self.settings = settings
+        self.base_path = base_path
         self.kind = kind
-        self.base_path = settings['base_path']
         self.frequency = frequency
 
         if frequency in ('monthly', 'M', 'm'):
             self.pre = 'm'
         elif frequency in ('quarterly', 'Q', 'q'):
             self.pre = 'q'
+        elif months is not None:
+            raise ValueError("Frequency expected `M` or `Q` if months is not None.")
         else:
-            raise ValueError("Frequency expected `M` or `Q`")
+            self.pre = frequency
 
         self.months = months
-        self.stores = self._select_stores()
+        if months:
+            self.stores = self._select_stores()
+
+    @classmethod
+    def from_directory(cls, directory, kind):
+        """
+        Alternative constructor. Should only be used for collecting
+        previously constructed wrappers. Directory is a path (str).
+        Returns all stores in that direcotry.
+        """
+        p = pathlib.Path(directory)
+        stores = dict((str(c.name), pd.HDFStore(str(c))) for c in p)
+        klass = cls(directory, kind=kind, frequency=kind)
+        klass.stores = stores
+        return klass
 
     def __call__(self, kind, months=None):
         # should return a success/failure code.
@@ -95,24 +109,13 @@ class HDFHandler(object):
         """
         for key in self:
             try:
-                yield zip(key, self[key][key])
+                yield key, self[key][key]
             except KeyError:
                 yield key, None
-
-    def from_directory(self, directory):
-        """
-        Alternative constructor. Should only be used for collecting
-        previously constructed wrappers. Directory is a path (str).
-        Returns all stores in that direcotry.
-        """
-        p = pathlib.Path(directory)
-        self.stores = dict((str(c), pd.HDFStore(str(c))) for c in p)
-        return self
 
     def _select_stores(self):
         pre = self.pre
         months = self.months
-
 
         if not os.path.exists(self.base_path):
             os.mkdir(self.base_path)
@@ -180,7 +183,8 @@ class HDFHandler(object):
         key = self._sanitize_key(key)
         return self[key].select(key)
 
-    def apply(self, func, groupby=None, levels=None, *args, **kwargs):
+    def apply(self, func, groupby=None, level=None, selector=None,
+              *args, **kwargs):
         """
         Apply a function to each pandas object in self. Optionally group by
         groupby, or levels.
@@ -206,6 +210,22 @@ class HDFHandler(object):
         """
         # results = []
 
-        # for df in self.
-        #     if groupby:
-        pass
+        aggfuncs = ['mean', 'median', 'mode', 'count', 'sum', 'size']
+
+        def apply_(func, selector):
+            for key, df in self.iteritems():
+                if selector is None:
+                    selector = df.columns
+                if groupby:
+                    g = df.groupby(groupby)
+                elif level:
+                    g = df.groupby(level=level)
+                else:
+                    raise NotImplementedError
+                if func in aggfuncs:
+                    res = g[selector].agg(func)
+                else:
+                    res = g[selector].apply(func)
+                yield res
+
+        return pd.concat(list(apply_(func, selector, *args, **kwargs)))

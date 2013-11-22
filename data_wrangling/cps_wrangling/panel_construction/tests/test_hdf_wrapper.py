@@ -6,15 +6,14 @@ import pandas.util.testing as tm
 
 from ..hdf_wrapper import HDFHandler
 
+
 class TestHDFWrapper(unittest.TestCase):
 
     def setUp(self):
         self.fdir = os.path.join('.', 'test_files', 'panel')
-
-        self.settings = {'base_path': './test_files/'}
         months = ['1994_01', '1994_02', '1994_03']
         frequency = 'monthly'
-        self.handler = HDFHandler(self.settings, 'panel', months, frequency)
+        self.handler = HDFHandler('./test_files', 'panel', months, frequency)
 
     def test_file_creation(self):
         # _ = self.handler._select_stores(self.handler)
@@ -25,10 +24,9 @@ class TestHDFWrapper(unittest.TestCase):
         assert all([os.path.exists(x) for x in expected])
 
     def test_create_from_list(self):
-        settings = {'base_path': './test_files/'}
         months = [['1994_01', '1994_02', '1994_03']]
         frequency = 'Q'
-        handler = HDFHandler(settings, kind='panel', months=months,
+        handler = HDFHandler('./test_files', kind='panel', months=months,
                              frequency=frequency)
         self.assertEqual(handler.stores.keys(), ['long_1994_Q1'])
 
@@ -84,8 +82,15 @@ class TestHDFWrapper(unittest.TestCase):
         self.assertEqual(name, 'm1994_01')
         self.assertIs(value, None)
 
+    # getting a `is not a regular file` error.
+    # def test_from_directory(self):
+    #     # setup should have created some.
+    #     handler = HDFHandler.from_directory('./test_files/')
+    #     self.assertEqual(len(handler.stores), len(self.handler.stores))
+
     def tearDown(self):
         self.handler.close()
+
         def unlink(subdir):
             for f in os.listdir(os.path.join('test_files', subdir)):
                 file_path = os.path.join('.', 'test_files', subdir, f)
