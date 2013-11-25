@@ -104,7 +104,7 @@ def dedup_cols(df):
         return df
 
 
-def pre_process(df, ids):
+def pre_process(df, ids, std_ids=False):
     """
     Get DataFrame ready for writing to store.
 
@@ -122,13 +122,19 @@ def pre_process(df, ids):
     df = dedup_cols(df)
     # May want to be careful with index here.
     # forcing numeric chops of leading zeros.
-    df = df.convert_objects(convert_numeric=True)
 
+    if std_ids:
+        df['HRHHID2'] = standardize_ids(df)
+        df = df.drop('HRSAMPLE', axis=1)
+        df = df.drop('HRSERSUF', axis=1)
+
+    df = df.convert_objects(convert_numeric=True)
     try:
         df[df == -1] = np.nan
     except TypeError:
         df = df.replace(-1, np.nan)
     df = df.replace('-', np.nan)
+
     df = df.loc[~(pd.isnull(df[ids]).any(1)), :]
     df = df.set_index(ids)
 
@@ -564,13 +570,38 @@ def standardize_cols(df, dd_name, settings):
     return df
 
 
-def standardize_ids(df, dd_name, settings):
+def standardize_ids(df):
     """
-    grab a *list* from settings with the correct names.
+    pre may2004 need to fill out the ids by creating HRHHID2 manually:
+    (ignore the position values, this is from jan2013)
+
+    HRHHID2        5         HOUSEHOLD IDENTIFIER (part 2) 71 - 75
+
+         EDITED UNIVERSE:    ALL HHLD's IN SAMPLE
+
+         Part 1 of this number is found in columns 1-15 of the record.
+         Concatenate this item with Part 1 for matching forward in time.
+
+         The component parts of this number are as follows:
+         71-72     Numeric component of the sample number (HRSAMPLE)
+         73-74     Serial suffix-converted to numerics (HRSERSUF)
+         75        Household Number (HUHHNUM)
+
+    NOTE: not documented by sersuf of -1 seems to map to '00'
     """
-    ids = settings["id_rename_by_dd"][dd_name]
-    df.index.names = ids
-    return df
+    import string
+
+    hrsample = df['HRSAMPLE'].str.slice(1,)
+    hrsersuf = df['HRSERSUF'].astype(str)
+    huhhnum = df['HUHHNUM'].astype(str)
+
+    sersuf_d = {a: str(ord(a.lower()) - 96).zfill(2) for a in hrsersuf.unique()
+                if a in list(string.ascii_letters)}
+    sersuf_d['-1.0'] = '00'
+    sersuf_d['-1'] = '00'
+    hrsersuf = hrsersuf.map(sersuf_d)  # 10x faster than replace
+    hrhhid2 = hrsample + hrsersuf + huhhnum
+    return hrhhid2.astype(np.int64)
 
 
 def special_by_dd(keys):
@@ -717,7 +748,14 @@ def append_to_store(month, settings, skips, dds, start_time):
         df = pd.read_fwf(name + '.gz', widths=widths,
                          names=dd.id.values, compression='gzip')
 
-        df = pre_process(df, ids=ids).sort_index()
+        # starting in may04 the identifiers change.
+        if dd_name in ["jan1994", "apr1994", "jun1995", "sep1995", "jan1998",
+                       "jan2003"]:
+            std_ids = True
+        else:
+            std_ids = False
+
+        df = pre_process(df, ids=ids, std_ids=std_ids).sort_index()
 
         if dd_name in ['jan1989', 'jan1992']:
             df = handle_89_pt2(df)
