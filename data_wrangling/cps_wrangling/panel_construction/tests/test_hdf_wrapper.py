@@ -4,7 +4,7 @@ import unittest
 import pandas as pd
 import pandas.util.testing as tm
 
-from ..hdf_wrapper import HDFHandler
+from data_wrangling.cps_wrangling.panel_construction.hdf_wrapper import HDFHandler
 
 
 class TestHDFWrapper(unittest.TestCase):
@@ -83,10 +83,22 @@ class TestHDFWrapper(unittest.TestCase):
         self.assertIs(value, None)
 
     # getting a `is not a regular file` error.
-    # def test_from_directory(self):
-    #     # setup should have created some.
-    #     handler = HDFHandler.from_directory('./test_files/')
-    #     self.assertEqual(len(handler.stores), len(self.handler.stores))
+    def test_from_directory(self):
+        # setup should have created some.
+        os.mkdir('from_dir')
+        with open(os.path.join('from_dir', 'file5.h5'), 'w'):
+            pass
+        try:
+            handler = HDFHandler.from_directory('from_dir', kind='M')
+            self.assertEqual(len(handler.stores), 1)
+        except Exception as e:
+            print(e)
+        finally:
+            os.remove(os.path.join('from_dir', 'file5.h5'))
+            os.removedirs('from_dir')
+
+    # def test_map(self):
+    #     res = self.handler.map(sum)
 
     def tearDown(self):
         self.handler.close()

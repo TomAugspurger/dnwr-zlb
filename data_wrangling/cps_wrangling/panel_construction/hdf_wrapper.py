@@ -10,6 +10,7 @@ import os
 
 import pathlib
 import pandas as pd
+from pandas.core.common import is_list_like
 
 from data_wrangling.cps_wrangling.analysis.helpers import date_parser, make_chunk_name
 
@@ -73,7 +74,7 @@ class HDFHandler(object):
         Returns all stores in that direcotry.
         """
         p = pathlib.Path(directory)
-        stores = dict((str(c.name), pd.HDFStore(str(c))) for c in p)
+        stores = dict((str(c.name.split('.')[0]), pd.HDFStore(str(c))) for c in p)
         klass = cls(directory, kind=kind, frequency=kind)
         klass.stores = stores
         return klass
@@ -92,7 +93,6 @@ class HDFHandler(object):
 
     def __getitem__(self, key):
         # TODO: handle ranges
-        key = self._sanitize_key(key)
         return self.stores[key]
 
     def __repr__(self):
@@ -180,7 +180,7 @@ class HDFHandler(object):
         """
         same as store.select()
         """
-        key = self._sanitize_key(key)
+        # key = self._sanitize_key(key)
         return self[key].select(key)
 
     def apply(self, func, groupby=None, level=None, selector=None,
@@ -212,8 +212,26 @@ class HDFHandler(object):
 
         aggfuncs = ['mean', 'median', 'mode', 'count', 'sum', 'size']
 
+        reset = False
+        if groupby is not None and level is not None:
+            reset = True
+
+        if groupby and not is_list_like(groupby):
+            groupby = [groupby]
+
+        if level and not is_list_like(level):
+            level = [level]
+
+        if reset:
+            groupby.extend(level)
+
         def apply_(func, selector):
             for key, df in self.iteritems():
+                if reset:
+                    # will set index later back to ids
+                    ids = df.index.names
+                    df = df.reset_index()
+
                 if selector is None:
                     selector = df.columns
                 if groupby:
@@ -226,6 +244,44 @@ class HDFHandler(object):
                     res = g[selector].agg(func)
                 else:
                     res = g[selector].apply(func)
+                # if reset:
+                #     res = res.set_index(set(ids).intersection(groupby))
                 yield res
 
         return pd.concat(list(apply_(func, selector, *args, **kwargs)))
+
+    def map(self, func, selector=None):
+        """
+        Apply a non grouping function to each frame.
+
+        Parameters
+        ----------
+
+        func : function :: Frame -> a
+        selector : str
+            subset of columns to operate on
+
+        Returns
+        -------
+
+        [a]
+
+        Examples
+        --------
+
+        long.map(pd.value_counts, selector='same_employer')
+        # returns a DataFrame of value_counts
+        """
+
+        results = []
+
+        for key, df in self.iteritems():
+            # need to think about handling methods this way.
+            sub = df[selector]
+            if hasattr(sub, str(func)):
+                res = sub.getattr(func)()
+            else:
+                res = func(sub)
+            results.append(res)
+
+        return pd.concat(results)
