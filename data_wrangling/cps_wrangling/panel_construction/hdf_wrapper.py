@@ -74,7 +74,8 @@ class HDFHandler(object):
         Returns all stores in that direcotry.
         """
         p = pathlib.Path(directory)
-        stores = dict((str(c.name.split('.')[0]), pd.HDFStore(str(c))) for c in p)
+        stores = dict((str(c.name.split('.')[0]), pd.HDFStore(str(c))) for c in p
+                      if not c.name.startswith('.'))
         klass = cls(directory, kind=kind, frequency=kind)
         klass.stores = stores
         return klass
