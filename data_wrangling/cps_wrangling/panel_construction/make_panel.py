@@ -124,48 +124,8 @@ def log_merge(df, ltype):
     return d
 
 
-def huhhnum_to_hrhhid_index(df1, df2):
-    """
-    When they switched names they also changed the numbering.
-    df1 will have the older index values, df2 will have the newer.
-
-    From the HRHHID2 doc:
-
-        Part 1 of this number is found in columns 1-15 of the record.
-    Concatenate this item with Part 1 for matching forward in time.
-
-    The component parts of this number are as follows:
-    71-72   Numeric component of the sample number (HRSAMPLE)
-    73-74   Serial suffix-converted to numerics (HRSERSUF)
-    75      Household Number (HUHHNUM)
-    """
-
-    ts1 = pd.to_datetime(str(df1.timestamp.dropna().unique()[0]))
-    ts2 = pd.to_datetime(str(df2.timestamp.dropna().unique()[0]))
-
-    if (ts1 >= pd.datetime(2003, 2, 1) and ts2 <= pd.datetime(2005, 7, 1)
-            and ts1 <= pd.datetime(2004, 4, 1)):
-
-        replace = df2.reset_index()
-        replace['HRHHID2'] = replace['HRHHID2'] % 10
-        replace = replace.set_index(["HRHHID", "HRHHID2", "PULINENO"])
-
-        # need to drop duplicates after the renaming.
-        # see GH 5553
-        if not replace.index.is_unique:
-
-            dupes = replace.index.get_duplicates()
-            warnings.warn('Dropping Duplicates {}'.format(dupes))
-            replace = replace.drop(dupes)
-
-        return replace
-    else:
-        return df2
-
-
 def match_panel(df1, df2, log=None):
     # TODO: refactor; combine w/ smart_match
-    df2 = huhhnum_to_hrhhid_index(df1, df2)
     left_idx = df1.index
     df2 = df2.loc[left_idx]  # left merge
     # When the CPS messed up the ids in June 1995.
@@ -426,14 +386,15 @@ def main():
     #---------------------------------------------------------------------------
 
     a0 = arrow.get('1994-01', format='YYYY-MM')
-    an = arrow.get('2013-06', format='YYYY-MM"')
+    an = arrow.get('2004-04', format='YYYY-MM"')
     months_todo = [x.strftime('%Y_%m') for x in arrow.Arrow.range('month', a0, an)]
 
     print("Panels to create: {}".format(months_todo))
 
-    panel_h = HDFHandler(settings, kind='full_panel', months=months_todo,
+    bp = settings['base_path']
+    panel_h = HDFHandler(bp, kind='full_panel', months=months_todo,
                          frequency='monthly')
-    import time
+
     for month in months_todo:
         wp = make_full_panel(cps_store, month, settings)
         try:
@@ -443,11 +404,8 @@ def main():
             print(e)
             pass
 
-        time.sleep(.5)
         s = panel_h[month]
-        time.sleep(.5)
         wp.to_hdf(s, key='m' + month, append=False, format='f')
-        time.sleep(.5)
         s.close()
 
         print("Finished " + month)

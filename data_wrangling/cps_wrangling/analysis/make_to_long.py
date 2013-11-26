@@ -7,6 +7,7 @@ import json
 import os
 
 import arrow
+import pathlib
 import pandas as pd
 
 from data_wrangling.cps_wrangling.analysis.helpers import (
@@ -14,7 +15,7 @@ from data_wrangling.cps_wrangling.analysis.helpers import (
 
 from data_wrangling.cps_wrangling.panel_construction.hdf_wrapper import HDFHandler
 
-def make_to_long(panel_h, start=None, stop=None):
+def make_to_long(panel_h, settings, start=None, stop=None):
     """
     Let's chunk by quarters.
     """
@@ -35,7 +36,8 @@ def make_to_long(panel_h, start=None, stop=None):
 
     month_chunks = chunk_quarters(months, 3)
     month_chunks = [x for x in month_chunks if len(x) > 0]
-    out_store = HDFHandler(settings, kind='long', months=month_chunks,
+    p = pathlib.Path(str(settings['base_path']))
+    out_store = HDFHandler(str(p), kind='long', months=month_chunks,
                            frequency='Q')
 
     for chunk in month_chunks:
@@ -54,8 +56,9 @@ def main():
     with open(os.path.join(os.pardir, 'panel_construction', 'settings.txt'), 'rt') as f:
         settings = json.load(f)
 
-    panel_h = HDFHandler(settings, kind='full_panel', frequency='monthly')
-    make_to_long(panel_h, start='1996_01', stop=None)
+    p = pathlib.Path(str(settings['base_path'])).join('full_panel')
+    panel_h = HDFHandler.from_directory(str(p), kind='full_panel')
+    make_to_long(panel_h, settings, start='1996_01', stop='2013_06')
 
 if __name__ == '__main__':
     main()
