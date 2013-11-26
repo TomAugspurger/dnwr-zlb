@@ -102,6 +102,9 @@ class HDFHandler(object):
     def __iter__(self):
         return iter(sorted(self.stores.keys()))
 
+    def keys(self):
+        return self.stores.keys()
+
     def iteritems(self):
         """
         Returns tuples containing the store/self key and the

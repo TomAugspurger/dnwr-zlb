@@ -31,11 +31,8 @@ class TestHDFWrapper(unittest.TestCase):
         self.assertEqual(handler.stores.keys(), ['long_1994_Q1'])
 
     def test_getitem(self):
-        result = self.handler['1994_01']
-        expected = self.handler.stores['m1994_01']
-        self.assertIs(result, expected)
-
         result = self.handler['m1994_01']
+        expected = self.handler.stores['m1994_01']
         self.assertIs(result, expected)
 
     def test_write(self):
