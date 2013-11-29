@@ -216,7 +216,7 @@ def replace_categorical(df, kind=None, inverse=False):
         for k, v in replacer.iteritems():
             df[k] = df[k].replace(v)
     else:
-        df = df.replace(replacer[kind])
+        df[kind] = df[kind].replace(replacer[kind])
     return df
 
 
