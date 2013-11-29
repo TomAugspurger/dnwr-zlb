@@ -198,6 +198,7 @@ class HDFHandler(object):
         ----------
 
         - func : callable
+            optinally list of funcs for agg
         - groupby : str or list of
             columns in each frame to groupby
         - levels : str or list of
@@ -214,7 +215,16 @@ class HDFHandler(object):
         """
         # results = []
 
-        aggfuncs = ['mean', 'median', 'mode', 'count', 'sum', 'size']
+        aggfuncs = ['mean', 'median', 'mode', 'count', 'sum', 'size', 'std']
+
+        if is_list_like(func) and all([f in aggfuncs for f in func]):
+            the_attr = 'agg'
+        elif is_list_like(func):
+            raise TypeError("Multiple functions only work with aggfuncs")
+        elif func in aggfuncs:
+            the_attr = 'agg'
+        else:
+            the_attr = 'apply'
 
         reset = False
         if groupby is not None and level is not None:
@@ -233,7 +243,6 @@ class HDFHandler(object):
             for key, df in self.iteritems():
                 if reset:
                     # will set index later back to ids
-                    ids = df.index.names
                     df = df.reset_index()
 
                 if selector is None:
@@ -244,10 +253,7 @@ class HDFHandler(object):
                     g = df.groupby(level=level)
                 else:
                     raise NotImplementedError
-                if func in aggfuncs:
-                    res = g[selector].agg(func)
-                else:
-                    res = g[selector].apply(func)
+                res = getattr(g[selector], the_attr)(func)
                 # if reset:
                 #     res = res.set_index(set(ids).intersection(groupby))
                 yield res
