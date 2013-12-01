@@ -117,6 +117,11 @@ class HDFHandler(object):
             except KeyError:
                 yield key, None
 
+    def select_all(self):
+        df = pd.concat((frame for _, frame in self.iteritems()))
+        df = df.sort_index()
+        return df
+
     def _select_stores(self):
         pre = self.pre
         months = self.months
