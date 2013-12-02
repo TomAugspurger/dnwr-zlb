@@ -117,8 +117,10 @@ class HDFHandler(object):
             except KeyError:
                 yield key, None
 
-    def select_all(self):
-        df = pd.concat((frame for _, frame in self.iteritems()))
+    def select_all(self, columns=None):
+        if columns is None:
+            columns = slice(0, None)
+        df = pd.concat((frame[slice] for _, frame in self.iteritems()))
         df = df.sort_index()
         return df
 
