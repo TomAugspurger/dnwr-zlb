@@ -5,7 +5,6 @@ We want to keep thing broken into separate files so that
 a failure (e.g. segfault) doesn't corrept the entire
 HDFStore.
 """
-from itertools import izip
 import os
 import shutil
 import subprocess
@@ -68,6 +67,10 @@ class HDFHandler(object):
         if months:
             self.stores = self._select_stores()
 
+        # set by groupby later
+        self._full_cache = None
+        self._full_cache_args = None
+
     @classmethod
     def from_directory(cls, directory, kind):
         """
@@ -121,12 +124,14 @@ class HDFHandler(object):
             except KeyError:
                 yield key, None
 
-    def select_all(self, columns=None):
-        if columns is None:
-            columns = slice(0, None)
-        df = pd.concat((frame[slice] for _, frame in self.iteritems()))
-        df = df.sort_index()
-        return df
+    def select_all(self, **kwargs):
+        if self._full_cache_args == kwargs:
+            return self._full_cache
+        else:
+            self._full_cache_args = kwargs
+            df = pd.concat((frame for _, frame in self.iteritems(**kwargs)))
+            df = df.sort_index()
+            return df
 
     def _select_stores(self):
         pre = self.pre
@@ -227,9 +232,15 @@ class HDFHandler(object):
         NDFrame
             DataFrame if the result of func is singleton, Panel otherwise.
 
+        Notes
+        -----
 
+        Stuff on disk is chunked according to some scheme. In my case it's
+        quarterly. So if you groupby some group that spans multiple files,
+        (e.g. sex, race, anything else really), your going to *have* to read
+        the entire dataset into memory.  I'd like to cache that somewhere
+        on self.
         """
-        # results = []
         select_kwargs = select_kwargs if select_kwargs else {}
         aggfuncs = ['mean', 'median', 'mode', 'count', 'sum', 'size', 'std']
 
@@ -272,7 +283,14 @@ class HDFHandler(object):
                 #     res = res.set_index(set(ids).intersection(groupby))
                 yield res
 
-        return pd.concat(list(apply_(func, selector, *args, **kwargs)))
+        if level is None:
+            if self._full_cache is None:
+                # self should be immuatble... hrff
+                self._full_cache = self.select_all(**select_kwargs)
+            return self._full_cache.groupby(groupby)[selector].apply(func)
+
+        else:
+            return pd.concat(list(apply_(func, selector, *args, **kwargs)))
 
     def map(self, func, selector=None):
         """

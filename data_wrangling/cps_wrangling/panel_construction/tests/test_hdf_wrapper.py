@@ -100,23 +100,8 @@ class TestHDFWrapper(unittest.TestCase):
     #     res = self.handler.map(sum)
 
     def test_apply(self):
-        # TOOD: make multiindex with a stamp.  with names
-        df = pd.DataFrame({'A': [1, 2, 3, 4], 'B': ['a', 'a', 'b', 'b']})
-
-        idx1 = lambda year: pd.to_datetime([year] * 4)
-        idx2 = ('L1', 'L2', 'L1', 'L2')
-        df.index = pd.MultiIndex.from_tuples(zip(idx1('1994-01-01'), idx2),
-                                             names=['stamp', 'l2'])
-        self.handler.write(df, 'm1994_01', format='table', append=False)
-
-        df.index = pd.MultiIndex.from_tuples(zip(idx1('1994-02-01'), idx2),
-                                             names=['stamp', 'l2'])
-        self.handler.write(df, 'm1994_02', format='table', append=False)
-        df.index = pd.MultiIndex.from_tuples(zip(idx1('1994-03-01'), idx2),
-                                             names=['stamp', 'l2'])
-        self.handler.write(df, 'm1994_03', format='table', append=False)
-
         # agg, groupby=None, level='stamp'
+        _write_df_to_handler(self)
         result = self.handler.apply('mean', level='stamp', selector='A')
         expected = pd.Series([2.5, 2.5, 2.5], name='A',
                              index=pd.to_datetime(['1994-01-01',
@@ -154,6 +139,13 @@ class TestHDFWrapper(unittest.TestCase):
         result = self.handler.stores['m1994_01'].select('m1994_01', columns=['A'])
         tm.assert_frame_equal(result, df[['A']])
 
+    def test_select_all(self):
+        df = _write_df_to_handler(self, return_df=True).sort_index()
+
+        # actual test
+        result = self.handler.select_all()
+        tm.assert_frame_equal(result, df)
+
     def tearDown(self):
         self.handler.close()
 
@@ -172,3 +164,26 @@ class TestHDFWrapper(unittest.TestCase):
         unlink('panel')
         # unlink('long')
         os.rmdir('test_files')
+
+
+def _write_df_to_handler(obj, return_df=False):
+    # keep tests fast for most; only write when needed.
+    df = pd.DataFrame({'A': [1, 2, 3, 4], 'B': ['a', 'a', 'b', 'b']})
+
+    idx1 = lambda year: pd.to_datetime([year] * 4)
+    idx2 = ('L1', 'L2', 'L1', 'L2')
+    df1 = df.copy()
+    df2 = df.copy()
+    df3 = df.copy()
+    df1.index = pd.MultiIndex.from_tuples(zip(idx1('1994-01-01'), idx2),
+                                          names=['stamp', 'l2'])
+    obj.handler.write(df1, 'm1994_01', format='table', append=False)
+
+    df2.index = pd.MultiIndex.from_tuples(zip(idx1('1994-02-01'), idx2),
+                                          names=['stamp', 'l2'])
+    obj.handler.write(df2, 'm1994_02', format='table', append=False)
+    df3.index = pd.MultiIndex.from_tuples(zip(idx1('1994-03-01'), idx2),
+                                          names=['stamp', 'l2'])
+    obj.handler.write(df3, 'm1994_03', format='table', append=False)
+    if return_df:
+        return pd.concat([df1, df2, df3])
