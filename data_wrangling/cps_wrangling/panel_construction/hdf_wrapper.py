@@ -242,9 +242,7 @@ class HDFHandler(object):
         else:
             the_attr = 'apply'
 
-        reset = False
-        if groupby is not None and level is not None:
-            reset = True
+        reset = bool(groupby) and bool(level)
 
         if groupby and not is_list_like(groupby):
             groupby = [groupby]
