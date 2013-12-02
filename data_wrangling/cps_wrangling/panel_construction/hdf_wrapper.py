@@ -7,6 +7,8 @@ HDFStore.
 """
 from itertools import izip
 import os
+import shutil
+import subprocess
 
 import pathlib
 import pandas as pd
@@ -302,3 +304,17 @@ class HDFHandler(object):
             results.append(res)
 
         return pd.concat(results)
+
+    def compress(self):
+        """
+        Runs ptrepcack over self.stores and closes.
+        """
+
+        stores = self.stores
+        for _, v in stores.iteritems():
+            src = v.filename
+            shutil.move(src, "_" + src)
+            subprocess.call(["ptrepack", "--complevel=9", "_" + src, src])
+            os.remove("_" + src)
+
+        self.close()
