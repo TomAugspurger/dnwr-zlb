@@ -29,6 +29,7 @@ class TestHDFWrapper(unittest.TestCase):
         handler = HDFHandler('./test_files', kind='panel', months=months,
                              frequency=frequency)
         self.assertEqual(handler.stores.keys(), ['long_1994_Q1'])
+        handler.close()
 
     def test_getitem(self):
         result = self.handler['m1994_01']
@@ -88,6 +89,7 @@ class TestHDFWrapper(unittest.TestCase):
         try:
             handler = HDFHandler.from_directory('from_dir', kind='M')
             self.assertEqual(len(handler.stores), 1)
+            handler.close()
         except Exception as e:
             print(e)
         finally:
@@ -135,7 +137,7 @@ class TestHDFWrapper(unittest.TestCase):
         # tm.assert_series_equal(result, expected)
 
     def test_select(self):
-        df = pd.DataFrame({'A': [1, 2, 3]})
+        df = pd.DataFrame({'A': [1, 2, 3], 'B': ['a', 'b', 'c']})
         self.handler.write(df, 'm1994_01', format='f', append=False)
 
         # actual test
@@ -160,4 +162,3 @@ class TestHDFWrapper(unittest.TestCase):
         unlink('panel')
         # unlink('long')
         os.rmdir('test_files')
-
