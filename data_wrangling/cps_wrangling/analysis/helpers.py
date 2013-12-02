@@ -79,7 +79,8 @@ def replace_categorical(df, kind=None, inverse=False):
     """
     Replace the numeric values with catigorical for a DataFrame.
 
-    kind must be one of {'sex', 'race', 'married', 'labor_status'}
+    kind must be one of {'sex', 'race', 'married', 'labor_status', 'industry',
+        'occupation', 'edu'}
     by defualt all are replaced.
     """
     sex = {1: "male", 2: "female"}
@@ -204,9 +205,26 @@ def replace_categorical(df, kind=None, inverse=False):
                   22: "Transportation and material moving",
                   23: "Armed Forces"}
 
+    edu = {31: "LESS THAN 1ST GRADE",
+           32: "1ST, 2ND, 3RD OR 4TH GRADE",
+           33: "5TH OR 6TH GRADE",
+           34: "7TH OR 8TH GRADE",
+           35: "9TH GRADE",
+           36: "10TH GRADE",
+           37: "11TH GRADE",
+           38: "12TH GRADE NO DIPLOMA",
+           39: "HIGH SCHOOL GRAD-DIPLOMA OR EQUIV (GED)",
+           40: "SOME COLLEGE BUT NO DEGREE",
+           41: "ASSOCIATE DEGREE-OCCUPATIONAL/VOCATIONAL",
+           42: "ASSOCIATE DEGREE-ACADEMIC PROGRAM",
+           43: "BACHELOR'S DEGREE (EX: BA, AB, BS)",
+           44: "MASTER'S DEGREE (EX: MA, MS, MEng, MEd, MSW)",
+           45: "PROFESSIONAL SCHOOL DEG (EX: MD, DDS, DVM)",
+           46: "DOCTORATE DEGREE (EX: PhD, EdD)"}
+
     replacer = {"sex": sex, "race": race, "married": married,
                 "labor_status": labor_status, "industry": industry,
-                "occupation": occupation}
+                "occupation": occupation, 'edu': edu}
     if inverse:
         replacer = {v: k for k, v in replacer.iteritems()}
 
@@ -219,6 +237,28 @@ def replace_categorical(df, kind=None, inverse=False):
         df[kind] = df[kind].replace(replacer[kind])
     return df
 
+
+def edu_to_years(s):
+    """
+    Replaces education values with approximate years of school.
+    """
+    d = {31: 1,
+         32: 4,
+         33: 6,
+         34: 8,
+         35: 9,
+         36: 10,
+         37: 11,
+         38: 12,
+         39: 12,
+         40: 14,
+         41: 14,
+         42: 14,
+         43: 18,
+         44: 20,
+         45: 22,
+         46: 22}
+    return s.replace(d)
 
 def add_flows_wrapper(frame, inplace=True):
     if isinstance(frame, pd.DataFrame):
@@ -602,7 +642,9 @@ def read_to_long(store, months):
             by_time.append(df)
 
     df = pd.concat(by_time).sort_index()
-
+    # Add an experience column: Age - years of school - 6
+    s = edu_to_years(df['edu'])
+    df['expr'] = df['age'] - s - 6
     return df
 
 
