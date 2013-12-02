@@ -65,8 +65,10 @@ def main():
         settings = json.load(f)
 
     analyzed = pd.HDFStore(settings['analyzed_path'])
+    df = df.rename(columns={"PRS85006093": "productivity",
+                            "PRS85006153": "compensation"})
     df.to_hdf(analyzed, 'bls_productivity_compensation', format='table', append=False)
-
+    analyzed.close()
 
 if __name__ == '__main__':
     main()
