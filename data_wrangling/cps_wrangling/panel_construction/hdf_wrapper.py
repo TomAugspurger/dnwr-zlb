@@ -108,14 +108,16 @@ class HDFHandler(object):
     def keys(self):
         return self.stores.keys()
 
-    def iteritems(self):
+    def iteritems(self, **kwargs):
         """
         Returns tuples containing the store/self key and the
         pandas object in the associated store.
+
+        kwargs are passed to pandas.HDFStore.select()
         """
         for key in self:
             try:
-                yield key, self[key][key]
+                yield key, self[key].select(key, **kwargs)
             except KeyError:
                 yield key, None
 
@@ -189,15 +191,16 @@ class HDFHandler(object):
         else:
             return self.pre + date_parser(key).strftime('%Y_%m')
 
-    def select(self, key):
+    def select(self, key, **kwargs):
         """
         same as store.select()
+
+        kwargs are all passed along as is.
         """
-        # key = self._sanitize_key(key)
-        return self[key].select(key)
+        return self[key].select(key, **kwargs)
 
     def apply(self, func, groupby=None, level=None, selector=None,
-              *args, **kwargs):
+              select_kwargs=None, *args, **kwargs):
         """
         Apply a function to each pandas object in self. Optionally group by
         groupby, or levels.
@@ -212,6 +215,10 @@ class HDFHandler(object):
             columns in each frame to groupby
         - levels : str or list of
             index names to group on
+        - selector : str or list of
+            subset of columsn to return. Default None
+        - select_kwargs : dict
+            keyword argument to pass along to HDFStore.select(). Default None
         - *args and **kwargs are passed along to func
 
         Returns
@@ -223,7 +230,7 @@ class HDFHandler(object):
 
         """
         # results = []
-
+        select_kwargs = select_kwargs if select_kwargs else {}
         aggfuncs = ['mean', 'median', 'mode', 'count', 'sum', 'size', 'std']
 
         if is_list_like(func) and all([f in aggfuncs for f in func]):
@@ -249,7 +256,7 @@ class HDFHandler(object):
             groupby.extend(level)
 
         def apply_(func, selector):
-            for key, df in self.iteritems():
+            for key, df in self.iteritems(**select_kwargs):
                 if reset:
                     # will set index later back to ids
                     df = df.reset_index()

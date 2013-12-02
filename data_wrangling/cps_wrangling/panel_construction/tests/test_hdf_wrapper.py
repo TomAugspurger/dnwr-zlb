@@ -107,14 +107,14 @@ class TestHDFWrapper(unittest.TestCase):
         idx2 = ('L1', 'L2', 'L1', 'L2')
         df.index = pd.MultiIndex.from_tuples(zip(idx1('1994-01-01'), idx2),
                                              names=['stamp', 'l2'])
-        self.handler.write(df, 'm1994_01', format='f', append=False)
+        self.handler.write(df, 'm1994_01', format='table', append=False)
 
         df.index = pd.MultiIndex.from_tuples(zip(idx1('1994-02-01'), idx2),
                                              names=['stamp', 'l2'])
-        self.handler.write(df, 'm1994_02', format='f', append=False)
+        self.handler.write(df, 'm1994_02', format='table', append=False)
         df.index = pd.MultiIndex.from_tuples(zip(idx1('1994-03-01'), idx2),
                                              names=['stamp', 'l2'])
-        self.handler.write(df, 'm1994_03', format='f', append=False)
+        self.handler.write(df, 'm1994_03', format='table', append=False)
 
         # agg, groupby=None, level='stamp'
         result = self.handler.apply('mean', level='stamp', selector='A')
@@ -130,6 +130,13 @@ class TestHDFWrapper(unittest.TestCase):
         expected.index.names = ['stamp']
         tm.assert_frame_equal(result, expected)
 
+        # with select kwargs
+        result = self.handler.apply('mean', level='stamp', selector=['A'],
+                                    select_kwargs={'columns': ['A']})
+        expected = pd.DataFrame(expected)
+        expected.index.names = ['stamp']
+        tm.assert_frame_equal(result, expected)
+
         # agg, groupby='B', level='None'
         # will fail
         # result = self.handler.apply('mean', groupby='B', selector=['A'])
@@ -138,11 +145,14 @@ class TestHDFWrapper(unittest.TestCase):
 
     def test_select(self):
         df = pd.DataFrame({'A': [1, 2, 3], 'B': ['a', 'b', 'c']})
-        self.handler.write(df, 'm1994_01', format='f', append=False)
+        self.handler.write(df, 'm1994_01', format='table', append=False)
 
         # actual test
         result = self.handler.stores['m1994_01'].select('m1994_01')
         tm.assert_frame_equal(result, df)
+
+        result = self.handler.stores['m1994_01'].select('m1994_01', columns=['A'])
+        tm.assert_frame_equal(result, df[['A']])
 
     def tearDown(self):
         self.handler.close()
