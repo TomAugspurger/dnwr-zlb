@@ -97,6 +97,51 @@ class TestHDFWrapper(unittest.TestCase):
     # def test_map(self):
     #     res = self.handler.map(sum)
 
+    def test_apply(self):
+        # TOOD: make multiindex with a stamp.  with names
+        df = pd.DataFrame({'A': [1, 2, 3, 4], 'B': ['a', 'a', 'b', 'b']})
+
+        idx1 = lambda year: pd.to_datetime([year] * 4)
+        idx2 = ('L1', 'L2', 'L1', 'L2')
+        df.index = pd.MultiIndex.from_tuples(zip(idx1('1994-01-01'), idx2),
+                                             names=['stamp', 'l2'])
+        self.handler.write(df, 'm1994_01', format='f', append=False)
+
+        df.index = pd.MultiIndex.from_tuples(zip(idx1('1994-02-01'), idx2),
+                                             names=['stamp', 'l2'])
+        self.handler.write(df, 'm1994_02', format='f', append=False)
+        df.index = pd.MultiIndex.from_tuples(zip(idx1('1994-03-01'), idx2),
+                                             names=['stamp', 'l2'])
+        self.handler.write(df, 'm1994_03', format='f', append=False)
+
+        # agg, groupby=None, level='stamp'
+        result = self.handler.apply('mean', level='stamp', selector='A')
+        expected = pd.Series([2.5, 2.5, 2.5], name='A',
+                             index=pd.to_datetime(['1994-01-01',
+                                                   '1994-02-01',
+                                                   '1994-03-01']))
+        tm.assert_series_equal(result, expected)
+
+        # agg, groupby=None, level='stamp', list selector
+        result = self.handler.apply('mean', level='stamp', selector=['A'])
+        expected = pd.DataFrame(expected)
+        expected.index.names = ['stamp']
+        tm.assert_frame_equal(result, expected)
+
+        # agg, groupby='B', level='None'
+        # will fail
+        # result = self.handler.apply('mean', groupby='B', selector=['A'])
+        # expected = pd.Series([1.5, 3.5], name='A', index=['a', 'b'])
+        # tm.assert_series_equal(result, expected)
+
+    def test_select(self):
+        df = pd.DataFrame({'A': [1, 2, 3]})
+        self.handler.write(df, 'm1994_01', format='f', append=False)
+
+        # actual test
+        result = self.handler.stores['m1994_01'].select('m1994_01')
+        tm.assert_frame_equal(result, df)
+
     def tearDown(self):
         self.handler.close()
 
