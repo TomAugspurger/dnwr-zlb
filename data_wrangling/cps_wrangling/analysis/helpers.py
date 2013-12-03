@@ -575,14 +575,14 @@ def chunk_list(l, n):
         yield l[i:i+n]
 
 
-def make_chunk_name(chunk):
+def make_chunk_name(chunk, id_='long'):
     """
     Base off first name. Write into quarters.
     """
     m = chunk[0]
     year = m[:4]
     month = int(m[-2:])
-    name = 'long_' + year + '_Q' + str(int(np.ceil(month / 3.)))
+    name = id_ + '_' + year + '_Q' + str(int(np.ceil(month / 3.)))
     return name
 
 

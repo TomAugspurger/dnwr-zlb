@@ -155,6 +155,7 @@ def post_process(df):
     month = int(df.HRMONTH.iloc[0])
 
     df['timestamp'] = datetime(year, month, 1)
+    df['PEHRUSL1'] = df['PEHRUSL1'].replace(-4, np.nan)  # Hours vary
     return df
 
 
