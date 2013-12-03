@@ -287,7 +287,7 @@ class HDFHandler(object):
             if self._full_cache is None:
                 # self should be immuatble... hrff
                 self._full_cache = self.select_all(**select_kwargs)
-            return self._full_cache.groupby(groupby)[selector].apply(func)
+            return getattr(self.full_cache.groupby(groupby)[selector], the_attr)(func)
 
         else:
             return pd.concat(list(apply_(func, selector, *args, **kwargs)))
@@ -336,8 +336,8 @@ class HDFHandler(object):
         stores = self.stores
         for _, v in stores.iteritems():
             src = v.filename
-            shutil.move(src, "_" + src)
-            subprocess.call(["ptrepack", "--complevel=9", "_" + src, src])
-            os.remove("_" + src)
+            shutil.move(src, src + '_')
+            subprocess.call(["ptrepack", "--complevel=9", src + '_', src])
+            os.remove(src + '_')
 
         self.close()
