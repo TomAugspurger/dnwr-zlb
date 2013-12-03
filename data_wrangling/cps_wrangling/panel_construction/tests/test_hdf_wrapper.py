@@ -128,6 +128,17 @@ class TestHDFWrapper(unittest.TestCase):
         # expected = pd.Series([1.5, 3.5], name='A', index=['a', 'b'])
         # tm.assert_series_equal(result, expected)
 
+        # a list of aggs
+        result = self.handler.apply(['mean', 'count'], level='stamp',
+                                    selector=['A'])
+        expected = pd.DataFrame([[2.5, 4], [2.5, 4], [2.5, 4]],
+                                index=pd.to_datetime(['1994-01-01',
+                                                     '1994-02-01',
+                                                     '1994-03-01']))
+        expected.index.name = 'stamp'
+        expected.columns = pd.MultiIndex.from_tuples([('A', 'mean'), ('A', 'count')])
+        tm.assert_frame_equal(result, expected)
+
     def test_select(self):
         df = pd.DataFrame({'A': [1, 2, 3], 'B': ['a', 'b', 'c']})
         self.handler.write(df, 'm1994_01', format='table', append=False)
