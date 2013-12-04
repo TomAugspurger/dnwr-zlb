@@ -73,3 +73,10 @@ class TestReadPanel(unittest.TestCase):
 
         result = helpers.replace_variable_hours(df)
         tm.assert_frame_equal(result, expected)
+
+    def test_fix_edu_bug(self):
+        df = pd.DataFrame({'edu': [31, 32, 321, 411]})
+        result = helpers.fix_edu_bug(df)
+        expected = pd.DataFrame({'edu': [31, 32, 32, 41]})
+        tm.assert_frame_equal(result, expected)
+

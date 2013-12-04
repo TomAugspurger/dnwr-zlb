@@ -653,11 +653,27 @@ def read_to_long(store, months):
             by_time.append(df)
 
     df = pd.concat(by_time).sort_index()
+
+    # Transformations
+    #--------------------------------------------------------------------------
+    # edu bug
+    df = fix_edu_bug(df)
+
     # Add an experience column: Age - years of school - 6
     s = edu_to_years(df['edu'])
     df['expr'] = df['age'] - s - 6
+
     # replace variable hours (-4) with actual hours
     df = replace_variable_hours(df)
+    #--------------------------------------------------------------------------
+    return df
+
+
+def fix_edu_bug(df, inplace=True):
+    """read_fwf bug on edu for 2007+; see note.md"""
+    edu = df.edu
+    edu[edu > 100] = edu[edu > 100].astype('str').str.slice(0, 2).astype(int)
+    df['edu'] = edu
     return df
 
 
