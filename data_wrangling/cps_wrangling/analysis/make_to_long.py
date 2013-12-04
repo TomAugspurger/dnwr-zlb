@@ -82,7 +82,7 @@ def make_to_long(panel_h, settings, start=None, stop=None):
         print("Finished " + str(chunk))
 
     # finally, chunk by quarter and write out.
-    cleaned = pd.HDFStore('/Volumes/HDD/Users/tom/DataStorage/CPS/analyzed/cleaned.h5')
+    cleaned = pd.HDFStore('/Volumes/HDD/Users/tom/DataStorage/CPS/analyzed/clean.h5')
     df = earn_store.select_all().drop('occupation', axis=1).dropna(how='any')
 
     df = quarterize(df)
@@ -90,8 +90,10 @@ def make_to_long(panel_h, settings, start=None, stop=None):
     df['productivity'] = prod.reindex(df.index, level='qmonth')
     df['real_hr_earns'] = df.real_hr_earns.replace(np.inf, np.nan)
     df = df.dropna(how='any')
+    df.to_hdf(cleaned, 'cleaned', format='f', append=False)
 
     out_store.close()
+    analyzed.close()
     earn_store.close()
     cleaned.close()
 
