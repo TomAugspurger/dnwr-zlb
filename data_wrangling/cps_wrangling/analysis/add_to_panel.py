@@ -87,11 +87,12 @@ def add_history(month, panel_store=None, frame=None):
     """
     Add the 3 month history for every employee working.
 
-    Return frame of bools:
+    Will return one of  {1,    0,     -1}
+                        {True, False NaN} where
 
-    True if new hire (according to kind)
-    False if existing "hire"
-    NaN if not currently working or NaN
+        - (1) True if kind anytime in past 3 months and employed today (new hire)
+        - (0) False if employed past 3 months and employed today
+        - (-1) NaN if un/non employed today.
 
     """
     # TODO: Chcek this...
