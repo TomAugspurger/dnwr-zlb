@@ -10,6 +10,7 @@ from data_wrangling.cps_wrangling.analysis.helpers import (bin_others,
                                                            filter_panel)
 from data_wrangling.cps_wrangling.analysis.make_to_long import quarterize
 
+
 class TestHelpers(unittest.TestCase):
 
     def test_bin_others(self):
@@ -133,3 +134,22 @@ class TestReadPanel(unittest.TestCase):
         result = result[['month', 'year', 'quarter']]
         expected = expected[['month', 'year', 'quarter']]
         tm.assert_frame_equal(result, expected)
+
+    def test_make_demo_dummies(self):
+        df = pd.DataFrame({'race': [1, 2, 6, 10, 11, 12],
+                           'sex': [1, 2, 2, 2, 2, 2],
+                           'married': [0, 1, 2, 2, 2, 2]})
+        expected = pd.DataFrame({'race_d': [0, 1, 1, 1, 1, 1],
+                                 'sex_d': [0, 1, 1, 1, 1, 1],
+                                 'married_d': [0, 1, 1, 1, 1, 1]})
+        expected = expected[['race_d', 'sex_d', 'married_d']]
+        result = helpers.make_demo_dummies(df)
+        tm.assert_frame_equal(result, expected)
+
+    def test_bin_education(self):
+        df = pd.DataFrame({'edu': [31, 32, 33, 34, 35, 36, 37, 38,
+                                   39, 40, 41, 42, 43, 44, 45, 46]})
+        expected = pd.Series([0, 0, 0, 0, 0, 0, 0, 0,
+                              1, 2, 3, 3, 4, 5, 5, 5], name='edu_d')
+        result = helpers.bin_education(df)
+        tm.assert_series_equal(result, expected)

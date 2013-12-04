@@ -809,3 +809,47 @@ def add_dummies(s, prefix='D_', start=0):
     cols = [prefix + str(x) for x in np.arange(start, ncols)]
     dummies = pd.DataFrame(dummies, columns=cols, index=s.index)
     return dummies
+
+
+def make_demo_dummies(df):
+    """
+    Add dummies for
+        race : black (2, 6, 10, 11, 12) = 1 (TODO: add hispanic)
+        sex  : female (2) = 1
+        married : married with spouse present (1, 2) = 1
+    """
+    race_d = pd.Series(np.zeros(df.shape[0]), index=df.index, name='race_d')
+    race_d[df['race'].isin([2, 6, 10, 11, 12])] = 1
+
+    sex_d = pd.Series(np.zeros(df.shape[0]), index=df.index, name='sex_d')
+    sex_d[df['sex'] == 2] = 1
+
+    married_d = pd.Series(np.zeros(df.shape[0]), index=df.index,
+                          name='married_d')
+    married_d[df['married'].isin([1, 2])] = 1
+
+    res = pd.concat([race_d, sex_d, married_d], axis=1)
+    res = res.astype(int)
+    return res
+
+
+def bin_education(df):
+    """
+    Break education into:
+
+        0. Didn't finish highschool (31, 32, 33, 34, 35, 36, 37, 38) < check
+        1. Highschool or GED (39)
+        2. Some college (40)
+        3. Associate (41, 42)
+        4. Finished college (43)
+        5. Some graduate (44, 45, 46)
+    """
+    res = pd.Series(np.zeros(df.shape[0]))
+    edu = df['edu']
+    res[edu == 39] = 1
+    res[edu == 40] = 2
+    res[edu.isin([41, 42])] = 3
+    res[edu == 43] = 4
+    res[edu.isin([44, 45, 46])] = 5
+    res = res.astype(int)
+    return res
