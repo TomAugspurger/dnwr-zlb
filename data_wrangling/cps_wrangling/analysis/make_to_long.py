@@ -72,6 +72,7 @@ def make_to_long(panel_h, settings, start=None, stop=None):
         # Also write out just earnings (nan issues so can't select later)
         # need to make real hrs fisrt.
         earn = df[~pd.isnull(df.real_hr_earns)]
+        earn = earn[(earn.hours > 0) & (earn.earnings > 0)]
         name = make_chunk_name(chunk)
         s = earn_store.stores[name]
         earn.to_hdf(s, name, format='table', append=False, data_columns=True)
