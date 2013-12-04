@@ -8,7 +8,7 @@ from data_wrangling.cps_wrangling.analysis import helpers
 from data_wrangling.cps_wrangling.analysis.helpers import (bin_others,
                                                            date_parser,
                                                            filter_panel)
-
+from data_wrangling.cps_wrangling.analysis.make_to_long import quarterize
 
 class TestHelpers(unittest.TestCase):
 
@@ -109,3 +109,24 @@ class TestReadPanel(unittest.TestCase):
 
         # inverse
         tm.assert_frame_equal(helpers.replace_categorical(expected), df)
+
+    def test_quarterize(self):
+        df = pd.DataFrame({'year':     [2012., 2012., 2012., 2012., 2012.],
+                           'month':    [1, 2, 5, 8, 11],
+                           'HRHHID':   [1, 1, 2, 2, 2],
+                           'HRHHID2':  [1, 2, 1, 2, 2],
+                           'PULINENO': [1, 2, 1, 2, 3]})
+        df = df.set_index(['HRHHID', 'HRHHID2', 'PULINENO'])
+        result = quarterize(df)
+        expected = pd.DataFrame({'year': [2012, 2012, 2012, 2012, 2012],
+                                 'month': [1, 2, 5, 8, 11],
+                                 'quarter': [1, 1, 2, 3, 4],
+                                 'HRHHID': [1, 1, 2, 2, 2],
+                                 'HRHHID2': [1, 2, 1, 2, 2],
+                                 'PULINENO': [1, 2, 1, 2, 3]})
+        expected['qmonth'] = pd.to_datetime(["2012-01-01", "2012-01-01", "2012-04-01",
+                                             "2012-07-01", "2012-10-01"])
+        expected = expected.set_index(['qmonth', 'HRHHID', 'HRHHID2', 'PULINENO'])
+        result = result[['month', 'year', 'quarter']]
+        expected = expected[['month', 'year', 'quarter']]
+        tm.assert_frame_equal(result, expected)

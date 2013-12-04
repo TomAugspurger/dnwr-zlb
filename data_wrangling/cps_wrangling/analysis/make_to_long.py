@@ -29,6 +29,7 @@ def make_to_long(panel_h, settings, start=None, stop=None):
 
     analyzed = pd.HDFStore(settings['analyzed_path'])
     comp = analyzed.select('bls_productivity_compensation')['compensation']
+    prod = analyzed.select('bls_productivity_compensation')['productivity']
 
     keys = sorted(panel_h.stores.keys())
 
@@ -80,6 +81,36 @@ def make_to_long(panel_h, settings, start=None, stop=None):
         earn.to_hdf(s, name, format='table', append=False, data_columns=True)
         print("Finished " + str(chunk))
 
+    # finally, chunk by quarter and write out.
+    cleaned = pd.HDFStore('/Volumes/HDD/Users/tom/DataStorage/CPS/analyzed/cleaned.h5')
+    df = earn_store.select_all().drop('occupation', axis=1).dropna(how='any')
+
+    df = quarterize(df)
+
+    df['productivity'] = prod.reindex(df.index, level='qmonth')
+    df['real_hr_earns'] = df.real_hr_earns.replace(np.inf, np.nan)
+    df = df.dropna(how='any')
+
+    out_store.close()
+    earn_store.close()
+    cleaned.close()
+
+
+def quarterize(df):
+    df['year'] = df.year.astype('str').str.slice(0, 4)
+    quarter = df.month.replace({1: '01', 2: '01', 3: '01',
+                                4: '04', 5: '04', 6: '04',
+                                7: '07', 8: '07', 9: '07',
+                                10: '10', 11: '10', 12: '10'})
+    q = pd.to_datetime(df.year + quarter + '01', format='%Y%m%d')
+    x = q.apply(lambda x: x.quarter)
+    x.index = q.index
+    df['qmonth'] = q
+    df['quarter'] = q.apply(lambda x: x.quarter)
+    df['year'] = df.year.astype('int')
+    df = df.reset_index().set_index(['qmonth', 'HRHHID', 'HRHHID2', 'PULINENO'])
+    return df
+
 
 def main():
     with open(os.path.join(os.pardir, 'panel_construction', 'settings.txt'), 'rt') as f:
@@ -88,6 +119,7 @@ def main():
     p = pathlib.Path(str(settings['base_path'])).join('full_panel')
     panel_h = HDFHandler.from_directory(str(p), kind='full_panel')
     make_to_long(panel_h, settings, start='1996_01', stop='2013_06')
+    panel_h.close()
 
 if __name__ == '__main__':
     main()
