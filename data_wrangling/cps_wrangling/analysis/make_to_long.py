@@ -68,7 +68,7 @@ def make_to_long(panel_h, settings, start=None, stop=None):
         df['real_hr_earns'] = (df['earnings'] / df['hours']) / c
         df['real_hr_earns'] = df['real_hr_earns'].replace(np.inf, np.nan)  # div by 0
 
-        df = df.replace_categorical(df, kind='flow', inverse=True)
+        df = replace_categorical(df, kind='flow', inverse=True)
         df.to_hdf(s, name, format='table', append=False)
 
         #----------------------------------------------------------------

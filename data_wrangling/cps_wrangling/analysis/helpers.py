@@ -232,7 +232,8 @@ def replace_categorical(df, kind=None, inverse=False, index=None,
                 "labor_status": labor_status, "industry": industry,
                 "occupation": occupation, 'edu': edu, 'flow': flow}
     if inverse:
-        replacer = {v: k for k, v in replacer.iteritems()}
+        for d in replacer.keys():
+            replacer[d] = {v: k for k, v in replacer[d].iteritems()}
 
     # df.replace(replacer)  # should work. bug
 

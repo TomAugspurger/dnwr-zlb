@@ -89,6 +89,7 @@ class TestReadPanel(unittest.TestCase):
                            'occupation': [1, 7],
                            'edu': [31, 35],
                            'flow': [1, 3]})
+        df_ = df.copy()
         expected = pd.DataFrame({'sex': ['male', 'female'],
                                  'race': ['White Only', 'Black Only'],
                                  'married': ["MARRIED, CIVILIAN SPOUSE PRESENT", "WIDOWED"],
@@ -98,17 +99,19 @@ class TestReadPanel(unittest.TestCase):
                                  'edu': ["LESS THAN 1ST GRADE", "9TH GRADE"],
                                  'flow': ['ee', 'en']})
         # full
-        result = helpers.replace_categorical(df)
+        result = helpers.replace_categorical(df_)
         tm.assert_frame_equal(result, expected)
 
         for k in df.columns:
-            r1 = helpers.replace_categorical(df, kind=k)
+            df_ = df.copy()
+            r1 = helpers.replace_categorical(df_, kind=k)
             ef = df.copy()
             ef[k] = expected[k]
             tm.assert_frame_equal(r1, ef)
 
         # inverse
-        tm.assert_frame_equal(helpers.replace_categorical(expected), df)
+        inv = helpers.replace_categorical(expected, inverse=True)
+        tm.assert_frame_equal(inv, df)
 
     def test_quarterize(self):
         df = pd.DataFrame({'year':     [2012., 2012., 2012., 2012., 2012.],
