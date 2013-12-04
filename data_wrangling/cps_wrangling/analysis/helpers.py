@@ -34,7 +34,8 @@ def _gen_items():
          'either_history': 'either_history',
          'HRMIS': 'month_in_sample',
          'PRDTIND1': 'industry',
-         'PRDTOCC1': 'occupation'}
+         'PRDTOCC1': 'occupation',
+         'PEHRACT1': 'actual_hours'}
     # TODO: check on older industries/occupation codes.
     return d
 
@@ -75,7 +76,8 @@ def get_useful(df, strict=True):
                 res = df[no_history]
     return res
 
-def replace_categorical(df, kind=None, inverse=False):
+def replace_categorical(df, kind=None, inverse=False, index=None,
+                        columns=None):
     """
     Replace the numeric values with catigorical for a DataFrame.
 
@@ -222,19 +224,28 @@ def replace_categorical(df, kind=None, inverse=False):
            45: "PROFESSIONAL SCHOOL DEG (EX: MD, DDS, DVM)",
            46: "DOCTORATE DEGREE (EX: PhD, EdD)"}
 
+    flow = {1: 'ee', 2: 'eu', 3: 'en',
+            4: 'ue', 5: 'uu', 6: 'un',
+            7: 'ne', 8: 'nu', 9: 'nn'}
+
     replacer = {"sex": sex, "race": race, "married": married,
                 "labor_status": labor_status, "industry": industry,
-                "occupation": occupation, 'edu': edu}
+                "occupation": occupation, 'edu': edu, 'flow': flow}
     if inverse:
         replacer = {v: k for k, v in replacer.iteritems()}
 
     # df.replace(replacer)  # should work. bug
 
-    if kind is None:
-        for k, v in replacer.iteritems():
-            df[k] = df[k].replace(v)
-    else:
-        df[kind] = df[kind].replace(replacer[kind])
+    if index is None and columns is None:
+        if kind is None:
+            for k, v in replacer.iteritems():
+                df[k] = df[k].replace(v)
+        else:
+            df[kind] = df[kind].replace(replacer[kind])
+    elif index is not None:
+        df = df.rename(index=replacer[kind])
+    elif columns is not None:
+        df = df.rename(columns=replacer[kind])
     return df
 
 
@@ -645,6 +656,17 @@ def read_to_long(store, months):
     # Add an experience column: Age - years of school - 6
     s = edu_to_years(df['edu'])
     df['expr'] = df['age'] - s - 6
+    # replace variable hours (-4) with actual hours
+    df = replace_variable_hours(df)
+    return df
+
+
+def replace_variable_hours(df, inplace=True):
+    """Variable is -4; replace with actual from last week"""
+    if not inplace:
+        df = df.copy()
+    idx = df[df['hours'] == -4].index
+    df.loc[idx, 'hours'] = df.loc[idx, 'actual_hours']
     return df
 
 
@@ -758,13 +780,15 @@ def add_dummies(s, prefix='D_', start=0):
     10  0    0    1
     11  0    0    0
     """
-    ncols = s.unique().shape[0] - 1
-    pat = np.vstack([np.eye(ncols), np.zeros(ncols)])
+    vals = s.dropna().unique()[:-1]
+    ncols = vals.shape[0]
     nrows = s.shape[0]
-    # a bit wasteful
-    nreps = np.ceil(float(nrows) / pat.shape[0])
+
+    dummies = np.zeros([nrows, ncols])
+
+    for i, val in enumerate(vals):
+        dummies[(s == val).values, i] = 1
+
     cols = [prefix + str(x) for x in np.arange(start, ncols)]
-    dummies = pd.DataFrame(np.tile(pat.T, nreps).T,
-                           columns=cols).iloc[:nrows]
-    dummies.index = s.index
+    dummies = pd.DataFrame(dummies, columns=cols, index=s.index)
     return dummies

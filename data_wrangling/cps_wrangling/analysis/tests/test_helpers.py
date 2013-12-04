@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import pandas.util.testing as tm
 
+from data_wrangling.cps_wrangling.analysis import helpers
 from data_wrangling.cps_wrangling.analysis.helpers import (bin_others,
                                                            date_parser,
                                                            filter_panel)
@@ -60,3 +61,15 @@ class TestReadPanel(unittest.TestCase):
                              'sex': pd.DataFrame({4: [1, 1]}, index=[1, 3])})
 
         tm.assert_panel_equal(result, expected)
+
+    def test_read_to_long_replace_variable_hours(self):
+        df = pd.DataFrame({'hours': [-4, 1, -4, 1],
+                           'actual_hours': [1, 1, 2, 1]},
+                          index=['a', 'b', 'c', 'd'])
+
+        expected = pd.DataFrame({'hours': [1, 1, 2, 1],
+                                 'actual_hours': [1, 1, 2, 1]},
+                                index=['a', 'b', 'c', 'd'])
+
+        result = helpers.replace_variable_hours(df)
+        tm.assert_frame_equal(result, expected)
