@@ -80,3 +80,32 @@ class TestReadPanel(unittest.TestCase):
         expected = pd.DataFrame({'edu': [31, 32, 32, 41]})
         tm.assert_frame_equal(result, expected)
 
+    def test_replace_catagorical(self):
+        df = pd.DataFrame({'sex': [1, 2],
+                           'race': [1, 2],
+                           'married': [1, 4],
+                           'labor_status': [1, 2],
+                           'industry': [1, 3],
+                           'occupation': [1, 7],
+                           'edu': [31, 35],
+                           'flow': [1, 3]})
+        expected = pd.DataFrame({'sex': ['male', 'female'],
+                                 'race': ['White Only', 'Black Only'],
+                                 'married': ["MARRIED, CIVILIAN SPOUSE PRESENT", "WIDOWED"],
+                                 'labor_status': ['employed', 'absent'],
+                                 'industry': ["Agriculture", "Mining"],
+                                 'occupation': ["Management", "Legal"],
+                                 'edu': ["LESS THAN 1ST GRADE", "9TH GRADE"],
+                                 'flow': ['ee', 'en']})
+        # full
+        result = helpers.replace_categorical(df)
+        tm.assert_frame_equal(result, expected)
+
+        for k in df.columns:
+            r1 = helpers.replace_categorical(df, kind=k)
+            ef = df.copy()
+            ef[k] = expected[k]
+            tm.assert_frame_equal(r1, ef)
+
+        # inverse
+        tm.assert_frame_equal(helpers.replace_categorical(expected), df)
