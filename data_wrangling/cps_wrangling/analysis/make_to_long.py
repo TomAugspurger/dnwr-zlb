@@ -89,6 +89,9 @@ def make_to_long(panel_h, settings, start=None, stop=None):
 
     df['productivity'] = prod.reindex(df.index, level='qmonth')
     df['real_hr_earns'] = df.real_hr_earns.replace(np.inf, np.nan)
+    df = add_demo_dummies(df)
+    model, res = construct_wage_index(df)
+    df.loc[:, 'wage_index_res'] = res.resid
 
     cln_path = '/Volumes/HDD/Users/tom/DataStorage/CPS/analyzed/clean.h5'
 
