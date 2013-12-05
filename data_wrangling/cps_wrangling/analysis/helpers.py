@@ -730,7 +730,7 @@ def add_demo_dummies(df, inplace=True):
         df = df.copy()
 
     df = pd.concat([df, make_demo_dummies(df)], axis=1)
-    df = pd.concat([df, bin_education(df)], axis=1)
+    df.loc[:, 'edu_bin'] = bin_education(df)
 
     return df
 
