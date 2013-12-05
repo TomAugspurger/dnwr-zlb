@@ -3,7 +3,7 @@ from datetime import datetime
 import arrow
 import numpy as np
 import pandas as pd
-
+import statsmodels.api as sm
 
 def sane_names(df):
     names = _gen_items()
@@ -856,14 +856,23 @@ def bin_education(df):
     return res
 
 
-def construct_wage_index(df, inplace=True):
-    """
-    Once you have the cleaned earnings frame, go here.
-    Adds in dummies for demographics, bins education.
-    """
+def add_demo_dummies(df, inplace=True):
     if not inplace:
         df = df.copy()
 
     df = pd.concat([df, make_demo_dummies(df)], axis=1)
     df = pd.concat([df, bin_education(df)], axis=1)
+
     return df
+
+
+def construct_wage_index(df):
+    """
+    Once you have the cleaned earnings frame, go here.
+    Adds in dummies for demographics, bins education.
+    """
+    model = sm.OLS.from_formula("np.log(real_hr_earns) ~ age + sex_d + race_d +"
+                                "married_d + edu_bin + expr + expr**2 +"
+                                "expr**3 + expr**4", df)
+    res = model.fit()
+    return model, res
