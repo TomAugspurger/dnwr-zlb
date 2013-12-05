@@ -13,7 +13,7 @@ import pandas as pd
 
 from data_wrangling.cps_wrangling.analysis.helpers import (
     chunk_quarters, date_parser, read_to_long, make_chunk_name,
-    replace_categorical)
+    replace_categorical, add_demo_dummies, construct_wage_index)
 
 from data_wrangling.cps_wrangling.panel_construction.hdf_wrapper import HDFHandler
 
@@ -82,7 +82,6 @@ def make_to_long(panel_h, settings, start=None, stop=None):
         print("Finished " + str(chunk))
 
     # finally, chunk by quarter and write out.
-    cleaned = pd.HDFStore('/Volumes/HDD/Users/tom/DataStorage/CPS/analyzed/clean.h5')
     df = earn_store.select_all().drop(['occupation', 'actual_hours'], axis=1)
     df = df.dropna(how='any', subset=['edu', 'age', 'flow', 'expr'])
 
@@ -91,12 +90,14 @@ def make_to_long(panel_h, settings, start=None, stop=None):
     df['productivity'] = prod.reindex(df.index, level='qmonth')
     df['real_hr_earns'] = df.real_hr_earns.replace(np.inf, np.nan)
 
-    df.to_hdf(cleaned, 'cleaned', format='f', append=False)
+    cln_path = '/Volumes/HDD/Users/tom/DataStorage/CPS/analyzed/clean.h5'
+
+    with pd.get_store(cln_path) as store:
+        df.to_hdf(store, 'cleaned', format='f', append=False)
 
     out_store.close()
     analyzed.close()
     earn_store.close()
-    cleaned.close()
 
 
 def quarterize(df):
