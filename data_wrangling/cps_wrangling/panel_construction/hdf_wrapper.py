@@ -131,6 +131,7 @@ class HDFHandler(object):
             self._full_cache_args = kwargs
             df = pd.concat((frame for _, frame in self.iteritems(**kwargs)))
             df = df.sort_index()
+            self._full_cache = df
             return df
 
     def _select_stores(self):
