@@ -11,6 +11,7 @@ import subprocess
 
 import pathlib
 import pandas as pd
+from pandas import get_store
 from pandas.core.common import is_list_like
 
 from data_wrangling.cps_wrangling.analysis.helpers import date_parser, make_chunk_name
@@ -70,6 +71,8 @@ class HDFHandler(object):
         # set by groupby later
         self._full_cache = None
         self._full_cache_args = None
+        if hasattr(self, "stores"):  # may be created from_directory
+            self.close()
 
     @classmethod
     def from_directory(cls, directory, kind):
@@ -83,6 +86,7 @@ class HDFHandler(object):
                       if not c.name.startswith('.'))
         klass = cls(directory, kind=kind, frequency=kind)
         klass.stores = stores
+        klass.close()
         return klass
 
     def __call__(self, kind, months=None):
@@ -120,7 +124,8 @@ class HDFHandler(object):
         """
         for key in self:
             try:
-                yield key, self[key].select(key, **kwargs)
+                with get_store(self[key].filename) as store:
+                    yield key, store.select(key, **kwargs)
             except KeyError:
                 yield key, None
 
@@ -188,8 +193,8 @@ class HDFHandler(object):
         key : key to use in the store
         """
         #TODO: need to seprate store key from self key.
-        store = self[key]
-        frame.to_hdf(store, key, *args, **kwargs)
+        with get_store(self[key].filename) as store:
+            frame.to_hdf(store, key, *args, **kwargs)
 
     def _sanitize_key(self, key):
         if self.kind == 'long':
@@ -203,7 +208,8 @@ class HDFHandler(object):
 
         kwargs are all passed along as is.
         """
-        return self[key].select(key, **kwargs)
+        with get_store(self[key].filename) as store:
+            return store.select(key, **kwargs)
 
     def apply(self, func, groupby=None, level=None, selector=None,
               select_kwargs=None, *args, **kwargs):

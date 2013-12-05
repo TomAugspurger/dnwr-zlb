@@ -39,7 +39,7 @@ class TestHDFWrapper(unittest.TestCase):
     def test_write(self):
         df = pd.DataFrame({'A': [1, 2, 3]})
         self.handler.write(df, 'm1994_01', format='f', append=False)
-        res = self.handler.stores['m1994_01'].select('m1994_01')
+        res = self.handler.select('m1994_01')
         tm.assert_frame_equal(df, res)
 
     def test_iter(self):
@@ -144,10 +144,10 @@ class TestHDFWrapper(unittest.TestCase):
         self.handler.write(df, 'm1994_01', format='table', append=False)
 
         # actual test
-        result = self.handler.stores['m1994_01'].select('m1994_01')
+        result = self.handler.select('m1994_01')
         tm.assert_frame_equal(result, df)
 
-        result = self.handler.stores['m1994_01'].select('m1994_01', columns=['A'])
+        result = self.handler.select('m1994_01', columns=['A'])
         tm.assert_frame_equal(result, df[['A']])
 
     def test_select_all(self):
