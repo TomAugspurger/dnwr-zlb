@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 
+
 def sane_names(df):
     names = _gen_items()
     if isinstance(df, pd.Panel):
@@ -39,17 +40,6 @@ def _gen_items():
     # TODO: check on older industries/occupation codes.
     return d
 
-def convert_names(code, way='cps'):
-    """
-    Give a key. `way`='cps' goes from my names to CPS codes. `way`='sane'
-    is the inverse.
-    """
-    d = _gen_items()
-
-    if way == 'cps':
-        d = {v: k for k, v in d.iteritems()}
-
-    return d[code]
 
 def get_useful(df, strict=True):
     df = sane_names(df)
@@ -75,6 +65,7 @@ def get_useful(df, strict=True):
             else:
                 res = df[no_history]
     return res
+
 
 def replace_categorical(df, kind=None, inverse=False, index=None,
                         columns=None):
@@ -272,21 +263,6 @@ def edu_to_years(s):
          46: 22}
     return s.replace(d)
 
-def add_flows_wrapper(frame, inplace=True):
-    if isinstance(frame, pd.DataFrame):
-        return add_flows_df(frame, inplace=inplace)
-    elif isinstance(frame, pd.Panel):
-        return add_flows_panel(frame, inplace=inplace)
-    else:
-        raise ValueError
-
-def add_flows_df(df, inplace=True):
-    s1 = df.labor_status.unstack()[4]
-    s1 = df.labor_status.unstack()[8]
-    res = add_flows(s1, s2)
-    if inplace:
-        raise ValueError
-    raise ValueError
 
 def add_flows(s1, s2, categorical=True):
     """
@@ -325,54 +301,6 @@ def add_flows(s1, s2, categorical=True):
     return s
 
 
-def clean_no_lineno(df):
-    """drop if lineno is -1"""
-    # TODO: why not just df.dropna(how='all', axis=0)?
-    idx_names = df.index.names
-    x = df.reset_index()
-    # good_idx_iloc = x[~pd.isnull(x[idx_names]).any(1)].index
-    df = (x.loc[~(x['PULINENO'] == -1)]).set_index(idx_names)
-    return df
-
-
-def prep_df(df, drop=False):
-    """Collapse HRYEAR4 and HRMONTH into timestamp"""
-    df = df.dropna(how='all', axis=0)
-    df = df.convert_objects(convert_numeric=True)
-    df['year'] = df.year.astype(np.int64)
-    df['month'] = df.month.astype(np.int64)
-    try:
-        df['timestamp'] = df.apply(lambda row: datetime(row['year'], row['month'], 1),
-                                   axis=1)
-    except TypeError:
-        df['timestamp'] = df.apply(lambda row: datetime(int(row['year']),
-                                   int(row['month']), 1), axis=1)
-    return df
-
-
-def labor_status_value_counts(cps_store, month):
-    """
-    Value counts of labor status straight from cps_store. Give month
-    name without leading m ('2010_01').  Sets name of the resulting series
-    to month. Concat together with pd.concat([m1, ... m2], axis=1)
-    """
-    cols = ['HRYEAR4', 'PTDTRACE', 'PEMARITL', 'PRTAGE', 'PRERNWA', 'PEMLR',
-            'PESEX', 'HRMONTH']
-    useful = ['age', 'year', 'month', 'labor_status', 'earnings', 'race', 'sex',
-              'married']
-    df = sane_names(cps_store.select('/monthly/data/m' + month, columns=cols))[useful]
-    df = clean_no_lineno(df)
-    df = df.dropna(how='all', axis=[0, 1])
-    clean = df.dropna(how='all', axis=0)['labor_status']
-    labels = {1: 'employed', 2: 'employed', 3: 'unemployed', 4: 'unemployed',
-              5: 'nilf', 6: 'nilf', 7: 'nilf'}
-    cts = clean.replace(labels).value_counts().T
-    # cts = cts.sort_index().T
-    date = datetime(int(df.year.iloc[0]), int(df.month.iloc[0]), 1)
-    cts.name = date
-    return cts
-
-
 def transform_date(month, to='earn'):
     """
     give month and transform to either:
@@ -395,6 +323,7 @@ def panel_to_frame(wp):
         ['minor', 'HRHHID', 'HUHHNUM', 'PULINENO']).sort_index()
     return df
 
+
 def quantile_list(df, quantiles):
     # this will work for both Series and DataFrames
     return type(df)({q: df.quantile(q) for q in quantiles})
@@ -404,15 +333,13 @@ def panel_select(store, month):
     # cols = _gen_items().values
     pass
 
-def hex_plot(df, nbins=30):
-    pass
-
 
 def get_from_earn(month, earn_store, stat='median'):
     df = get_useful(earn_store.select('m' + month))
     df = replace_categorical(df)
     x = df['earnings'].unstack()
     return getattr((x[8] - x[4]), 'median')()
+
 
 def get_earn_quantiles(month, earn_store, quantiles=[.05, .1, .25, .5, .75, .9, .95]):
     df = get_useful(earn_store.select('m' + month))
@@ -421,12 +348,14 @@ def get_earn_quantiles(month, earn_store, quantiles=[.05, .1, .25, .5, .75, .9, 
     diff = x[8] - x[4]
     return quantile_list(diff, quantiles)
 
+
 def get_earn_summary(month, earn_store):
     df = get_useful(earn_store.select('m' + month))
     df = replace_categorical(df)
     x = df['earnings'].unstack()
     diff = x[8] - x[4]
     return diff.describe()
+
 
 def get_earn_summary_group(month, earn_store):
     df = get_useful(earn_store.select('m' + month))
@@ -437,6 +366,7 @@ def get_earn_summary_group(month, earn_store):
     res = e.groupby(flows).describe()
     return res
 
+
 def get_earn_diff_with_flow(month, earn_store):
     df = get_useful(earn_store.select('m' + month))
     e = df.earnings.unstack()
@@ -444,6 +374,7 @@ def get_earn_diff_with_flow(month, earn_store):
     s1, s2 = ls[4], ls[8]
     e['flow'] = add_flows(s1, s2, categorical=False)
     return e
+
 
 def make_MultiIndex_date(df, month):
     """"
@@ -488,6 +419,7 @@ def bin_others(ser, others, name="other", strict=True, inplace=False):
     ser[ser.isin(others)] = name
     return ser
 
+
 def df_unique(df, index=None):
     df = [df[x].unique() for x in df]
     assert [len(x) == 1 for x in df]
@@ -508,6 +440,7 @@ def date_parser(date):
     else:
         r = arrow.get(pd.datetools.parse(date))
     return r
+
 
 def filter_panel(wp, *args):
     """
@@ -685,71 +618,6 @@ def replace_variable_hours(df, inplace=True):
     idx = df[df['hours'] == -4].index
     df.loc[idx, 'hours'] = df.loc[idx, 'actual_hours']
     return df
-
-
-class Handler(object):
-
-    def __init__(self, store):
-        """
-        Object to chunk reading / aggregation of long tables.
-
-        For now just handles one file at a time. May add more control later.
-        """
-        self.store = store
-        self.keys = list(self._gen_keys())
-        self.reduced = None
-
-    def __call__(self, grouper, aggfunc, groupby_columns=None,
-                 store_columns=None, *args, **kwargs):
-        """
-        # TODO: handle timeseries and by demo groups differently.
-        just by month/quarter doesn't need to the whole thing read in.
-
-        grouper: str or mappable or series
-        aggfunc: str (agg) or func
-        groupby_columns: list of column names to include in groupby
-        store_columns: list of column names to select from store
-        """
-        for key in self._gen_keys():
-            df = self.store.select(key, columns=store_columns)
-
-            if groupby_columns is None:
-                cols = df.columns
-            else:
-                cols = groupby_columns
-            if isinstance(grouper, str):
-                if grouper in df.index.names:
-                    gr = df[cols].groupby(level=grouper)
-            else:
-                gr = df[cols].groupby(grouper).apply(aggfunc)
-
-            if isinstance(aggfunc, str):
-                res = gr.agg(aggfunc)
-            else:
-                res = gr.apply(aggfunc)
-
-            self.add_to_reduced(res)
-
-        return self.final_reduction()
-
-    def _gen_keys(self):
-        return (x for x in self.store.keys() if x.startswith('/long'))
-
-    def add_to_reduced(self, df):
-        """
-        For each chunk/file, will apply aggfunc to each group.
-        self.reduced holds the DataFrames from each file.
-
-        Index should (always?) include stamp. May optionally contain
-        otherse like sex, age, to be reduced further.
-        """
-        if self.reduced is None:
-            self.reduced = df
-        else:
-            self.reduced = pd.concat([self.reduced, df])
-
-    def final_reduction(self):
-        return self.reduced
 
 
 def add_dummies(s, prefix='D_', start=0):
