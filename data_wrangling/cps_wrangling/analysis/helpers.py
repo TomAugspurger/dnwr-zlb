@@ -63,7 +63,7 @@ def get_useful(df, strict=True):
             res = df.loc[cols]
         except KeyError:
             if strict:
-                raise KeyError
+                raise KeyError("Missing {}".format(set(df.columns) - set(cols)))
             else:
                 res = df.loc[no_history]
     else:
@@ -71,7 +71,7 @@ def get_useful(df, strict=True):
             res = df[cols]
         except KeyError:
             if strict:
-                raise KeyError
+                raise KeyError("Missing {}".format(set(df.columns) - set(cols)))
             else:
                 res = df[no_history]
     return res
