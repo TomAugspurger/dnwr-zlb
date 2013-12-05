@@ -114,6 +114,12 @@ class TestReadPanel(unittest.TestCase):
         inv = helpers.replace_categorical(expected, inverse=True)
         tm.assert_frame_equal(inv, df)
 
+        s = pd.DataFrame({"flow": ['ee', 'eu', 'en', 'ue', 'uu', 'un', 'ne',
+                                   'nu', 'nn']})
+        expected = pd.DataFrame({"flow": [1, 2, 3, 4, 5, 6, 7, 8, 9]})
+        result = helpers.replace_categorical(s, kind='flow', inverse=True)
+        tm.assert_frame_equal(result, expected)
+
     def test_quarterize(self):
         df = pd.DataFrame({'year':     [2012., 2012., 2012., 2012., 2012.],
                            'month':    [1, 2, 5, 8, 11],
