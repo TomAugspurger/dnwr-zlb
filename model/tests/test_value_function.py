@@ -78,12 +78,14 @@ class TestValueFunction(unittest.TestCase):
             'full_ln_dist': (ln_dist, 'a'),
             'mu': (mu, 'mean of underlying nomral distribution.')}
 
+    @slow
     def test_flexible(self):
         ss_w = 1.0041753592911187  # from ..vf_iteration.ss_wage_flexible
         h_ = lambda x: -1 * u_(x)
         xopt = fminbound(h_, .5, 3)
         self.assertAlmostEqual(xopt, ss_w, places=5)
 
+    @slow
     def test_bellman_smoke(self):
 
         params = {
@@ -184,6 +186,7 @@ class TestValueFunction(unittest.TestCase):
     #     actual = get_rigid_output(flex_ws, params, flex_ws, gf)
     #     self.assertAlmostEquals(actual, expected)
 
+    @slow
     def test_ss_wage_sanity(self):
         params = self.params
         gamma = params['gamma'][0]
