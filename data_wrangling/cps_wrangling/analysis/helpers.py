@@ -725,6 +725,7 @@ def bin_education(df):
 
 
 def add_demo_dummies(df, inplace=True):
+    """wrapper for make_demo_dummies and bin_education"""
     if not inplace:
         df = df.copy()
 
