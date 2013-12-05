@@ -1,3 +1,9 @@
+# Todo
+
+- compute wage index
+- ran HSvR type regression on durable vs. nondurable
+
+
 # Data
 
 ## read_fwf education bug
