@@ -83,7 +83,8 @@ def make_to_long(panel_h, settings, start=None, stop=None):
 
     # finally, chunk by quarter and write out.
     cleaned = pd.HDFStore('/Volumes/HDD/Users/tom/DataStorage/CPS/analyzed/clean.h5')
-    df = earn_store.select_all().drop('occupation', axis=1).dropna(how='any')
+    df = earn_store.select_all().drop(['occupation', 'actual_hours'],
+                                      axis=1).dropna(how='any')
 
     df = quarterize(df)
 
