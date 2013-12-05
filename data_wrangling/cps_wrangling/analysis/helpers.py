@@ -844,7 +844,8 @@ def bin_education(df):
         4. Finished college (43)
         5. Some graduate (44, 45, 46)
     """
-    res = pd.Series(np.zeros(df.shape[0]))
+    res = pd.Series(np.zeros(df.shape[0]), name='edu_bin')
+    res.index = df.index
     edu = df['edu']
     res[edu == 39] = 1
     res[edu == 40] = 2
@@ -853,3 +854,16 @@ def bin_education(df):
     res[edu.isin([44, 45, 46])] = 5
     res = res.astype(int)
     return res
+
+
+def construct_wage_index(df, inplace=True):
+    """
+    Once you have the cleaned earnings frame, go here.
+    Adds in dummies for demographics, bins education.
+    """
+    if not inplace:
+        df = df.copy()
+
+    df = pd.concat([df, make_demo_dummies(df)], axis=1)
+    df = pd.concat([df, bin_education(df)], axis=1)
+    return df
