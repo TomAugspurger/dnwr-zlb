@@ -219,9 +219,11 @@ def replace_categorical(df, kind=None, inverse=False, index=None,
             4: 'ue', 5: 'uu', 6: 'un',
             7: 'ne', 8: 'nu', 9: 'nn'}
 
+    history = {-1: 'NaN', 0: 'employed', 1: 'not_employed'}
     replacer = {"sex": sex, "race": race, "married": married,
                 "labor_status": labor_status, "industry": industry,
-                "occupation": occupation, 'edu': edu, 'flow': flow}
+                "occupation": occupation, 'edu': edu, 'flow': flow,
+                "history": history}
     if inverse:
         for d in replacer.keys():
             replacer[d] = {v: k for k, v in replacer[d].iteritems()}
