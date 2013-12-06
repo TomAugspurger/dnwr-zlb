@@ -24,4 +24,5 @@ def add_rec_bars(ax, df=None, dates=None, **kwargs):
 
     for span in ranges:
         ax.fill_between(span, y1=y1, y2=y2, alpha=alpha, color=color, **kwargs)
+    ax.set_ylim(y1, y2)
     return ax
