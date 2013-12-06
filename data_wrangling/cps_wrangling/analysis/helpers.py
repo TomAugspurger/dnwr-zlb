@@ -634,6 +634,7 @@ def add_dummies(s, prefix='D_', start=0):
         prefix for column names; Default `"D_"`
     start : int
         Number for first seasonal group's name.
+
     Returns
     -------
 
