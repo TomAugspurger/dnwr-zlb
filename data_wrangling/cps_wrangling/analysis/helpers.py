@@ -622,66 +622,6 @@ def replace_variable_hours(df, inplace=True):
     return df
 
 
-def add_dummies(s, prefix='D_', start=0):
-    """
-    Generate a DataFrame of dummy values based on the values
-    of a Series. Useful for regressions with seasonality.
-
-    Parameters
-    ----------
-    ser : Series
-    prefix : str
-        prefix for column names; Default `"D_"`
-    start : int
-        Number for first seasonal group's name.
-
-    Returns
-    -------
-
-    DataFrame
-
-    Notes
-    -----
-
-    For a timeseries with ``n`` seasons, only ``n-1`` columns
-    are created. This is to avoid perfect multi-colinearity
-    between the intercept term and the seasonal dummies. So
-    for monthly data, 11 columns will be created.
-
-    Examples
-    --------
-
-    # quarterly data
-    >>> s = pd.Series([1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4])
-    >>> add_dummies(s, prefix='Q_')
-        Q_0  Q_1  Q_2
-     0  1    0    0
-     1  0    1    0
-     2  0    0    1
-     3  0    0    0
-     4  1    0    0
-     5  0    1    0
-     6  0    0    1
-     7  0    0    0
-     8  1    0    0
-     9  0    1    0
-    10  0    0    1
-    11  0    0    0
-    """
-    vals = s.dropna().unique()[:-1]
-    ncols = vals.shape[0]
-    nrows = s.shape[0]
-
-    dummies = np.zeros([nrows, ncols])
-
-    for i, val in enumerate(vals):
-        dummies[(s == val).values, i] = 1
-
-    cols = [prefix + str(x) for x in np.arange(start, ncols)]
-    dummies = pd.DataFrame(dummies, columns=cols, index=s.index)
-    return dummies
-
-
 def make_demo_dummies(df):
     """
     Add dummies for
