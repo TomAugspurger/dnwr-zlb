@@ -58,6 +58,35 @@ class TestAddHistory(unittest.TestCase):
         expected = expected.convert_objects(convert_numeric=True)
         tm.assert_frame_equal(result, expected)
 
+    def test_status_partial(self):
+        wp = self.wp.loc[:, :, (1, 2, 3, 4, 5)]
+        result = add_to_panel._add_flows_panel(wp, inplace=False)
+        expected = pd.DataFrame({'a': [nan, 'ee', 'ee', 'ee', 'ee'],
+                                 'b': [nan, 'ee', 'ee', 'ee', 'ee'],
+                                 'c': [nan, 'ue', 'ee', 'ee', 'eu'],
+                                 'd': [nan, 'ue', 'ee', 'eu', 'ue'],
+                                 'e': [nan, 'ne', 'ee', 'ee', 'eu'],
+                                 'f': [nan, 'ne', 'ee', 'en', 'nn'],
+                                 'g': [nan, 'ne', 'ee', 'eu', 'ue'],
+                                 'h': [nan, 'ee', 'ee', 'eu', 'ue'],
+                                 'i': [nan, 'ee', 'ee', 'en', 'ne']
+                                 }, index=range(1, 6)).T
+        expected = expected.convert_objects(convert_numeric=True)
+        tm.assert_frame_equal(result, expected)
+
+    def test_history_partial(self):
+        wp = self.wp.copy().loc[:, :, (1, 2, 3, 4, 5)]
+        result = add_to_panel._add_employment_status_last_period(wp, 'unemployed',
+                                                                 inplace=False)
+        expected = pd.DataFrame([np.nan]).reindex_like(wp['labor_status'])
+        expected.loc['a', 4] = 0
+        expected.loc['b', 4] = 0
+        expected.loc['c', 4] = 1
+        expected = expected.fillna(-1)
+        expected = expected.astype('int64')
+
+        tm.assert_frame_equal(result, expected)
+
     def tearDown(self):
 
         import os

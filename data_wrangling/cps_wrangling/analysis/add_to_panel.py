@@ -62,6 +62,7 @@ def _add_flow_series(s1, s2, categorical=False):
         s.loc[v] = k
     return s
 
+
 def _add_flows_panel(wp, inplace=True):
     """wrapper for add_flows.
     The flow in 2 is the flow *from* 1 *to* 2. 1 will contain NaNs.
@@ -70,8 +71,7 @@ def _add_flows_panel(wp, inplace=True):
     """
     labor = wp['labor_status']
     d = {1: pd.Series(np.nan, labor[1].index)}
-    for i in range(1, 8):
-        s1 = labor[i]
+    for i, s1 in labor.iloc[:, :-1].iteritems():
         s2 = labor[i+1]
         d[i+1] = _add_flow_series(s1, s2, categorical=False)
     d = pd.DataFrame(d)
@@ -147,18 +147,24 @@ def _add_employment_status_last_period(wp, kind, inplace=True):
 
     # all since changes caught below
     employed_at_4 = ls.loc[:, 1:4].isin([1, 2]).all(1)
-    employed_at_8 = ls.loc[:, 5:8].isin([1, 2]).all(1)
 
     kind_at_4 = ls.loc[:, 1:3].isin(d[kind]).any(1) & ls[4].isin([1, 2])
-    kind_at_8 = ls.loc[:, 5:7].isin(d[kind]).any(1) & ls[8].isin([1, 2])
 
     sub4 = ls.loc[:, 1:4][kind_at_4 | employed_at_4]
     sub4 = sub4.isin(d[kind]).any(1)
 
-    sub8 = ls.loc[:, 5:8][kind_at_8 | employed_at_8]
-    sub8 = sub8.isin(d[kind]).any(1)
+    try:
+        employed_at_8 = ls.loc[:, 5:8].isin([1, 2]).all(1)
+        kind_at_8 = ls.loc[:, 5:7].isin(d[kind]).any(1) & ls[8].isin([1, 2])
+        sub8 = ls.loc[:, 5:8][kind_at_8 | employed_at_8]
+        sub8 = sub8.isin(d[kind]).any(1)
+    except (KeyError, IndexError):  # Recent panel with no second wave.
+        sub8 = None
 
-    emp = pd.concat([sub4, sub8], axis=1, keys=[4, 8]).reindex_like(ls)
+    if sub8 is not None:
+        emp = pd.concat([sub4, sub8], axis=1, keys=[4, 8]).reindex_like(ls)
+    else:
+        emp = pd.concat([sub4], axis=1, keys=[4]).reindex_like(ls)
     emp = emp.replace({True: 1, False: 0, np.nan: -1})
 
     if inplace:
