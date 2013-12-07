@@ -386,7 +386,7 @@ def main():
     #---------------------------------------------------------------------------
 
     a0 = arrow.get('1994-01', format='YYYY-MM')
-    an = arrow.get('2004-04', format='YYYY-MM"')
+    an = arrow.get('2013-07', format='YYYY-MM"')
     months_todo = [x.strftime('%Y_%m') for x in arrow.Arrow.range('month', a0, an)]
 
     print("Panels to create: {}".format(months_todo))
@@ -404,9 +404,9 @@ def main():
             print(e)
             pass
 
-        s = panel_h[month]
-        wp.to_hdf(s, key='m' + month, append=False, format='f')
-        s.close()
+        s = panel_h['m' + month]
+        with pd.get_store(s.filename) as store:
+            wp.to_hdf(store, key='m' + month, append=False, format='f')
 
         print("Finished " + month)
 
