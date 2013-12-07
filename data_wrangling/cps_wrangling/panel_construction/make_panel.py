@@ -185,7 +185,7 @@ def make_full_panel(cps_store, start_month, settings):
                 yield None
 
     dfs = gen_dfs(start_month)
-
+    dfs = (df for df in dfs if df is not None)
     df1 = next(dfs)
 
     ids = ["HRHHID", "HRHHID2", "PULINENO"]
@@ -194,9 +194,12 @@ def make_full_panel(cps_store, start_month, settings):
 
     df_dict = {1: df1}
     for i, dfn in enumerate(dfs, 2):
-        if not dfn.index.names == ids:
-            dfn.index.names = ids
-        df_dict[i] = match_panel(df1, dfn, log=settings['panel_log'])
+        if dfn is None:
+            df_dict[i] = None
+        else:
+            if not dfn.index.names == ids:
+                dfn.index.names = ids
+            df_dict[i] = match_panel(df1, dfn, log=settings['panel_log'])
     # Lose dtype info here if I just do from dict.
     # to preserve dtypes:
     df_dict = {k: v for k, v in df_dict.iteritems() if v is not None}
