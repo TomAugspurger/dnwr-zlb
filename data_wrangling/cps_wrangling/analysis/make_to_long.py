@@ -69,16 +69,19 @@ def make_to_long(panel_h, settings, start=None, stop=None):
         df['real_hr_earns'] = df['real_hr_earns'].replace(np.inf, np.nan)  # div by 0
 
         df = replace_categorical(df, kind='flow', inverse=True)
-        df.to_hdf(s, name, format='table', append=False)
+        with pd.get_store(s.filename) as store:
+            df.to_hdf(store, name, format='table', append=False)
 
         #----------------------------------------------------------------
         # Also write out just earnings (nan issues so can't select later)
         # need to make real hrs fisrt.
         earn = df[~pd.isnull(df.real_hr_earns)]
         earn = earn[(earn.hours > 0) & (earn.earnings > 0)]
-        name = make_chunk_name(chunk)
+
         s = earn_store.stores[name]
-        earn.to_hdf(s, name, format='table', append=False, data_columns=True)
+        with pd.get_store(s.filename) as store:
+            earn.to_hdf(store, name, format='table', append=False,
+                        data_columns=True)
         print("Finished " + str(chunk))
 
     # finally, chunk by quarter and write out.
