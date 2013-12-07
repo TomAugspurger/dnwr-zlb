@@ -67,12 +67,7 @@ def writer(df, name, store_path, settings, start_time, overwrite=True):
     None - IO
     """
     with pd.get_store(store_path) as store:
-        if overwrite:
-            try:
-                store.remove(name)
-            except KeyError:
-                pass
-        store.append(name, df)
+        store.append(name, df, append=False)
 
     logname = name.lstrip('m')
     with open(settings["make_hdf_store_completed"], 'a') as f:
