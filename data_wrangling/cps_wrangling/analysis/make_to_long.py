@@ -3,6 +3,8 @@ Once you have a panel, use this to convert to long form.
 
 Each quarter gets its own node in the `analyzed` HDFStore.
 """
+from __future__ import division
+
 import json
 import os
 
@@ -65,6 +67,10 @@ def make_to_long(panel_h, settings, start=None, stop=None):
 
         # add in real hourly wage
         c = comp.reindex(df.index, level='stamp').fillna(method='ffill') / 100
+
+        # CPS reports earnings in cents
+        df.loc[:, 'earnings'] = df['earnings'] / 100
+
         df['real_hr_earns'] = (df['earnings'] / df['hours']) / c
         df['real_hr_earns'] = df['real_hr_earns'].replace(np.inf, np.nan)  # div by 0
 
