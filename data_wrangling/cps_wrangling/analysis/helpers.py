@@ -36,7 +36,8 @@ def _gen_items():
          'HRMIS': 'month_in_sample',
          'PRDTIND1': 'industry',
          'PRDTOCC1': 'occupation',
-         'PEHRACT1': 'actual_hours'}
+         'PEHRACT1': 'actual_hours',
+         "PWORWGT": "og_weight"}
     # TODO: check on older industries/occupation codes.
     return d
 

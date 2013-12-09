@@ -596,7 +596,7 @@ def standardize_ids(df):
     sersuf_d['-1.0'] = '00'
     sersuf_d['-1'] = '00'
     hrsersuf = hrsersuf.map(sersuf_d)  # 10x faster than replace
-    hrhhid2 = hrsample + hrsersuf + huhhnum
+    hrhhid2 = (hrsample + hrsersuf + huhhnum).dropna()
     return hrhhid2.astype(np.int64)
 
 
