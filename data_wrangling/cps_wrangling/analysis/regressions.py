@@ -48,12 +48,16 @@ idx = real_hr_earns_d.index.droplevel('quarter')  # to match with trim
 real_hr_earns_d.index = idx
 trim['ln_real_hr_earns_d'] = real_hr_earns_d
 
-# First Stage
 
 trim = add_demo_dummies(trim)
 trim['expr_2'] = trim.expr ** 2
 trim['expr_3'] = trim.expr ** 3
 trim['expr_4'] = trim.expr ** 4
+
+with pd.get_store('/Volumes/HDD/Users/tom/DataStorage/CPS/analyzed/clean.h5') as store:
+    trim.to_hdf(store, 'trim', format='f', append=False)
+
+# First Stage
 
 mod_fs = sm.OLS.from_formula("ln_real_hr_earns_d ~ age + sex_d + race_d +"
                              "married_d + edu_bin + expr + expr_2 +"
