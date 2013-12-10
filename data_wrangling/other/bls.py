@@ -1,6 +1,5 @@
 from __future__ import (division, print_function, unicode_literals)
 
-from collections import Iterable
 import itertools as it
 import json
 
@@ -22,7 +21,7 @@ def fetch_data(data_l):
     """
     Expects a iterable from make_data. Yields requests.
     """
-    if not isinstance(data_l, Iterable):
+    if isinstance(data_l, str):
         data_l = [data_l]
     for data in data_l:
         r = requests.get(URL, data=data, headers=HEADERS)
