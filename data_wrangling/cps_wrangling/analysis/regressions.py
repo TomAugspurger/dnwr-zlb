@@ -15,7 +15,7 @@ s_dummies = pd.get_dummies(df.quarter).rename(columns={1: "Q1", 2: "Q2",
 df = pd.concat([df, s_dummies], axis=1)
 
 # Add time trend
-df['trend'] = df.year - 1996 + df.quarter
+df['trend'] = 4 * (df.year - 1996) + df.quarter
 
 # Filter out outer .005% of hours and real hourly earnings
 low_hours, high_hours = df.hours.quantile(.005), df.hours.quantile(.995)
@@ -54,6 +54,8 @@ trim['expr_2'] = trim.expr ** 2
 trim['expr_3'] = trim.expr ** 3
 trim['expr_4'] = trim.expr ** 4
 
+trim['og_weight'] = trim.og_weight / 10000  # do earleir.
+trim = trim[~pd.isnull(trim.either_history.replace(-1, np.nan))]
 with pd.get_store('/Volumes/HDD/Users/tom/DataStorage/CPS/analyzed/clean.h5') as store:
     trim.to_hdf(store, 'trim', format='f', append=False)
 
@@ -97,3 +99,36 @@ res_from_e = mod_from_e.fit()
 
 mod_from_n = sm.OLS.from_formula("from_n ~ productivity", df_ss)
 res_from_n = mod_from_n.fit()
+
+
+#-----------------------------------------------------------------------------
+# Using weights
+mod_fs = sm.OLS.from_formula("ln_real_hr_earns_d ~ age + sex_d + race_d +"
+                             "married_d + edu_bin + expr + expr_2 +"
+                             "expr_3 + expr_4 + trend", trim)
+res_fs = mod_fs.fit()
+trim['wage_index'] = res_fs.resid
+
+weights = trim.og_weight.div(trim.og_weight.groupby(level='qmonth').sum(),
+                             level='qmonth')
+
+trim['wage_index_weighted'] = trim.wage_index.mul(weights, level='qmonth')
+g = trim.reset_index().groupby(['qmonth', 'either_history'])
+res = g['wage_index_weighted'].sum()
+
+
+#-----------------------------------------------------------------------------
+# By major sector (see notes.md)
+
+durable = trim[trim.industry.isin([5, 6, 7, 8, 9, 10, 11, 12, 13])]
+nondurable = trim[trim.industry.isin([14, 15, 16, 17, 18, 19, 20])]
+
+gd = durable.reset_index().groupby(['qmonth', 'either_history'])
+mean_ln_earn_ts = gd['ln_real_hr_earns_d'].mean().unstack()[[0, 1]].rename(columns={0: 'from_e',
+                                                                                    1: 'from_n'})
+mean_ln_earn_ts_d = mean_ln_earn_ts.diff()
+
+with pd.get_store('/Volumes/HDD/Users/tom/DataStorage/CPS/analyzed/analyzed_store.h5') as store:
+    prod = store.select('major_sectors_output_per_hour')
+
+mean_ln_earn_ts_d['prod'] = prod['durable'].diff()
