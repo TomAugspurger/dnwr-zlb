@@ -1,5 +1,6 @@
 from __future__ import (division, print_function, unicode_literals)
 
+from collections import Iterable
 import itertools as it
 import json
 
@@ -19,8 +20,10 @@ HEADERS = {'Content-type': 'application/json'}
 
 def fetch_data(data_l):
     """
-    Expects a iterable from _make_data. Yields requests.
+    Expects a iterable from make_data. Yields requests.
     """
+    if not isinstance(data_l, Iterable):
+        data_l = [data_l]
     for data in data_l:
         r = requests.get(URL, data=data, headers=HEADERS)
         if r.status_code == 200:
@@ -77,7 +80,7 @@ def _filter_dates(df, inplace=True):
     return df
 
 
-def _make_data(series, start='2003', end='2011'):
+def make_data(series, start='2003', end='2011'):
     # BLS limits queries to 10 years because reasons
     n_years = int(end) - int(start)
     if n_years > 10:
@@ -87,9 +90,9 @@ def _make_data(series, start='2003', end='2011'):
                      for x in np.arange(1, n_queries + 1))
         startpoints = (int(start) + x * 11 for x in np.arange(n_queries))
 
-        for start, end in it.izip(startpoints, endpoints):
-            yield json.dumps({"seriesid": series, "startyear": str(start),
-                              "endyear": str(end)})
+        for s, e in it.izip(startpoints, endpoints):
+            yield json.dumps({"seriesid": series, "startyear": str(s),
+                              "endyear": str(e)})
     else:
         yield json.dumps({"seriesid": series, "startyear": start, "endyear": end})
 
@@ -100,7 +103,7 @@ def write_data(r):
 
 def main():
     data1 = json.dumps({"seriesid": ["PRS85006093", "PRS85006153"],
-                       "startyear": "1994", "endyear": "2004"})
+                        "startyear": "1994", "endyear": "2004"})
     p1 = parse_data(fetch_data(data1))
     data2 = json.dumps({"seriesid": ["PRS85006093", "PRS85006153"],
                        "startyear": "2005", "endyear": "2013"})
@@ -177,7 +180,8 @@ def main():
     duration_code           =               1
     """
     codes = ['PRS31006093', 'PRS32006093', 'PRS85006093']
-    df = parse_data(fetch_data(_make_data(codes, end=2013)))
+    df = parse_data(fetch_data(make_data(codes, start='1996', end='2013')))
+    # Not returning concated thigns
     renamer = dict(zip(codes, ['durable', 'nondurable', 'business']))
     df = df.rename(columns=renamer)
     df.to_hdf(analyzed, 'major_sectors_output_per_hour', format='t',
