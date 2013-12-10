@@ -68,6 +68,9 @@ def make_to_long(panel_h, settings, start=None, stop=None):
         # add in real hourly wage
         c = comp.reindex(df.index, level='stamp').fillna(method='ffill') / 100
 
+        # adjust weight decimals
+        df.loc[:, 'og_weight'] = df['og_weight'] / 10000
+
         # CPS reports earnings in cents
         df.loc[:, 'earnings'] = df['earnings'] / 100
 
