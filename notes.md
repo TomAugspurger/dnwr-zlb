@@ -36,3 +36,43 @@ To see the correct values, extract the `2007-01` file (`7z x 2007_01.gz`). Then:
 
 The relavent columns are 1. Educataion: 137 and 138 and 2. Race: 139 and 140.
 Under current HEAD: `0.13.0rc1`, this bug is fixed.
+
+# Definitions of Durable/Non Durables:
+
+Durables include the following 3-digit NAICS industries:
+- wood product manufacturing                        ( 11 )
+- nonmetallic mineral product manufacturing         ( 5  )
+- primary metal manufacturing                       ( 6  )
+- fabricated metal product manufacturing            ( 6  )
+- machinery manufacturing                           ( 7  )
+- computer and electronic product manufacturing     ( 8  )
+- electrical equipment and appliance manufacturing  ( 9  )
+- transportation equipment manufacturing            ( 10 )
+- furniture and related product manufacturing       ( 12 )
+- miscellaneous manufacturing.                      ( 13 )
+
+Nondurables include:
+- food manufacturing                                ( 14 )
+- beverage and tobacco product manufacturing        ( 15 )
+- textile mills                                     ( 16 ) ?
+- textile product mills                             ( 16 ) ?
+- apparel manufacturing                             ( 16 ) ?
+- leather and allied product manufacturing          ( 16 ) ?
+- paper manufacturing                               ( 17 )
+- printing and related support activities           ( 17 )
+- petroleum and coal products manufacturing         ( 18 )
+- chemical manufacturing                            ( 19 )
+- plastics and rubber products manufacturing.       ( 20 )
+
+ Nonfinancial corporate output is a chain-type, current-weighted index
+calculated on the basis of the costs incurred and the incomes earned from
+production.  The output measure excludes the following outputs from GDP:
+general government
+- nonprofit institutions
+- private households
+-
+unincorporated business
+- and those corporations classified as offices of
+bank holding companies, offices of other holding companies, or offices in
+the finance and insurance sector. Nonfinancial corporations accounted for
+about 49 percent of the value of GDP in 2012.
