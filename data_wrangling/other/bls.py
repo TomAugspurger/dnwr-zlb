@@ -74,6 +74,8 @@ def _filter_dates(df, inplace=True):
                                                     "Q02": "04-01",
                                                     "Q03": "07-01",
                                                     "Q04": "10-01"})
+    elif df.period.str.match(r'M\d+').all():
+        df.loc[:, 'period'] = df['period'].apply(lambda x: x.strip('M') + '-01')
     else:
         raise ValueError("Couldn't infer frequency.")
     return df
@@ -186,7 +188,13 @@ def main():
     df.to_hdf(analyzed, 'major_sectors_output_per_hour', format='t',
               append=False)
 
-    analyzed.close()
+    #--------------------------------------------------------------------------
+    # Unemployment rate
+    df = parse_data(fetch_data(make_data(['LNS14000000'], start='1996',
+                                         end='2013')))
+    df = df.rename(columns={'LNS14000000': 'u_rate'})
+    df.to_hdf(analyzed, 'u_rate', format='t', append=False)
 
+    analyzed.close()
 if __name__ == '__main__':
     main()
