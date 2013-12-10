@@ -32,3 +32,8 @@ class TestBLS(unittest.TestCase):
         expected.index.name = 'stamp'
         expected.columns.name = 'series_id'
         tm.assert_frame_equal(result, expected)
+
+    @network
+    def test_bls_split_years(self):
+        data = _make_data('PRS85006093', start="1994", end="2004")
+        pass

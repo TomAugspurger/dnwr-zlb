@@ -1,7 +1,11 @@
+from __future__ import (division, print_function, unicode_literals)
+
+import itertools as it
 import json
 
 import requests
 import pandas as pd
+import numpy as np
 
 # Nonfarm Business - Labor Productivity (Output per Hour) - PRS85006093
 # Nonfarm Business - Real Hourly Compensation - PRS85006153
@@ -13,34 +17,43 @@ HEADERS = {'Content-type': 'application/json'}
 #-----------------------------------------------------------------------------
 
 
-def fetch_data(data):
-    r = requests.get(URL, data=data, headers=HEADERS)
-    if r.status_code == 200:
-        return r
-    else:
-        raise requests.RequestException(r)
+def fetch_data(data_l):
+    """
+    Expects a iterable from _make_data. Yields requests.
+    """
+    for data in data_l:
+        r = requests.get(URL, data=data, headers=HEADERS)
+        if r.status_code == 200:
+            yield r
+        else:
+            raise requests.RequestException(r)
 
 
-def parse_data(r, freq=None):
+def parse_data(r_l, freq=None):
     """
     Assumes quarterly. May need to factor out.
     """
-    series = r.json()['Results']['series']
-    res = []
-    for s in series:
-        name = s['seriesID']
-        data = s['data']
-        df = pd.DataFrame(data)
-        df = _filter_dates(df)
-        # ISO 8601 timestamp
-        df['stamp'] = pd.to_datetime(df.year + '-' + df.period, format='%Y-%m-%d')
-        df['series_id'] = name
-        df = df.set_index(['series_id', 'stamp']).loc[:, 'value']
-        df = df.sort_index()
-        res.append(df)
+    dfs = []
+    for r in r_l:
+        series = r.json()['Results']['series']
+        res = []
+        for s in series:
+            name = s['seriesID']
+            data = s['data']
+            df = pd.DataFrame(data)
+            df = _filter_dates(df)
+            # ISO 8601 timestamp
+            df['stamp'] = pd.to_datetime(df.year + '-' + df.period, format='%Y-%m-%d')
+            df['series_id'] = name
+            df = df.set_index(['series_id', 'stamp']).loc[:, 'value']
+            df = df.sort_index()
+            res.append(df)
 
-    df = pd.concat(res)
-    df = df.convert_objects(convert_numeric=True)
+        df = pd.concat(res)
+        df = df.convert_objects(convert_numeric=True)
+        dfs.append(df)
+
+    df = pd.concat(dfs)
     return df.unstack('series_id')
 
 
@@ -65,7 +78,20 @@ def _filter_dates(df, inplace=True):
 
 
 def _make_data(series, start='2003', end='2011'):
-    return json.dumps({"seriesid": series, "startyear": start, "endyear": end})
+    # BLS limits queries to 10 years because reasons
+    n_years = int(end) - int(start)
+    if n_years > 10:
+
+        n_queries = int(np.ceil(n_years / 10))
+        endpoints = (np.min([int(start) + x * 10, int(end)])
+                     for x in np.arange(1, n_queries + 1))
+        startpoints = (int(start) + x * 11 for x in np.arange(n_queries))
+
+        for start, end in it.izip(startpoints, endpoints):
+            yield json.dumps({"seriesid": series, "startyear": str(start),
+                              "endyear": str(end)})
+    else:
+        yield json.dumps({"seriesid": series, "startyear": start, "endyear": end})
 
 
 def write_data(r):
