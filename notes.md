@@ -3,6 +3,12 @@
 - compute wage index
 - ran HSvR type regression on durable vs. nondurable
 
+### Today
+
+[x] Compare my *median* avg. wage with his (mine's higher)
+[ ] compare my resid wage with eqn 2 preceisly
+
+
 
 # Data
 
@@ -38,6 +44,7 @@ The relavent columns are 1. Educataion: 137 and 138 and 2. Race: 139 and 140.
 Under current HEAD: `0.13.0rc1`, this bug is fixed.
 
 # Definitions of Durable/Non Durables:
+source: http://www.bls.gov/news.release/prod2.tn.htm
 
 Durables include the following 3-digit NAICS industries:
 - wood product manufacturing                        ( 11 )
