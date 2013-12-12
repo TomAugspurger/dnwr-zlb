@@ -89,7 +89,8 @@ class TestReadPanel(unittest.TestCase):
                            'industry': [1, 3],
                            'occupation': [1, 7],
                            'edu': [31, 35],
-                           'flow': [1, 3]})
+                           'flow': [1, 3],
+                           'history': [0, 1]})
         df_ = df.copy()
         expected = pd.DataFrame({'sex': ['male', 'female'],
                                  'race': ['White Only', 'Black Only'],
@@ -98,7 +99,8 @@ class TestReadPanel(unittest.TestCase):
                                  'industry': ["Agriculture", "Mining"],
                                  'occupation': ["Management", "Legal"],
                                  'edu': ["LESS THAN 1ST GRADE", "9TH GRADE"],
-                                 'flow': ['ee', 'en']})
+                                 'flow': ['ee', 'en'],
+                                 'history': ['employed', 'not_employed']})
         # full
         result = helpers.replace_categorical(df_)
         tm.assert_frame_equal(result, expected)
