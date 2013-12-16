@@ -22,7 +22,14 @@ def main():
 
     for filename in dtas:
         year = filename.split('.')[0]
-        df = pd.read_stata(os.path.join(base_path, filename))
+
+        if year == '2010':
+            # malformed dta file
+            # just do it in R
+            df = pd.read_csv('/Volumes/HDD/Users/tom/DataStorage/CPS/morg/2010.csv')
+        else:
+            df = pd.read_stata(os.path.join(base_path, filename))
+
         quarter = df.intmonth.replace({1: '01', 2: '01', 3: '01',
                                        4: '04', 5: '04', 6: '04',
                                        7: '07', 8: '07', 9: '07',
@@ -43,6 +50,7 @@ def main():
         df['HRHHID2'] = df['HRHHID2'].astype(int)
 
         df = df.set_index(idx_cols)
+        df = df[(df['age'] > 18) & (df['age'] < 65)]
 
         merged = df.join(trim, how='left', rsuffix='_r')
 
@@ -60,9 +68,14 @@ def main():
         else:
             extra_cols = [u'ihigrdc', u'ind02']
         merged = merged[common_cols + extra_cols]
-        merged.loc[:, 'uhourse'] = merged[['uhourse']].update(merged.hourslw,
-                                                              overwrite=False)
+        hours = merged[['uhourse']].copy()
+
+        hours.update(merged[['hourslw']].rename(columns={'hourslw': 'uhourse'}),
+                     overwrite=False)
+        merged.loc[:, 'uhourse'] = hours
         assert merged.index.is_unique
+
+        merged = merged.dropna(subset=['flow'])
 
         with pd.get_store('/Volumes/HDD/Users/tom/DataStorage/CPS/analyzed/clean.h5') as store:
             merged.to_hdf(store, 'y' + year, format='t', append=False)
@@ -70,16 +83,22 @@ def main():
         print((year, len(merged.labor_status)))
 
 
-df = pd.concat([df])
-df = df[df.agri == 0]
-df = df[(df.age > 18) & (df.age < 65)]
-cols = ['Q1', 'Q2', 'Q3', 'age', 'earnwt', 'earnwke', 'earnings', 'earnhre',
-        'edu', 'ethnic', 'expr', 'flow', 'ihigrdc', 'ind02', 'industry',
-        'labor_status', 'lfsr94', 'marital', 'married_d', 'month',
-        'nonemployed_history', 'unemployed_history', 'either_history',
-        'og_weight', 'paidhre', 'productivity', 'quarter', 'race', 'race_d',
-        'same_employer', 'sex', 'sex_d', 'uhourse']
-df = df[cols]
+def merge():
+    dfs = []
+    with pd.get_store('/Volumes/HDD/Users/tom/DataStorage/CPS/analyzed/clean.h5') as store:
+
+        for k, v in store.iteritems():
+            if k.startswith('/y'):
+                df = store.select(k)
+
+                df = df[(df['age'] > 18) & (df['age'] < 65)]
+
+                dfs.append(df)
+
+    df = pd.concat(dfs)
+    assert df.index.is_unique
+    with pd.get_store('/Volumes/HDD/Users/tom/DataStorage/CPS/analyzed/clean.h5') as store:
+        df.to_hdf(store, 'merged', format='t', append=False)
 
 if __name__ == '__main__':
     main()
