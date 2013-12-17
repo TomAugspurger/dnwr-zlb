@@ -97,6 +97,15 @@ def merge():
                 dfs.append(df)
 
     df = pd.concat(dfs)
+
+    with pd.get_store('/Volumes/HDD/Users/tom/DataStorage/CPS/analyzed/analyzed_store.h5') as store:
+        deflator = store.select('deflator')['deflator']
+        deflator.index.set_names(['qmonth'], inplace=True)
+
+    df.loc[:, 'wage'] = df.earnwke.div(df.uhourse)
+    df.loc[:, 'r_wage'] = df.wage.div(deflator, level='qmonth') * 100
+    df.loc[:, 'lr_wage'] = np.log(df.r_wage)
+
     assert df.index.is_unique
     with pd.get_store('/Volumes/HDD/Users/tom/DataStorage/CPS/analyzed/clean.h5') as store:
         df.to_hdf(store, 'merged', format='t', append=False)
