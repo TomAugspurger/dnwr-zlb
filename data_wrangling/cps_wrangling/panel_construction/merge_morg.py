@@ -59,7 +59,8 @@ def main():
                        'labor_status', 'lfsr94', 'marital', 'married_d', 'month',
                        'nonemployed_history', 'unemployed_history', 'either_history',
                        'og_weight', 'paidhre', 'productivity', 'quarter', 'race', 'race_d',
-                       'same_employer', 'sex', 'sex_d', 'uhourse', 'hourslw']
+                       'same_employer', 'sex', 'sex_d', 'uhourse', 'hourslw',
+                       'edu_bin']
 
         if int(year) <= 1997:
             extra_cols = []
