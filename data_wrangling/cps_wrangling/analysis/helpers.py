@@ -1,4 +1,5 @@
 from datetime import datetime
+import itertools as it
 
 import arrow
 import numpy as np
@@ -689,3 +690,62 @@ def construct_wage_index(df):
                                 "expr**3 + expr**4", df)
     res = model.fit()
     return model, res
+
+
+def make_df_ss(df_fs, params, lrprod, history='either_history'):
+    """
+    Construct the second stage Dataframe.
+
+
+    Parameters
+    ----------
+
+    df_fs : DataFrame
+        should contain all parameter columns, history, and qmonth index
+    params : Series
+        params series from first stage Results
+    lrprod : Series
+        log real productivity measure
+    history : str
+        History to group on. Default `'either_history'`
+
+    Returns
+    -------
+
+
+
+    """
+    g_ts = df_fs.reset_index().groupby(['qmonth', history])
+    g_ts_all = df_fs.groupby(level='qmonth')
+
+    parameters = params.index[1:]  # Don't need intercept
+
+    demo_means_ts = g_ts[parameters].mean()
+    demo_means_ts_all = g_ts_all[parameters].mean()
+
+    idx = pd.MultiIndex.from_tuples(zip(demo_means_ts_all.index,
+                                        it.cycle(['all_'])),
+                                    names=demo_means_ts.index.names)
+    demo_means_ts_all.index = idx
+    demo_means_ts = pd.concat([demo_means_ts, demo_means_ts_all]).sort_index()
+
+    means = df_fs.groupby(history)[parameters].mean()
+    means_all = pd.DataFrame(df_fs[parameters].mean(), columns=['all_']).T
+    means = pd.concat([means, means_all])
+
+    deviations = demo_means_ts.sub(means, level=history)
+
+    wage_index = pd.concat([deviations.xs(0, level=history).dot(params.iloc[1:]),
+                            deviations.xs(1, level=history).dot(params.iloc[1:]),
+                            deviations.xs('all_', level=history).dot(params.iloc[1:])],
+                           axis=1, keys=['from_e', 'from_n', 'all_']).diff().stack(dropna=False).shift(-3)
+    wage_index.name = 'wage_index'
+
+    lrprod_reindexed = lrprod.reindex(index=wage_index.index, level='qmonth')
+    df_ss = pd.concat([pd.DataFrame(wage_index), lrprod_reindexed], axis=1)
+    dummies = pd.get_dummies(df_ss.index.map(lambda x: x[0].quarter), prefix='Q')
+    dummies.index = df_ss.index
+    df_ss = pd.concat([df_ss, dummies], axis=1)
+
+    df_ss = df_ss.unstack().reorder_levels([1, 0], axis=1).sort_index(axis=1)
+    return df_ss

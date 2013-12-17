@@ -7,7 +7,8 @@ import pandas.util.testing as tm
 from data_wrangling.cps_wrangling.analysis import helpers
 from data_wrangling.cps_wrangling.analysis.helpers import (bin_others,
                                                            date_parser,
-                                                           filter_panel)
+                                                           filter_panel,
+                                                           make_df_ss)
 from data_wrangling.cps_wrangling.analysis.make_to_long import quarterize
 
 
@@ -22,6 +23,60 @@ class TestHelpers(unittest.TestCase):
 
         with np.testing.assert_raises(ValueError):
             bin_others(s, [3, 4, 12])
+
+    def test_make_df_ss(self):
+
+        idx = pd.DatetimeIndex(start='1996-01-01', periods=4, freq='QS', name='qmonth')
+        # idx = pd.MultiIndex.from_tuples(idx0, )
+        df = pd.DataFrame({'age': [9, 9, 11, 11], 'sex_d': [0, 0, 1, 1],
+                           'race_d': [0, 0, 1, 1], 'married_d': [0, 0, 1, 1],
+                           'edu_bin': [0, 1, 3, 4], 'expr': [1, 2, 3, 4],
+                           'expr_2': [1, 4, 9, 16], 'expr_3': [1, 8, 27, 64],
+                           'expr_4': [1, 16, 81, 256]}, index=idx)
+        params = pd.Series([1, 1, 1, 1, 1, 1, 1, 1, 1], index=df.columns)
+        df['either_history'] = [0, 0, 1, 1]
+        lrprod = pd.DataFrame({'durable': [.1, .5, 1, 2],
+                               'nondurable': [.1, .5, 1, 2],
+                               'all_': [.1, .5, 1, 2]}, index=idx)
+        result = make_df_ss(df, params, lrprod)
+        levels = [[u'from_e', u'from_n', u'all_'],
+                  [u'wage_index', u'all_', u'durable', u'nondurable', u'Q_1', u'Q_2', u'Q_3', u'Q_4']]
+        labels = [[0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2],
+                  [0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7]]
+        cols = pd.MultiIndex(levels=levels, labels=labels)
+        expected = pd.DataFrame(np.array([[27,    .1,   .1,
+                                           0.1,   1.0,   0,
+                                           0,   0, np.nan,
+                                           0.1,   .1,   .1,
+                                           1.0,   0,   0,
+                                           0,   27,   .1,
+                                           0.1,   .1,   1.0,
+                                           0,   0,   0],
+                                          [np.nan,   .5,   .5,
+                                           .5,   0,   1.0,
+                                           0,   0, np.nan,
+                                           .5,   .5,   .5,
+                                           0,   1.0,   0,
+                                           0,   95,   .5,
+                                           .5,   .5,   0,
+                                           1.0,   0,   0],
+                                          [np.nan,   1.0,   1.0,
+                                           1.0,   0,   0,
+                                           1.0,   0,   221,
+                                           1.0,   1.0,   1.0,
+                                           0,   0,   1.0,
+                                           0,   221,   1.0,
+                                           1.0,   1.0,   0,
+                                           0,   1.0,   0],
+                                          [np.nan,   2,   2,
+                                           2,   0,   0,
+                                           0,   1.0, np.nan,
+                                           2,   2,   2,
+                                           0,   0,   0,
+                                           1.0, np.nan,   2,
+                                           2,   2,   0,
+                                           0,   0,   1.0]]), index=idx, columns=cols)
+        tm.assert_frame_equal(result, expected)
 
 
 class TestReadPanel(unittest.TestCase):
