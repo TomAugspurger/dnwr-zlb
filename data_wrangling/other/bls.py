@@ -195,6 +195,13 @@ def main():
     df = df.rename(columns={'LNS14000000': 'u_rate'})
     df.to_hdf(analyzed, 'u_rate', format='t', append=False)
 
+    #---------------------------------------------------------------------------
+    # Implicit price deflator (nonfarm business, index year)
+    # measure_code = 14
+    df = parse_data(fetch_data(make_data(['PRS85006143'], start='1996', end='2013')))
+    df = df.rename(columns={'PRS85006143': 'deflator'})
+    df.to_hdf(analyzed, 'deflator', format='t', append=False)
+
     analyzed.close()
 if __name__ == '__main__':
     main()
