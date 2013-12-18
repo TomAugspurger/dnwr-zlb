@@ -24,7 +24,10 @@
 \section{Intro}
 \label{sec:intro}
 
-The degree of flexibility in wages has interested economists for a while now.
+The degree of rigidity in wages has interested economists for a while now.
+I provide some evidence for the ongoing discussion.
+I look at the rigidity of wages for newly hired workers and for workers in ongoing relationships separately.
+The wages of workers in ongoing relationships are rigid, while the wages of newly hired workers are more flexible.
 
 After \cite{shimer_2005} pointed out the inability of standard labor search and matching models to generate the observed fluctuations in unemployment and vacancies, wage rigidity was offered as a potential explanation.
 For example, \cite{hall_milgrom_2008} posit a different bargaining structure between employers and workers that results in more rigid wages and generates more employment volatility than the standard model.
@@ -114,16 +117,18 @@ but, thanks to using the wage index, the sample still includes newly hired worke
 \label{sec:results}
 
 I estimate \autoref{eq:second_stage} to produce the results in \autoref{tab:elasticity_estimates}.
-A value of 1 represents perfect wage flexibility, while a value of 0 represents perfect rigidity.
-Seasonal dummies are also included in the regression.
+Log real labor output per hour used as $y_t$
+A value of 1 represents perfect wage flexibility, wages move 1 for 1 with productivity, while a value of 0 represents perfect rigidity.
+The monthly data from the CPS are resampled at a quarterly frequency to match the frequency of the exogenous variable $y_t$.
+Quarterly seasonal dummies are also included in the regression.
 The key parameter is $\eta_j$, the estimate for the wage elasticity for either previously employed or non-employed workers.
 
-The estimate for previously employed workers is nearly zero, suggesting that their wages are quite rigid.
+The estimate of the wage elasticity for previously employed workers is nearly zero, suggesting that their wages are quite rigid.
 For newly hired workers, the estimate is higher (0.33) suggesting more flexibility.
 However, the standard error for the newly higher worker's elasticity (0.232) is also higher, partially reflecting the smaller sample size.
 
 My estimates for the wage elasticity are smaller than those reported in \cite{haefke_sonntag_vanRens_2013},  who find values of 0.24 for all workers and 0.79 for new hires.
-Our samples cover different time periods, so the estimates needn't match exactly.
+Our samples cover different time periods, so the estimates needn't match exactly, but the difference is large enough to merit some concern.
 As reported in the appendix, their sample demographics information differs from mine;
 it's possible that the differences are due to different matching criteria and filtering methods.
 
@@ -149,7 +154,7 @@ it's possible that the differences are due to different matching criteria and fi
 \subsection{By Industry}
 
 It's widely known that the behavior of durable and nondurable goods differs over the business cycle.
-This suggests that we may want to perform a similar analysis as above, but with workers grouped by their sector along with their employment history.
+This suggests a similar analysis as above, but with workers grouped by their sector along with their employment history.
 These results are presented in \autoref{tab:elasticity_estimates_sector}.
 
 \begin{table}
@@ -164,11 +169,13 @@ These results are presented in \autoref{tab:elasticity_estimates_sector}.
                   & All workers          & 0.1267          & 0.202            & 65,613      \\ \bottomrule
     \end{tabular}
     \caption{
-                Similar results to \autoref{tab:elasticity_estimates}, but with workers grouped by major sector as well. Sectors are defined as in the BLS's Major Sector Productivity and Costs (see appendix).
+                Similar results to \autoref{tab:elasticity_estimates}, but with workers grouped by major sector as well. Sectors are defined as in the BLS's Major Sector Productivity and Costs (see the \autoref{sec:appendix}).
             }
     \label{tab:elasticity_estimates_sector}
 \end{table}
 
+The estimates of wage rigidity for workers in durables industries are uniformly lower than for workers in nondurables.
+Newly hired workers in nondurables industries have the highest estimated elasticity (.9766), but also the highest standard error (1.137) and the smallest sample size (just 2,465).
 
 \section{Conclusion}
 
@@ -214,6 +221,13 @@ They must be employed this month for a wage to be reported.
 The employment status is given by the labor force status recode (\texttt{PEMLR}).
 
 As in \cite{haefke_sonntag_vanRens_2013}, if a worker reports his hours as variable (\texttt{PEHRUSL1} = -4), then his actual hours last month are used (\texttt{PEHRACT1}).
+
+Productivity is measured by taken from the BLS's Major Sector Productivity and Costs program.
+The series used are \texttt{PRS85006093} (Nonfarm Business Labor Output per Hour, base year 2009),
+\textttt{PRS31006093} (same, but for just Durables), and \texttt{PRS32006093} (for nondurables).
+
+Both wages and productivity measures are deflated by the BLS's implicit price deflator, \texttt{PRS85006143.
+The productivity measures and deflator can be downloaded with \texttt{bls.py}.
 
 Industry codes are taken from \texttt{PRDTIND1}.
 The codes are broken into durable and nondurble at \href{http://www.bls.gov/news.release/prod2.tn.htm}{http://www.bls.gov/news.release/prod2.tn.htm}.
