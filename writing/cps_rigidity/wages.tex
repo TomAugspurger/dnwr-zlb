@@ -1,0 +1,272 @@
+\documentclass[11pt]{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}    % Set color of text/background
+
+\definecolor{purple}{HTML}{7A68A6}
+\definecolor{blue}{HTML}{2020A1}
+\definecolor{red}{HTML}{A60628}
+
+\usepackage[colorlinks=true, citecolor=blue]{hyperref}     % References
+\usepackage{cleveref}                                      % Better References
+\usepackage{graphicx}                                      % Required for the inclusion of images
+\usepackage{natbib}
+\usepackage[font=small,labelfont=bf]{caption}
+
+\title{Wage Rigidity in the CPS}
+\author{Tom Augspurger}
+\date{\today}
+\begin{document}
+\maketitle
+
+\section{Intro}
+\label{sec:intro}
+
+The degree of flexibility in wages has interested economists for a while now.
+
+After \cite{shimer_2005} pointed out the inability of standard labor search and matching models to generate the observed fluctuations in unemployment and vacancies, wage rigidity was offered as a potential explanation.
+For example, \cite{hall_milgrom_2008} posit a different bargaining structure between employers and workers that results in more rigid wages and generates more employment volatility than the standard model.
+
+It has been used to explain employment fluctuations over the business cycle.
+Recently, researchers have used the Consumer Population Survey (CPS) to measure wage flexibility.
+
+\section{Data}
+\label{sec:section_name}
+
+A more thorough description of the data and the methods use to acquire and filter it can be found in the appendix.
+Here, I will describe the layout of the CPS and what makes it useful for the problem at hand.
+
+The CPS was established in 1940 and (since July 2001) interviews about 60,000 households per month.
+A selected household is interviewed for four consecutive months, exits the survey for the next
+eight months, and then returns to be surveyed for a final four months.
+In total, a household is interviewed for eight months, spread over a twelve month period.
+
+Certain questions are asked only of those households in months 4 and 8 (referred to as the Outgoing Rotation Group).
+Importantly for this project, earnings questions are among these.
+I constructed a panel matching individuals across their (potentially) 8 months in the survey.
+The variables of interest include demographic variables such as age, race, education level, marital status, and gender;
+employment variables such as labor force status (employed, unemployed, not in labor force), whether they remained at the same job, and hours worked;
+and earnings variables, which are only available in survey months 4 and 8.
+
+The CPS is attractive because of its long run (with micro-data back to the 1960s), large sample sizes, and broad suite of questions.
+A drawback of the CPS is that it is not necessarily designed to be used longitudinally.
+This makes matching individuals across time somewhat difficult (see \cite{madrian1999note} for a note on these topics).
+
+\section{Search and Matching Models}
+\label{sec:search_and_matching_models}
+
+\cite{hall_milgrom_2008} showed that in the standard labor search and matching model, where the average product of labor is \emph{always} equal to its marginal product, unemployment volatility is one in the same as wage stickiness.
+\cite{pissarides_2009} adjusts the standard labor searching and matching model in response to \cite{shimer_2005}'s and others' critiques.
+He distinguishes the wage rigidity for workers in ongoing jobs from the wage rigidity for newly-hired workers.
+He offers some evidence for the wages in ongoing jobs being especially rigid, while for new hires wages are quite flexible.
+Here, wage rigidity or flexibility means how much the wage changes in response to a change in some measure of economic activity (e.g. labor productivity or the unemployment rate).
+
+\section{Statistical Method}
+\label{sec:statistical_method}
+
+I use the method developed in \cite{haefke_sonntag_vanRens_2013} to estimate the degree of wage rigidity.
+This method is designed to work with the structure of the CPS survey;
+it allows for an estimate of wage rigidity without needing to observe an employed worker at regular individuals over time, which the CPS does not do.
+
+Before describing their method, I will lay out how wage rigidity has typically been estimated.
+The goal is to estimate some equation of the form:
+
+\begin{equation}
+    \label{eq:individual_wage}
+    \ln w_{it} = \boldsymbol{x}_i^{T} \boldsymbol{\beta} + \ln \hat{w}_{it}
+\end{equation}
+
+where $w_{it}$ is the wage of an individual $i$ at time $t$, $\boldsymbol{x}_i$ is a vector of individual deterministic characteristics (such as age, gender, or race). $\hat{w}_{it}$ is the residual wage from this regression.
+
+In the past, researchers would use longitudinal surveys and take the first difference of wages for a worker employed at two consecutive time periods (see, for example \citep{bils_1985}).
+First differences are appropriate for two reasons.
+First, it is possible that wage growth and measures of economic activity, like labor productivity, are cointegrated.
+Second, first differences will remove individual heterogeneity.
+
+This method has the negative effect of limiting the sample to only those workers employed in two consecutive periods;
+you can't difference individual $i$'s wage if he didn't have a wage in the previous period.
+As discussed in section \autoref{sec:search_and_matching_models}, the effects of wage rigidity among newly hired workers may differ from those of workers in ongoing relationships.
+
+Finally getting to the method in \cite{haefke_sonntag_vanRens_2013}, the idea is to construct a wage index that controls for fluctuations in observable worker characteristics,
+which fluctuate over time and the business cycle.
+The wage index can then be regressed on a measure economic activity (labor productivity, or the unemployment rate, for example), to asses the degree of wage flexibility.
+Since this method does not require taking the first difference of an individual's wage between two consecutive periods, newly hired workers can be included in the sample.
+This in turn allows the CPS to be used.
+
+As suggested by \cite{pissarides_2009}, currently employed workers at any date can be classified according to whether they were previously employed or are newly hired.
+Following \cite{haefke_sonntag_vanRens_2013}, currently employed workers are classified as newly hired if they were either unemployed or not in the labor force in any of the preceding three months.
+
+With this we can estimate the degree of wage rigidity for each group of workers:
+
+\begin{equation}
+    \label{eq:second_stage}
+    \Delta \ln \hat{w}_{jt} = \alpha_j + \eta_j \Delta \ln y_t + \epsilon_{jt}
+\end{equation}
+
+where $j$ indicates the group of workers (previously employed or newly hired) and $y_t$ is taken to be the real productivity of labor.
+With this setup, $\eta$ is the elasticity of wages with respect to productivity and has the convenient interpretation as the degree of wage rigidity.
+As mentioned earlier, this equation is estimated in first differences;
+but, thanks to using the wage index, the sample still includes newly hired workers.
+
+\section{Results}
+\label{sec:results}
+
+I estimate \autoref{eq:second_stage} to produce the results in \autoref{tab:elasticity_estimates}.
+A value of 1 represents perfect wage flexibility, while a value of 0 represents perfect rigidity.
+Seasonal dummies are also included in the regression.
+The key parameter is $\eta_j$, the estimate for the wage elasticity for either previously employed or non-employed workers.
+
+The estimate for previously employed workers is nearly zero, suggesting that their wages are quite rigid.
+For newly hired workers, the estimate is higher (0.33) suggesting more flexibility.
+However, the standard error for the newly higher worker's elasticity (0.232) is also higher, partially reflecting the smaller sample size.
+
+My estimates for the wage elasticity are smaller than those reported in \cite{haefke_sonntag_vanRens_2013},  who find values of 0.24 for all workers and 0.79 for new hires.
+Our samples cover different time periods, so the estimates needn't match exactly.
+As reported in the appendix, their sample demographics information differs from mine;
+it's possible that the differences are due to different matching criteria and filtering methods.
+
+\begin{table}
+    \centering
+    \begin{tabular}{lccc} \toprule
+        \textsc{Group}               & $\hat{\eta}_j$ & Standard Error & Observations\\
+        \textsc{Newly hired}         & 0.3332       & 0.232            & 68,973       \\
+        \textsc{Previously employed} & 0.0538       & 0.048            & 1,447,530     \\
+        \textsc{All workers}         & 0.0702       & 0.050            & 1,516,503     \\ \bottomrule
+    \end{tabular}
+    \caption{
+                Results from estimation of \autoref{eq:second_stage}.
+                Workers are grouped according to their employment history.
+                A worker is counted as \textsc{newly hired} if he was either unemployed
+                or not in the labor force in any three months prior to his wage
+                being observed. $\hat{\eta}_j$ is the estimate for the elasticity of the wage with respect to real labor productivity.
+                The number of observations is the number of workers in that group.
+            }
+    \label{tab:elasticity_estimates}
+\end{table}
+
+\subsection{By Industry}
+
+It's widely known that the behavior of durable and nondurable goods differs over the business cycle.
+This suggests that we may want to perform a similar analysis as above, but with workers grouped by their sector along with their employment history.
+These results are presented in \autoref{tab:elasticity_estimates_sector}.
+
+\begin{table}
+    \centering
+    \begin{tabular}{llrrr} \toprule
+       \textsc{Sector}     & History              & $\hat{\eta_j}$ & Standard Error   & Observations\\
+       \textsc{Durable}    & Newly hired          & -0.1410         & 0.470            & 4,705       \\
+                  & Previously employed  & -0.0114         & 0.080            & 124,311     \\
+                  & All workers          & -0.0058         & 0.077            & 129,016     \\
+       \textsc{Nondurable} & Newly hired          & 0.9766          & 1.137            & 2,465       \\
+                  & Previously employed  & 0.1156          & 0.198            & 63,148      \\
+                  & All workers          & 0.1267          & 0.202            & 65,613      \\ \bottomrule
+    \end{tabular}
+    \caption{
+                Similar results to \autoref{tab:elasticity_estimates}, but with workers grouped by major sector as well. Sectors are defined as in the BLS's Major Sector Productivity and Costs (see appendix).
+            }
+    \label{tab:elasticity_estimates_sector}
+\end{table}
+
+
+\section{Conclusion}
+
+I used data from the CPS to estimate the degree of wage rigidity for various groups of workers.
+
+\newpage
+\bibliographystyle{apa}
+\bibliography{citations}
+
+\appendix
+
+\section{Appendix}
+\label{sec:appendix}
+
+All source files are available at \href{https://github.com/tomAugspurger/dnwr-zlb}{https://github.com/tomAugspurger/dnwr-zlb}.
+
+The CPS was not originally designed for longitudinal use.
+Over the years, some variables have been added to facilitate the matching of individuals across interview months.
+
+Matched data on the Outgoing Rotation Groups (ORG) can be fetched from the NBER website at http://www.nber.org/morg/annual/.
+The included \texttt{morg\_downloader.py} file will do this.
+We need to supplement the ORG data with monthly employment histories.
+These are available from the raw monthly files.
+Run \texttt{monthly\_data\_downloader.py} to gather the data dictionaries and monthly files.
+
+All CPS variable names referred to are set in \texttt{monospace type} and refer to the January 2013 names.
+
+An employment history for each worker can be constructed from the raw, unmatched, monthly data files themselves.
+Because the CPS is not designed as a longitudinal survey, the unique household identifier in a given month does not necessarily identify the same household in the next month.
+To be considered a valid match the following conditions must be met:
+
+\begin{itemize}
+    \item the individuals unique identifier (\texttt{HRHHID, HRHHID2, PULINENO}) must match
+    \item the difference in age (\texttt{PRTAGE}) must be between -1 and 3 (to allow for aging measurement error)
+    \item the reported sex (\texttt{PESEX}) must match
+\end{itemize}
+
+Ideally, each worker's employment status at each of the preceding 3 months is known.
+If the employment status during any of the previous three months is unknown, the individual is dropped.
+A worker is classified as coming from employment if they were employed in all of the previous three months (as well as this month).
+A worker is classified as coming from unemployment if they were either unemployed or non-employed in \emph{any} of the preceding three months.
+They must be employed this month for a wage to be reported.
+The employment status is given by the labor force status recode (\texttt{PEMLR}).
+
+As in \cite{haefke_sonntag_vanRens_2013}, if a worker reports his hours as variable (\texttt{PEHRUSL1} = -4), then his actual hours last month are used (\texttt{PEHRACT1}).
+
+Industry codes are taken from \texttt{PRDTIND1}.
+The codes are broken into durable and nondurble at \href{http://www.bls.gov/news.release/prod2.tn.htm}{http://www.bls.gov/news.release/prod2.tn.htm}.
+The following are durable industries:
+
+\begin{center}
+\begin{tabular}{lc} \toprule
+NAICS Name                                      & BLS Code \\ \midrule
+wood product manufacturing                      & 11       \\
+nonmetallic mineral product manufacturing       & 5        \\
+primary metal manufacturing                     & 6        \\
+fabricated metal product manufacturing          & 6        \\
+machinery manufacturing                         & 7        \\
+computer and electronic product manufacturing   & 8        \\
+electrical equipment and appliance manufacturing& 9        \\
+transportation equipment manufacturing          & 10       \\
+furniture and related product manufacturing     & 12       \\
+miscellaneous manufacturing.                    & 13       \\
+\end{tabular}
+\end{center}
+and nondurables:
+
+\begin{center}
+\begin{tabular}{lc} \toprule
+NAICE Name                                  & BLS Code \\ \midrule
+food manufacturing                          &  14      \\
+beverage and tobacco product manufacturing  &  15      \\
+textile mills                               &  16      \\
+textile product mills                       &  16      \\
+apparel manufacturing                       &  16      \\
+leather and allied product manufacturing    &  16      \\
+paper manufacturing                         &  17      \\
+printing and related support activities     &  17      \\
+petroleum and coal products manufacturing   &  18      \\
+chemical manufacturing                      &  19      \\
+plastics and rubber products manufacturing  &  20      \\
+\end{tabular}
+\end{center}
+
+\begin{center}
+  \noindent \includegraphics[width=1.25\linewidth]{demographics_ts.pdf}
+  \label{fig:demographics_ts}
+\end{center}
+
+\begin{center}
+  \noindent \includegraphics[width=1.25\linewidth]{wages_ts.pdf}
+  \label{fig:earnings_ts}
+\end{center}
+
+
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+
+\end{document}
