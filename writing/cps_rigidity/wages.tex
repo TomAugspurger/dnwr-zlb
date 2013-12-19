@@ -20,16 +20,24 @@
 \DeclareMathOperator*{\argmax}{arg\!\max}
 
 
-\title{Wage Rigidity in the CPS}
+\title{Wage Rigidity}
 \author{Tom Augspurger}
 \date{\today}
 \begin{document}
 \maketitle
 
 %----------------------------------------------------------------------------------------
+
+\abstract{
+            I construct a dataset from the monthly CPS micro-data files to measure
+            wage rigidity. I find that the wages of workers in existing relationships
+            are rigid, while the wages of newly hired workers are more flexible.
+}
+
+%----------------------------------------------------------------------------------------
 %----------------------------------------------------------------------------------------
 
-\section{Intro}
+\section{Introduction}
 \label{sec:intro}
 
 The degree of rigidity in wages has interested economists for a while now.
@@ -59,7 +67,7 @@ In total, a household is interviewed for eight months, spread over a twelve mont
 Certain questions are asked only of those households in months 4 and 8 (referred to as the Outgoing Rotation Group).
 Importantly for this project, earnings questions are among these.
 Only observing the wages of a specific individual twice, separated by a 12-month gap, limits the type of analysis.
-\autoref{sec:statistical_method} describes one technique for working around this limitation.
+In \autoref{sec:statistical_method} I describe one technique for working around this limitation.
 
 I constructed a panel matching individuals across their (potentially) 8 months in the survey.
 The variables of interest include demographic variables such as age, race, education level, marital status, and gender;
@@ -69,6 +77,8 @@ and earnings variables, which are only available in survey months 4 and 8.
 The CPS is attractive because of its long run (with micro-data back to the 1960s), large sample sizes, and broad suite of questions.
 A drawback of the CPS is that it is not necessarily designed to be used longitudinally.
 This makes matching individuals across time somewhat difficult (see \cite{madrian1999note} for a note on these topics).
+I only use data from 1994 on, after the CPS redesign.
+Also, due to a change in household identifiers in 1994, I'm only able to construct partial histories for most workers in 1995, so my sample starts in 1996.
 
 %----------------------------------------------------------------------------------------
 
@@ -135,11 +145,11 @@ The wage equation satisfies
 
 Using the job creation condition, the value of unemployment must be such that
 
-\begin{align}
+\begin{align*}
     rU &= z + f(\theta)(W - U)\\
        &= z + f(\theta)\frac{\beta}{1 - \beta}(J - V)\\
        &=z + \frac{\beta}{1 - \beta}c \theta
-\end{align}
+\end{align*}
 
 where $f(\theta) \equiv m(1, v/u)$ is the transition rate of workers from unemployment to employment.
 Using this in \autoref{eq:wage_general}, the wage equation now satisfies
@@ -152,10 +162,14 @@ The interpretation here is that productivity shocks translate to wage changes in
 First, there is a direct effect of productivity on the value of output from a match, $p$.
 Second, an indirect effect on $p$ from the change in the reservation value for the worker.
 And third, a similar indirect effect on $p$, but through the change in the reservation value for the firm.
+\cite{pissarides_2009} then goes on to differentiate between new and existing jobs.
+
+% I will not be able to differentiate between these three effects.
+% My results will be for the combined effect: the change in wages due to a change in productivity.
 
 %------------------------------------------------------------------------------
 
-\section{Statistical Method}
+\section{Estimation Method}
 \label{sec:statistical_method}
 
 I use the method developed in \cite{haefke_sonntag_vanRens_2013} to estimate the degree of wage rigidity.
@@ -197,7 +211,7 @@ With this we can estimate the degree of wage rigidity for each group of workers:
     \Delta \ln \hat{w}_{jt} = \alpha_j + \eta_j \Delta \ln y_t + \epsilon_{jt}
 \end{equation}
 
-where $j$ indicates the group of workers (previously employed or newly hired) and $y_t$ is taken to be the real productivity of labor.
+where $j$ indicates the group of workers (previously employed or newly hired) and $y_t$ is taken to be the real output per hour of labor.
 With this setup, $\eta$ is the elasticity of wages with respect to productivity and has the convenient interpretation as the degree of wage rigidity.
 As mentioned earlier, this equation is estimated in first differences;
 but, thanks to using the wage index, the sample still includes newly hired workers.
@@ -209,7 +223,7 @@ but, thanks to using the wage index, the sample still includes newly hired worke
 
 I estimate \autoref{eq:second_stage} to produce the results in \autoref{tab:elasticity_estimates}.
 Log real labor output per hour is used as $y_t$.
-A value of $\eta = 1$ represents perfect wage flexibility (wages move 1 for 1 with productivity) while a value of 0 represents perfect rigidity.
+A value of $\eta = 1$ represents perfect wage flexibility (wages move one-for-one with productivity) while a value of 0 represents perfect rigidity.
 The monthly data from the CPS are resampled at a quarterly frequency to match the frequency of the exogenous variable $y_t$.
 Quarterly seasonal dummies are also included in the regression.
 The key parameter is $\eta_j$, the estimate for the wage elasticity for either previously employed or non-employed workers.
@@ -284,7 +298,7 @@ Indeed, the point estimate for newly hired workers is quite negative.
 Newly hired workers in nondurables industries have the highest estimated elasticity (.9766), but also the highest standard error (1.137) and the smallest sample size (just 2,465).
 
 %----------------------------------------------------------------------------------------
-
+\newpage
 \section{Conclusion}
 
 I used data from the CPS to estimate the degree of wage rigidity for various groups of workers.
