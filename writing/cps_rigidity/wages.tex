@@ -26,6 +26,9 @@
 \begin{document}
 \maketitle
 
+%----------------------------------------------------------------------------------------
+%----------------------------------------------------------------------------------------
+
 \section{Intro}
 \label{sec:intro}
 
@@ -39,6 +42,8 @@ For example, \cite{hall_milgrom_2008} posit a different bargaining structure bet
 
 It has been used to explain employment fluctuations over the business cycle.
 Recently, researchers have used the Consumer Population Survey (CPS) to measure wage flexibility.
+
+%----------------------------------------------------------------------------------------
 
 \section{Data}
 \label{sec:section_name}
@@ -61,6 +66,8 @@ and earnings variables, which are only available in survey months 4 and 8.
 The CPS is attractive because of its long run (with micro-data back to the 1960s), large sample sizes, and broad suite of questions.
 A drawback of the CPS is that it is not necessarily designed to be used longitudinally.
 This makes matching individuals across time somewhat difficult (see \cite{madrian1999note} for a note on these topics).
+
+%----------------------------------------------------------------------------------------
 
 \section{Search and Matching Models}
 \label{sec:search_and_matching_models}
@@ -96,14 +103,14 @@ where $J$ is the employer's value of an occupied job, which must satisfy:
 
 where $r$ is the risk-free interest rate, $p$ is the flow value of output from a match, and $w$ is the wage.
 
-The job creation condition is that
+The job creation condition is such that:
 
 \begin{equation}
     V = 0 \iff \frac{p - w}{r + s} = \frac{c}{q(\theta)}
 \end{equation}
 
 At this point, a wage sharing rule must be specified.
-In the usual setup, the wage is such that the surplus created by the match is split at a fixed proportion.
+In the usual setup, the wage splits the surplus created by the match in a fixed proportion.
 Let $W$ be the worker's value from holding a job and $U$ be the worker's value of unemployment.
 Then
 
@@ -142,6 +149,8 @@ The interpretation here is that productivity shocks translate to wage changes in
 First, there is a direct effect of productivity on the value of output from a match, $p$.
 Second, an indirect effect on $p$ from the change in the reservation value for the worker.
 And third, a similar indirect effect on $p$, but through the change in the reservation value for the firm.
+
+%------------------------------------------------------------------------------
 
 \section{Statistical Method}
 \label{sec:statistical_method}
@@ -190,6 +199,8 @@ With this setup, $\eta$ is the elasticity of wages with respect to productivity 
 As mentioned earlier, this equation is estimated in first differences;
 but, thanks to using the wage index, the sample still includes newly hired workers.
 
+%----------------------------------------------------------------------------------------
+
 \section{Results}
 \label{sec:results}
 
@@ -228,6 +239,8 @@ it's possible that the differences are due to different matching criteria and fi
     \label{tab:elasticity_estimates}
 \end{table}
 
+%----------------------------------------------------------------------------------------
+
 \subsection{By Industry}
 
 It's widely known that the behavior of durable and nondurable goods differs over the business cycle.
@@ -254,6 +267,8 @@ These results are presented in \autoref{tab:elasticity_estimates_sector}.
 The estimates of wage rigidity for workers in durables industries are uniformly lower than for workers in nondurables.
 Newly hired workers in nondurables industries have the highest estimated elasticity (.9766), but also the highest standard error (1.137) and the smallest sample size (just 2,465).
 
+%----------------------------------------------------------------------------------------
+
 \section{Conclusion}
 
 I used data from the CPS to estimate the degree of wage rigidity for various groups of workers.
@@ -262,8 +277,9 @@ I used data from the CPS to estimate the degree of wage rigidity for various gro
 \bibliographystyle{apa}
 \bibliography{citations}
 
-\appendix
+%----------------------------------------------------------------------------------------
 
+\appendix
 \section{Appendix}
 \label{sec:appendix}
 
