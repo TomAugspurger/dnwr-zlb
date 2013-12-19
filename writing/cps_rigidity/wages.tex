@@ -4,6 +4,7 @@
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}    % Set color of text/background
+% \usepackage{ctable}
 
 \definecolor{purple}{HTML}{7A68A6}
 \definecolor{blue}{HTML}{2020A1}
@@ -65,6 +66,39 @@ This makes matching individuals across time somewhat difficult (see \cite{madria
 He distinguishes the wage rigidity for workers in ongoing jobs from the wage rigidity for newly-hired workers.
 He offers some evidence for the wages in ongoing jobs being especially rigid, while for new hires wages are quite flexible.
 Here, wage rigidity or flexibility means how much the wage changes in response to a change in some measure of economic activity (e.g. labor productivity or the unemployment rate).
+
+Very briefly, I want to describe the standard labor search and matching model.
+The details are not important for my results, but it will provide context.
+For a more detailed layout, see (among many others) \cite{pissarides_2009}.
+
+There is a pool of unemployed workers who match fill a vacancy posted by an employer according the the matching technology, $m(u, v)$,
+where $u$ is the pool of unemployed workers and $v$ is the pool of vacancies.
+A key parameter in these models is the tightness ratio $\theta \equiv v/u$, the ratio of vacancies to unemployed.
+Let $q(\theta) \equiv m(\theta, 1)$ denote the transition rate for each vacant job.
+Everyone has linear utility, and unemployed workers receive an unemployment benefit worth $z$.
+Employers can post vacancies at a flow cost of $c$ while the vacancy is unfilled.
+
+If $V$ is defined to be the value of a new vacancy to the employer, then
+
+\begin{equation}
+    rV = -c + q(\theta)(J - V)
+\end{equation}
+
+where $J$ is the employer's value of an occupied job, which must satisfy:
+
+\begin{equation}
+    rJ = p - w - sJ
+\end{equation}
+
+where $r$ is the risk-free interest rate.
+
+The job creation condition is that
+
+\begin{equation}
+    V = 0 \Doublearrow \frac{p - w}{r + s} = \frac{c}{q(\theta)}
+\end{equation}
+
+At this point, a wage sharing rule must be specified.
 
 \section{Statistical Method}
 \label{sec:statistical_method}
