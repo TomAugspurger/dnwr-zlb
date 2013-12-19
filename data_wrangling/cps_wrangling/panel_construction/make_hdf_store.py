@@ -587,7 +587,7 @@ def standardize_ids(df):
     """
     import string
 
-    hrsample = df['HRSAMPLE'].str.slice(1,)
+    hrsample = df['HRSAMPLE'].str.extract(r'(\d+)')
     hrsersuf = df['HRSERSUF'].astype(str)
     huhhnum = df['HUHHNUM'].astype(str)
 
