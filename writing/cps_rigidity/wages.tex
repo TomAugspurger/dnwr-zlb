@@ -33,7 +33,8 @@
 \label{sec:intro}
 
 The degree of rigidity in wages has interested economists for a while now.
-I provide some evidence for the ongoing discussion.
+Attempts to measure wage rigidity go back at least to \cite{dunlop_1938}.
+I provide some evidence on wage rigidity for the continuing discussion.
 I look at the rigidity of wages for newly hired workers and for workers in ongoing relationships separately.
 The wages of workers in ongoing relationships are rigid, while the wages of newly hired workers are more flexible.
 
@@ -46,21 +47,23 @@ Recently, researchers have used the Consumer Population Survey (CPS) to measure 
 %----------------------------------------------------------------------------------------
 
 \section{Data}
-\label{sec:section_name}
+\label{sec:data}
 
 A more thorough description of the data and the methods use to acquire and filter it can be found in the appendix.
 Here, I will describe the layout of the CPS and what makes it useful for the problem at hand.
 
 The CPS was established in 1940 and (since July 2001) interviews about 60,000 households per month.
-A selected household is interviewed for four consecutive months, exits the survey for the next
-eight months, and then returns to be surveyed for a final four months.
+A selected household is interviewed for four consecutive months, exits the survey for the next eight months, and then returns to be surveyed for a final four months.
 In total, a household is interviewed for eight months, spread over a twelve month period.
 
 Certain questions are asked only of those households in months 4 and 8 (referred to as the Outgoing Rotation Group).
 Importantly for this project, earnings questions are among these.
+Only observing the wages of a specific individual twice, separated by a 12-month gap, limits the type of analysis.
+\autoref{sec:statistical_method} describes one technique for working around this limitation.
+
 I constructed a panel matching individuals across their (potentially) 8 months in the survey.
 The variables of interest include demographic variables such as age, race, education level, marital status, and gender;
-employment variables such as labor force status (employed, unemployed, not in labor force), whether they remained at the same job, and hours worked;
+employment variables such as labor force status (employed, unemployed, not in labor force), whether they remained at the same job, industry worked in, and hours worked;
 and earnings variables, which are only available in survey months 4 and 8.
 
 The CPS is attractive because of its long run (with micro-data back to the 1960s), large sample sizes, and broad suite of questions.
@@ -73,7 +76,7 @@ This makes matching individuals across time somewhat difficult (see \cite{madria
 \label{sec:search_and_matching_models}
 
 \cite{hall_milgrom_2008} showed that in the standard labor search and matching model, where the average product of labor is \emph{always} equal to its marginal product, unemployment volatility is one in the same as wage stickiness.
-\cite{pissarides_2009} adjusts the standard labor searching and matching model in response to \cite{shimer_2005}'s and others' critiques.
+\cite{pissarides_2009} adjusted the standard labor searching and matching model in response to \cite{shimer_2005}'s and others' critiques.
 He distinguishes the wage rigidity for workers in ongoing jobs from the wage rigidity for newly-hired workers.
 He offers some evidence for the wages in ongoing jobs being especially rigid, while for new hires wages are quite flexible.
 Here, wage rigidity or flexibility means how much the wage changes in response to a change in some measure of economic activity (e.g. labor productivity or the unemployment rate).
@@ -82,10 +85,10 @@ Very briefly, I want to describe the standard labor search and matching model.
 The details are not important for my results, but it will provide context.
 For a more detailed layout, see (among many others) \cite{pissarides_2009}.
 
-There is a pool of unemployed workers who match fill a vacancy posted by an employer according the the matching technology, $m(u, v)$,
+There is a pool of unemployed workers who match with a vacancy posted by an employer according the the matching technology, $m(u, v)$,
 where $u$ is the pool of unemployed workers and $v$ is the pool of vacancies.
 A key parameter in these models is the tightness ratio $\theta \equiv v/u$, the ratio of vacancies to unemployed.
-Let $q(\theta) \equiv m(\theta, 1)$ denote the transition rate for each vacant job.
+Let $q(\theta) \equiv m(\theta, 1)$ denote the fill rate for each vacancy.
 Everyone has linear utility, and unemployed workers receive an unemployment benefit worth $z$.
 Employers can post vacancies at a flow cost of $c$ while the vacancy is unfilled.
 
@@ -115,7 +118,7 @@ Let $W$ be the worker's value from holding a job and $U$ be the worker's value o
 Then
 
 \begin{equation}
-    W - U = \beta ( J + W - V - U)
+    W - U = \beta (J + W - V - U)
 \end{equation}
 
 In \cite{pissarides_2009} the wage is determined by the Nash sharing rule:
@@ -167,22 +170,22 @@ The goal is to estimate some equation of the form:
     \ln w_{it} = \boldsymbol{x}_i^{T} \boldsymbol{\beta} + \ln \hat{w}_{it}
 \end{equation}
 
-where $w_{it}$ is the wage of an individual $i$ at time $t$, $\boldsymbol{x}_i$ is a vector of individual deterministic characteristics (such as age, gender, or race). $\hat{w}_{it}$ is the residual wage from this regression.
+where $w_{it}$ is the wage of an individual $i$ at time $t$, $\boldsymbol{x}_i$ is a vector of deterministic individual characteristics (such as age, gender, or race). $\hat{w}_{it}$ is the residual wage from this regression.
 
-In the past, researchers would use longitudinal surveys and take the first difference of wages for a worker employed at two consecutive time periods (see, for example \citep{bils_1985}).
+In the past, researchers would use longitudinal surveys and take the first difference of wages for a worker employed at two consecutive time periods (see, for example \cite{bils_1985}).
 First differences are appropriate for two reasons.
 First, it is possible that wage growth and measures of economic activity, like labor productivity, are cointegrated.
 Second, first differences will remove individual heterogeneity.
 
 This method has the negative effect of limiting the sample to only those workers employed in two consecutive periods;
 you can't difference individual $i$'s wage if he didn't have a wage in the previous period.
-As discussed in section \autoref{sec:search_and_matching_models}, the effects of wage rigidity among newly hired workers may differ from those of workers in ongoing relationships.
+As discussed in section \autoref{sec:search_and_matching_models}, the effects of wage rigidity among newly hired workers may differ from those of workers in ongoing relationships, so they should be included in the sample.
 
-Finally getting to the method in \cite{haefke_sonntag_vanRens_2013}, the idea is to construct a wage index that controls for fluctuations in observable worker characteristics,
-which fluctuate over time and the business cycle.
+Finally getting to the method in \cite{haefke_sonntag_vanRens_2013}, the idea is to construct a wage index that controls for fluctuations in observable worker characteristics, which fluctuate over time and the business cycle.
 The wage index can then be regressed on a measure economic activity (labor productivity, or the unemployment rate, for example), to asses the degree of wage flexibility.
 Since this method does not require taking the first difference of an individual's wage between two consecutive periods, newly hired workers can be included in the sample.
-This in turn allows the CPS to be used.
+Furthermore, this method allows the CPS to be used.
+As discussed in \autoref{sec:data}, the CPS could not be used in a \cite{bils_1985} type setting since each individual is observed only twice, and those two observations are a year apart.
 
 As suggested by \cite{pissarides_2009}, currently employed workers at any date can be classified according to whether they were previously employed or are newly hired.
 Following \cite{haefke_sonntag_vanRens_2013}, currently employed workers are classified as newly hired if they were either unemployed or not in the labor force in any of the preceding three months.
@@ -205,8 +208,8 @@ but, thanks to using the wage index, the sample still includes newly hired worke
 \label{sec:results}
 
 I estimate \autoref{eq:second_stage} to produce the results in \autoref{tab:elasticity_estimates}.
-Log real labor output per hour used as $y_t$
-A value of 1 represents perfect wage flexibility, wages move 1 for 1 with productivity, while a value of 0 represents perfect rigidity.
+Log real labor output per hour is used as $y_t$.
+A value of $\eta = 1$ represents perfect wage flexibility (wages move 1 for 1 with productivity) while a value of 0 represents perfect rigidity.
 The monthly data from the CPS are resampled at a quarterly frequency to match the frequency of the exogenous variable $y_t$.
 Quarterly seasonal dummies are also included in the regression.
 The key parameter is $\eta_j$, the estimate for the wage elasticity for either previously employed or non-employed workers.
@@ -215,9 +218,9 @@ The estimate of the wage elasticity for previously employed workers is nearly ze
 For newly hired workers, the estimate is higher (0.33) suggesting more flexibility.
 However, the standard error for the newly higher worker's elasticity (0.232) is also higher, partially reflecting the smaller sample size.
 
-My estimates for the wage elasticity are smaller than those reported in \cite{haefke_sonntag_vanRens_2013},  who find values of 0.24 for all workers and 0.79 for new hires.
+My estimates for the wage elasticity are smaller than those reported in \cite{haefke_sonntag_vanRens_2013},  who find values of 0.24 for all workers and 0.79 for new hires (they did not report result for just ongoing relationships).
 Our samples cover different time periods, so the estimates needn't match exactly, but the difference is large enough to merit some concern.
-As reported in the appendix, their sample demographics information differs from mine;
+As reported in the appendix, their sample demographics differ from mine;
 it's possible that the differences are due to different matching criteria and filtering methods.
 
 \begin{table}
@@ -244,6 +247,18 @@ it's possible that the differences are due to different matching criteria and fi
 \subsection{By Industry}
 
 It's widely known that the behavior of durable and nondurable goods differs over the business cycle.
+See, for example, \autoref{fig:productivity}.
+
+\begin{figure}
+    \begin{center}
+      \includegraphics[width=\linewidth]{productivity.pdf}
+    \end{center}
+    \caption{
+             Productivity (labor output per hour) by sector.
+            }
+    \label{fig:productivity}
+\end{figure}
+
 This suggests a similar analysis as above, but with workers grouped by their sector along with their employment history.
 These results are presented in \autoref{tab:elasticity_estimates_sector}.
 
@@ -265,6 +280,7 @@ These results are presented in \autoref{tab:elasticity_estimates_sector}.
 \end{table}
 
 The estimates of wage rigidity for workers in durables industries are uniformly lower than for workers in nondurables.
+Indeed, the point estimate for newly hired workers is quite negative.
 Newly hired workers in nondurables industries have the highest estimated elasticity (.9766), but also the highest standard error (1.137) and the smallest sample size (just 2,465).
 
 %----------------------------------------------------------------------------------------
@@ -272,6 +288,8 @@ Newly hired workers in nondurables industries have the highest estimated elastic
 \section{Conclusion}
 
 I used data from the CPS to estimate the degree of wage rigidity for various groups of workers.
+I found that the wages for new hires are more flexible than for workers in ongoing relationships.
+This is in line with \cite{haefke_sonntag_vanRens_2013}, those my estimates indicate that wages are less flexible overall.
 
 \newpage
 \bibliographystyle{apa}
@@ -302,7 +320,7 @@ To be considered a valid match the following conditions must be met:
 
 \begin{itemize}
     \item the individuals unique identifier (\texttt{HRHHID, HRHHID2, PULINENO}) must match
-    \item the difference in age (\texttt{PRTAGE}) must be between -1 and 3 (to allow for aging measurement error)
+    \item the difference in age (\texttt{PRTAGE}) must be between -1 and 3 (to allow for measurement error and aging)
     \item the reported sex (\texttt{PESEX}) must match
 \end{itemize}
 
@@ -313,7 +331,11 @@ A worker is classified as coming from unemployment if they were either unemploye
 They must be employed this month for a wage to be reported.
 The employment status is given by the labor force status recode (\texttt{PEMLR}).
 
+
 As in \cite{haefke_sonntag_vanRens_2013}, if a worker reports his hours as variable (\texttt{PEHRUSL1} = -4), then his actual hours last month are used (\texttt{PEHRACT1}).
+
+There are some extreme outliers in the hourly wage distribution.
+The top and bottom .005\% of the wage distribution are trimmed.
 
 Productivity is measured by taken from the BLS's Major Sector Productivity and Costs program.
 The series used are \texttt{PRS85006093} (Nonfarm Business Labor Output per Hour, base year 2009),
@@ -360,15 +382,41 @@ plastics and rubber products manufacturing  &  20      \\
 \end{tabular}
 \end{center}
 
+A worker's experience is defined to be his age minus his highest grade completed minus six.
+
+\begin{figure}
 \begin{center}
-  \noindent \includegraphics[width=1.25\linewidth]{demographics_ts.pdf}
+  \includegraphics[width=\linewidth]{demographics_ts.pdf}
+  \caption{
+            Demographics over time. Shaded areas indicate recessions as defined by the NBER.
+            The education variable is a categorical variable with six values, similar to \cite{jaeger_1997}.
+            The values are for No high-school, high-school or GED, some college, degree from a 4-year program,
+            graduate degree from a 2 year program, and graduate degree from a longer than 2-year program.
+            A person is counted as married if they are married and the spouse is present. Married and separated
+            are counted as non-married.
+          }
   \label{fig:demographics_ts}
 \end{center}
+\end{figure}
 
+\begin{figure}
 \begin{center}
-  \noindent \includegraphics[width=1.25\linewidth]{wages_ts.pdf}
-  \label{fig:earnings_ts}
+  \includegraphics[width=\linewidth]{wages_ts.pdf}
+  \caption{
+            Average real wages over time for different subgroups. All wages are in 2009 dollars.
+          }
+  \label{fig:wages_ts}
 \end{center}
+\end{figure}
 
+\begin{figure}
+\begin{center}
+  \includegraphics[width=\linewidth]{wages_by_age.pdf}
+  \caption{
+            Average real wages per hour across the age distribution. All wages are in 2009 dollars.
+          }
+  \label{fig:wages_by_age}
+\end{center}
+\end{figure}
 
 \end{document}
