@@ -16,6 +16,10 @@
 \usepackage{natbib}
 \usepackage[font=small,labelfont=bf]{caption}
 
+\DeclareMathOperator*{\argmin}{arg\!\min}
+\DeclareMathOperator*{\argmax}{arg\!\max}
+
+
 \title{Wage Rigidity in the CPS}
 \author{Tom Augspurger}
 \date{\today}
@@ -90,15 +94,54 @@ where $J$ is the employer's value of an occupied job, which must satisfy:
     rJ = p - w - sJ
 \end{equation}
 
-where $r$ is the risk-free interest rate.
+where $r$ is the risk-free interest rate, $p$ is the flow value of output from a match, and $w$ is the wage.
 
 The job creation condition is that
 
 \begin{equation}
-    V = 0 \Doublearrow \frac{p - w}{r + s} = \frac{c}{q(\theta)}
+    V = 0 \iff \frac{p - w}{r + s} = \frac{c}{q(\theta)}
 \end{equation}
 
 At this point, a wage sharing rule must be specified.
+In the usual setup, the wage is such that the surplus created by the match is split at a fixed proportion.
+Let $W$ be the worker's value from holding a job and $U$ be the worker's value of unemployment.
+Then
+
+\begin{equation}
+    W - U = \beta ( J + W - V - U)
+\end{equation}
+
+In \cite{pissarides_2009} the wage is determined by the Nash sharing rule:
+
+\begin{equation}
+    w = \argmax \left\{ (W - U)^\beta (J - V)^{1 - \beta} \right\}
+\end{equation}
+
+The wage equation satisfies
+
+\begin{equation} \label{eq:wage_general}
+    w = r U + \beta (p - r U - (r + s) V)
+\end{equation}
+
+Using the job creation condition, the value of unemployment must be such that
+
+\begin{align}
+    rU &= z + f(\theta)(W - U)\\
+       &= z + f(\theta)\frac{\beta}{1 - \beta}(J - V)\\
+       &=z + \frac{\beta}{1 - \beta}c \theta
+\end{align}
+
+where $f(\theta) \equiv m(1, v/u)$ is the transition rate of workers from unemployment to employment.
+Using this in \autoref{eq:wage_general}, the wage equation now satisfies
+
+\begin{equation}
+    w = (1 - \beta) z + \beta ( p + c \theta )
+\end{equation}
+
+The interpretation here is that productivity shocks translate to wage changes in three ways.
+First, there is a direct effect of productivity on the value of output from a match, $p$.
+Second, an indirect effect on $p$ from the change in the reservation value for the worker.
+And third, a similar indirect effect on $p$, but through the change in the reservation value for the firm.
 
 \section{Statistical Method}
 \label{sec:statistical_method}
