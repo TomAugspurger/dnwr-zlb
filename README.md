@@ -3,6 +3,8 @@ dnwr-zlb
 
 Version control for [my second-year paper](https://www.dropbox.com/s/ldff0p6j6m0jeh1/inflation_and_welfare.pdf).
 
+See the IPython notebook used for all regressions [here](http://nbviewer.ipython.org/github/TomAugspurger/dnwr-zlb/blob/master/data_wrangling/cps_wrangling/analysis/morg.ipynb).
+
 There are two main topics in this repo: data wrangling and model building.
 They are broken into the main subdirectories `data_wrangling` and `model`.
 Each of those subdirectories has its own readme file.
